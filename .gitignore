@@ -1,0 +1,59 @@
+# =========================
+# Unity generated folders
+# =========================
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Ll]ogs/
+[Bb]uild/
+[Bb]uilds/
+[Uu]ser[Ss]ettings/
+
+# =========================
+# IDE / Editor files
+# =========================
+.vs/
+.vscode/
+.idea/
+
+# =========================
+# Visual Studio / Mono
+# =========================
+*.csproj
+*.sln
+*.user
+*.unityproj
+*.pidb
+*.booproj
+*.svd
+
+# =========================
+# OS generated files
+# =========================
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =========================
+# Crash reports
+# =========================
+sysinfo.txt
+
+# =========================
+# Unity Cloud / Collaborate
+# =========================
+.collabignore
+
+# =========================
+# Addressables (optional cache)
+# =========================
+[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+
+# =========================
+# Backup & temp files
+# =========================
+*.bak
+*.tmp
+*.swp
