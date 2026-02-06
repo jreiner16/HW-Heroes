@@ -25,13 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1966818730484752520}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1966818730484752522
 MonoBehaviour:
@@ -46,7 +46,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _ActiveAgent: {fileID: 0}
-  _agentPrefab: {fileID: 2000174215685155523, guid: e6aa9689bb0ab13439de126327e09bbe, type: 3}
+  _SelectedCharacterIndex: 0
+  _agentPrefab: {fileID: 2000174215685155523, guid: cd73a7340ee884d81afb0481e22b7a11, type: 3}
+  _agentPrefabs:
+  - {fileID: 2000174215685155523, guid: e6aa9689bb0ab13439de126327e09bbe, type: 3}
+  - {fileID: 2000174215685155523, guid: cd73a7340ee884d81afb0481e22b7a11, type: 3}
 --- !u!114 &1966818730484752523
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65,3 +69,4 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 1966818730484752522}
+  ForceRemoteRenderTimeframe: 0
