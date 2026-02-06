@@ -57,3 +57,10 @@ sysinfo.txt
 *.bak
 *.tmp
 *.swp
+
+# =========================
+# Unity Packages (track only basics)
+# =========================
+Packages/*
+!Packages/manifest.json
+!Packages/packages-lock.json
