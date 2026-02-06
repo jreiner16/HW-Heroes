@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 750882487852086919}
   - component: {fileID: 1128444158403002831}
   m_Layer: 0
-  m_Name: PlayerAgent
+  m_Name: PlayerAgent2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -55,7 +55,7 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 3785713149
+  SortKey: 2686320963
   ObjectInterest: 1
   Flags: 264449
   NestedObjects: []
@@ -85,7 +85,7 @@ MonoBehaviour:
   _Owner: {fileID: 0}
   _cameraPivot: {fileID: 5401675310905547977}
   _cameraHandle: {fileID: 2117859135794692440}
-  _moveSpeed: 6
+  _moveSpeed: 55
   _upGravity: -18
   _downGravity: -25
   _maxCameraAngle: 75

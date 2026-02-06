@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 
@@ -41,20 +41,84 @@ namespace Projectiles
 			OnPlayerJoined(player);
 		}
 
-		public void Leave(Player player)
+	public void Leave(Player player)
+	{
+		if (HasStateAuthority == false)
+			return;
+
+		if (Players.ContainsKey(player.Object.InputAuthority) == false)
+			return;
+
+		Players.Remove(player.Object.InputAuthority);
+
+		OnPlayerLeft(player);
+	}
+
+	/// <summary>
+	/// Gets the local player's Player component. Returns null if not available.
+	/// </summary>
+	public Player GetLocalPlayer()
+	{
+		if (Context == null || Context.Runner == null || Context.Runner.IsRunning == false)
+			return null;
+
+		var localPlayerObject = Context.Runner.GetPlayerObject(Context.Runner.LocalPlayer);
+		if (localPlayerObject == null)
+			return null;
+
+		return localPlayerObject.GetComponent<Player>();
+	}
+
+	/// <summary>
+	/// Public method to switch character for the local player. Can be called from UI buttons.
+	/// </summary>
+	public void SwitchLocalPlayerCharacter(int characterIndex)
+	{
+		var player = GetLocalPlayer();
+		if (player == null)
+			return;
+
+		// Call RPC to request character change
+		player.RPC_SelectCharacter(characterIndex);
+	}
+
+	/// <summary>
+	/// Cycles to the next character for the local player. Can be called from UI buttons.
+	/// </summary>
+	public void SwitchLocalPlayerToNextCharacter()
+	{
+		var player = GetLocalPlayer();
+		if (player == null)
+			return;
+
+		int currentIndex = player.SelectedCharacterIndex;
+		int characterCount = player.GetCharacterCount();
+		if (characterCount > 0)
 		{
-			if (HasStateAuthority == false)
-				return;
-
-			if (Players.ContainsKey(player.Object.InputAuthority) == false)
-				return;
-
-			Players.Remove(player.Object.InputAuthority);
-
-			OnPlayerLeft(player);
+			int newIndex = (currentIndex + 1) % characterCount;
+			player.RPC_SelectCharacter(newIndex);
 		}
+	}
 
-		// NetworkBehaviour INTERFACE
+	/// <summary>
+	/// Cycles to the previous character for the local player. Can be called from UI buttons.
+	/// </summary>
+	public void SwitchLocalPlayerToPreviousCharacter()
+	{
+		var player = GetLocalPlayer();
+		if (player == null)
+			return;
+
+		int currentIndex = player.SelectedCharacterIndex;
+		int characterCount = player.GetCharacterCount();
+		if (characterCount > 0)
+		{
+			int newIndex = (currentIndex - 1 + characterCount) % characterCount;
+			player.RPC_SelectCharacter(newIndex);
+		}
+	}
+
+	// NetworkBehaviour INTERFACE
 
 		public override void Spawned()
 		{
@@ -120,17 +184,63 @@ namespace Projectiles
 		{
 		}
 
-		protected void SpawnPlayerAgent(Player player)
+	protected void SpawnPlayerAgent(Player player)
+	{
+		DespawnPlayerAgent(player);
+
+		var agent = SpawnAgent(player.Object.InputAuthority, player.AgentPrefab) as PlayerAgent;
+		player.AssignAgent(agent);
+
+		agent.Health.FatalHitTaken += OnFatalHitTaken;
+
+		OnPlayerAgentSpawned(agent);
+	}
+
+	/// <summary>
+	/// Requests a character switch for a player. Spawns new agent with selected character prefab.
+	/// </summary>
+	public void RequestCharacterSwitch(Player player)
+	{
+		if (HasStateAuthority == false)
+			return;
+
+		if (player == null || player.Object == null)
+			return;
+
+		// Store current position and rotation if agent exists
+		Vector3 position = Vector3.zero;
+		Quaternion rotation = Quaternion.identity;
+		bool hasPosition = false;
+
+		if (player.ActiveAgent != null && player.ActiveAgent.Object != null)
 		{
-			DespawnPlayerAgent(player);
-
-			var agent = SpawnAgent(player.Object.InputAuthority, player.AgentPrefab) as PlayerAgent;
-			player.AssignAgent(agent);
-
-			agent.Health.FatalHitTaken += OnFatalHitTaken;
-
-			OnPlayerAgentSpawned(agent);
+			position = player.ActiveAgent.transform.position;
+			rotation = player.ActiveAgent.transform.rotation;
+			hasPosition = true;
 		}
+
+		// Despawn current agent
+		DespawnPlayerAgent(player);
+
+		// Spawn new agent with selected character prefab
+		PlayerAgent agentPrefab = player.AgentPrefab;
+		PlayerAgent newAgent;
+
+		if (hasPosition)
+		{
+			// Spawn at current position (character switch mid-game)
+			newAgent = Runner.Spawn(agentPrefab, position, rotation, player.Object.InputAuthority) as PlayerAgent;
+		}
+		else
+		{
+			// Spawn at spawn point (initial spawn or after death)
+			newAgent = SpawnAgent(player.Object.InputAuthority, agentPrefab) as PlayerAgent;
+		}
+
+		player.AssignAgent(newAgent);
+		newAgent.Health.FatalHitTaken += OnFatalHitTaken;
+		OnPlayerAgentSpawned(newAgent);
+	}
 
 		protected void DespawnPlayerAgent(Player player)
 		{
