@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Deathmatch.unity
+    path: Assets/Scenes/MainScene.unity
     guid: 4213cc4aa9415c94eb19e5e87b4316fb
   - enabled: 0
     path: Assets/Scenes/Playground.unity
