@@ -19,9 +19,10 @@ namespace Projectiles
 		private SpawnPoint[] _spawnPoints;
 		private int _lastSpawnPoint = -1;
 
-		private List<SpawnRequest> _spawnRequests = new();
+	private List<SpawnRequest> _spawnRequests = new();
+	private List<CharacterSwitchRequest> _characterSwitchRequests = new();
 
-		// PUBLIC METHODS
+	// PUBLIC METHODS
 
 		public void Join(Player player)
 		{
@@ -150,6 +151,40 @@ namespace Projectiles
 
 				SpawnPlayerAgent(request.Player);
 			}
+
+			// Process character switch requests
+			for (int i = _characterSwitchRequests.Count - 1; i >= 0; i--)
+			{
+				var request = _characterSwitchRequests[i];
+
+				if (request.Tick > currentTick)
+					continue;
+
+				_characterSwitchRequests.RemoveAt(i);
+
+				if (request.Player == null || request.Player.Object == null)
+					continue; // Player no longer valid
+
+				if (Players.ContainsKey(request.Player.Object.InputAuthority) == false)
+					continue; // Player left gameplay
+
+				// Spawn new agent at stored position
+				PlayerAgent agentPrefab = request.Player.AgentPrefab;
+				PlayerAgent newAgent;
+
+				if (request.HasPosition)
+				{
+					newAgent = Runner.Spawn(agentPrefab, request.Position, request.Rotation, request.Player.Object.InputAuthority) as PlayerAgent;
+				}
+				else
+				{
+					newAgent = SpawnAgent(request.Player.Object.InputAuthority, agentPrefab) as PlayerAgent;
+				}
+
+				request.Player.AssignAgent(newAgent);
+				newAgent.Health.FatalHitTaken += OnFatalHitTaken;
+				OnPlayerAgentSpawned(newAgent);
+			}
 		}
 
 		public override void Despawned(NetworkRunner runner, bool hasState)
@@ -197,7 +232,7 @@ namespace Projectiles
 	}
 
 	/// <summary>
-	/// Requests a character switch for a player. Spawns new agent with selected character prefab.
+	/// Requests a character switch for a player. Uses delayed spawning to ensure proper network synchronization.
 	/// </summary>
 	public void RequestCharacterSwitch(Player player)
 	{
@@ -219,27 +254,21 @@ namespace Projectiles
 			hasPosition = true;
 		}
 
-		// Despawn current agent
+		// Despawn current agent first
 		DespawnPlayerAgent(player);
 
-		// Spawn new agent with selected character prefab
-		PlayerAgent agentPrefab = player.AgentPrefab;
-		PlayerAgent newAgent;
+		// Add character switch request with small delay (0.15 seconds) to ensure despawn syncs across network
+		float switchDelay = 0.15f;
+		int delayTicks = Mathf.RoundToInt(Runner.TickRate * switchDelay);
 
-		if (hasPosition)
+		_characterSwitchRequests.Add(new CharacterSwitchRequest()
 		{
-			// Spawn at current position (character switch mid-game)
-			newAgent = Runner.Spawn(agentPrefab, position, rotation, player.Object.InputAuthority) as PlayerAgent;
-		}
-		else
-		{
-			// Spawn at spawn point (initial spawn or after death)
-			newAgent = SpawnAgent(player.Object.InputAuthority, agentPrefab) as PlayerAgent;
-		}
-
-		player.AssignAgent(newAgent);
-		newAgent.Health.FatalHitTaken += OnFatalHitTaken;
-		OnPlayerAgentSpawned(newAgent);
+			Player = player,
+			Position = position,
+			Rotation = rotation,
+			HasPosition = hasPosition,
+			Tick = Runner.Tick + delayTicks,
+		});
 	}
 
 		protected void DespawnPlayerAgent(Player player)
@@ -303,12 +332,21 @@ namespace Projectiles
 			Runner.Despawn(agent.Object);
 		}
 
-		// HELPERS
+	// HELPERS
 
-		public struct SpawnRequest
-		{
-			public Player Player;
-			public int Tick;
-		}
+	public struct SpawnRequest
+	{
+		public Player Player;
+		public int Tick;
 	}
+
+	public struct CharacterSwitchRequest
+	{
+		public Player Player;
+		public Vector3 Position;
+		public Quaternion Rotation;
+		public bool HasPosition;
+		public int Tick;
+	}
+}
 }
