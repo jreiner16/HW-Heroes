@@ -1,4 +1,4 @@
-﻿ using UnityEngine;
+ using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -14,6 +14,11 @@ namespace StarterAssets
 #endif
     public class ThirdPersonController : MonoBehaviour
     {
+        [Header("Networked Visual Mode")]
+        [Tooltip("If this controller is under a Projectiles.PlayerAgent (Fusion/KCC), it will not move/rotate and will only drive animations from the agent movement.")]
+        [SerializeField]
+        private bool AnimateOnlyWhenUnderPlayerAgent = true;
+
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
         public float MoveSpeed = 2.0f;
@@ -109,6 +114,8 @@ namespace StarterAssets
         private const float _threshold = 0.01f;
 
         private bool _hasAnimator;
+        private bool _animateOnly;
+        private Projectiles.PlayerAgent _playerAgent;
 
         private bool IsCurrentDeviceMouse
         {
@@ -134,7 +141,10 @@ namespace StarterAssets
 
         private void Start()
         {
-            _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
+            if (CinemachineCameraTarget != null)
+            {
+                _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
+            }
             
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
@@ -147,6 +157,13 @@ namespace StarterAssets
 
             AssignAnimationIDs();
 
+            if (AnimateOnlyWhenUnderPlayerAgent == true)
+            {
+                _playerAgent = GetComponentInParent<Projectiles.PlayerAgent>();
+                // If this object is part of a networked PlayerAgent visual, do not drive movement here.
+                _animateOnly = _playerAgent != null && _playerAgent.gameObject != gameObject;
+            }
+
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
@@ -156,6 +173,12 @@ namespace StarterAssets
         {
             _hasAnimator = TryGetComponent(out _animator);
 
+            if (_animateOnly == true)
+            {
+                UpdateAnimatorFromPlayerAgent();
+                return;
+            }
+
             JumpAndGravity();
             GroundedCheck();
             Move();
@@ -163,6 +186,9 @@ namespace StarterAssets
 
         private void LateUpdate()
         {
+            if (_animateOnly == true)
+                return;
+
             CameraRotation();
         }
 
@@ -177,6 +203,9 @@ namespace StarterAssets
 
         private void GroundedCheck()
         {
+            if (_animateOnly == true)
+                return;
+
             // set sphere position, with offset
             Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset,
                 transform.position.z);
@@ -213,6 +242,9 @@ namespace StarterAssets
 
         private void Move()
         {
+            if (_animateOnly == true)
+                return;
+
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
 
@@ -279,8 +311,38 @@ namespace StarterAssets
             }
         }
 
+        private void UpdateAnimatorFromPlayerAgent()
+        {
+            if (_hasAnimator == false || _animator == null || _playerAgent == null || _playerAgent.KCC == null)
+                return;
+
+            var velocity = _playerAgent.KCC.RealVelocity;
+            float horizontalSpeed = new Vector3(velocity.x, 0f, velocity.z).magnitude;
+
+            _animator.SetFloat(_animIDSpeed, horizontalSpeed);
+            _animator.SetFloat(_animIDMotionSpeed, horizontalSpeed > 0.05f ? 1f : 0f);
+
+            bool grounded = _playerAgent.KCC.IsGrounded;
+            _animator.SetBool(_animIDGrounded, grounded);
+
+            // Basic jump/freefall flags based on vertical velocity when airborne.
+            if (grounded == true)
+            {
+                _animator.SetBool(_animIDJump, false);
+                _animator.SetBool(_animIDFreeFall, false);
+            }
+            else
+            {
+                _animator.SetBool(_animIDJump, velocity.y > 0.25f);
+                _animator.SetBool(_animIDFreeFall, velocity.y < -0.25f);
+            }
+        }
+
         private void JumpAndGravity()
         {
+            if (_animateOnly == true)
+                return;
+
             if (Grounded)
             {
                 // reset the fall timeout timer
