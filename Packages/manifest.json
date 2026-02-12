@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "com.unity.burst": "1.8.21",
+    "com.unity.cinemachine": "2.10.3",
     "com.unity.collab-proxy": "2.11.3",
     "com.unity.collections": "1.4.0",
     "com.unity.ext.nunit": "1.0.6",

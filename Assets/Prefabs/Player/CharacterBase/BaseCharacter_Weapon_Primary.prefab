@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4224916988346163789}
   - component: {fileID: 6760726039705429157}
   m_Layer: 0
-  m_Name: PulseGrenade
+  m_Name: BaseCharacter_Weapon_Primary
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

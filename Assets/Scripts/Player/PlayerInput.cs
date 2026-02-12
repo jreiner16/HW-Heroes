@@ -11,6 +11,8 @@ namespace Projectiles
 		AltFire  = 1,
 		Jump     = 2,
 		Reload   = 3,
+		X        = 4,
+		E        = 5,
 	}
 
 	public struct GameplayInput : INetworkInput
@@ -118,6 +120,10 @@ namespace Projectiles
 				if (keyboard.dKey.isPressed) { moveDirection += Vector2.right; }
 
 				_accumulatedInput.MoveDirection = moveDirection.normalized;
+
+				// Extra input buttons for weapon triggers / abilities.
+				_accumulatedInput.Buttons.Set(EInputButton.X, keyboard.xKey.isPressed);
+				_accumulatedInput.Buttons.Set(EInputButton.E, keyboard.eKey.isPressed);
 
 				_accumulatedInput.Buttons.Set(EInputButton.Jump, keyboard.spaceKey.isPressed);
 				_accumulatedInput.Buttons.Set(EInputButton.Reload, keyboard.rKey.isPressed);
