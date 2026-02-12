@@ -39,6 +39,8 @@ namespace Projectiles
 
 			Players.Add(playerRef, player);
 
+			AssignTeamIfNeeded(player);
+
 			OnPlayerJoined(player);
 		}
 
@@ -178,7 +180,7 @@ namespace Projectiles
 				}
 				else
 				{
-					newAgent = SpawnAgent(request.Player.Object.InputAuthority, agentPrefab) as PlayerAgent;
+					newAgent = SpawnAgent(request.Player.Object.InputAuthority, agentPrefab, request.Player.Team) as PlayerAgent;
 				}
 
 				request.Player.AssignAgent(newAgent);
@@ -223,7 +225,7 @@ namespace Projectiles
 	{
 		DespawnPlayerAgent(player);
 
-		var agent = SpawnAgent(player.Object.InputAuthority, player.AgentPrefab) as PlayerAgent;
+		var agent = SpawnAgent(player.Object.InputAuthority, player.AgentPrefab, player.Team) as PlayerAgent;
 		player.AssignAgent(agent);
 
 		agent.Health.FatalHitTaken += OnFatalHitTaken;
@@ -310,18 +312,80 @@ namespace Projectiles
 			}
 		}
 
-		private PlayerAgent SpawnAgent(PlayerRef inputAuthority, PlayerAgent agentPrefab)
+		private PlayerAgent SpawnAgent(PlayerRef inputAuthority, PlayerAgent agentPrefab, ETeam team)
 		{
 			if (_spawnPoints == null)
 			{
 				_spawnPoints = Runner.SimulationUnityScene.FindObjectsOfTypeInOrder<SpawnPoint>(false);
 			}
 
-			_lastSpawnPoint = (_lastSpawnPoint + 1) % _spawnPoints.Length;
-			var spawnPoint = _spawnPoints[_lastSpawnPoint].transform;
+			var spawnPoint = GetNextSpawnPoint(team);
+			if (spawnPoint == null)
+			{
+				Debug.LogError("No SpawnPoint found in the scene. Spawning agent at origin.");
+				return Runner.Spawn(agentPrefab, Vector3.zero, Quaternion.identity, inputAuthority);
+			}
 
 			var agent = Runner.Spawn(agentPrefab, spawnPoint.position, spawnPoint.rotation, inputAuthority);
 			return agent;
+		}
+
+		private Transform GetNextSpawnPoint(ETeam team)
+		{
+			if (_spawnPoints == null || _spawnPoints.Length == 0)
+				return null;
+
+			// Prefer team spawn points if any exist for the requested team.
+			if (team != ETeam.None)
+			{
+				int startIndex = _lastSpawnPoint;
+
+				for (int i = 0; i < _spawnPoints.Length; i++)
+				{
+					_lastSpawnPoint = (_lastSpawnPoint + 1) % _spawnPoints.Length;
+					var sp = _spawnPoints[_lastSpawnPoint];
+
+					if (sp != null && sp.Team == team)
+						return sp.transform;
+				}
+
+				// No matching team spawns; restore index so neutral cycling remains stable.
+				_lastSpawnPoint = startIndex;
+			}
+
+			for (int i = 0; i < _spawnPoints.Length; i++)
+			{
+				_lastSpawnPoint = (_lastSpawnPoint + 1) % _spawnPoints.Length;
+				var sp = _spawnPoints[_lastSpawnPoint];
+				if (sp != null)
+					return sp.transform;
+			}
+
+			return null;
+		}
+
+		private void AssignTeamIfNeeded(Player player)
+		{
+			if (player == null)
+				return;
+
+			if (player.Team != ETeam.None)
+				return;
+
+			int team1 = 0;
+			int team2 = 0;
+
+			foreach (var kvp in Players)
+			{
+				var p = kvp.Value;
+				if (p == null)
+					continue;
+
+				if (p.Team == ETeam.Team1) team1++;
+				else if (p.Team == ETeam.Team2) team2++;
+			}
+
+			player.SetTeam(team1 <= team2 ? ETeam.Team1 : ETeam.Team2);
 		}
 
 		private void DespawnAgent(PlayerAgent agent)

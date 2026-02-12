@@ -11,6 +11,9 @@ namespace Projectiles
 		// PUBLIC MEMBERS
 
 		[Networked]
+		public ETeam Team { get; private set; }
+
+		[Networked]
 		public PlayerAgent ActiveAgent { get; private set; }
 		
 		[Networked]
@@ -30,6 +33,14 @@ namespace Projectiles
 		private int _lastWeaponSlot;
 
 		// PUBLIC METHODS
+
+		public void SetTeam(ETeam team)
+		{
+			if (HasStateAuthority == false)
+				return;
+
+			Team = team;
+		}
 
 		public void AssignAgent(PlayerAgent agent)
 	{

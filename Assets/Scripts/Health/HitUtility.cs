@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 
@@ -55,6 +55,9 @@ namespace Projectiles
 	/// </summary>
 	public static class HitUtility
 	{
+		// Friendly fire is disabled by default for simple team gameplay.
+		private const bool FRIENDLY_FIRE_ENABLED = false;
+
 		// PUBLIC METHODS
 
 		public static void GetAllTargets(NetworkRunner runner, List<IHitTarget> targets, bool onlyActive = true)
@@ -148,6 +151,34 @@ namespace Projectiles
 
 		public static HitData ProcessHit(ref HitData hitData)
 		{
+			if (FRIENDLY_FIRE_ENABLED == false)
+			{
+				// Only enforce team rules for player-vs-player hits (Health targets).
+				var targetHealth = hitData.Target as Health;
+				if (targetHealth != null)
+				{
+					var runner = targetHealth.Runner;
+					if (runner != null)
+					{
+						var instigatorPlayerObject = runner.GetPlayerObject(hitData.InstigatorRef);
+						var targetPlayerObject = runner.GetPlayerObject(targetHealth.Object.InputAuthority);
+
+						var instigatorPlayer = instigatorPlayerObject != null ? instigatorPlayerObject.GetComponent<Player>() : null;
+						var targetPlayer = targetPlayerObject != null ? targetPlayerObject.GetComponent<Player>() : null;
+
+						// If both are players and on the same (non-none) team, ignore damage.
+						if (instigatorPlayer != null && targetPlayer != null &&
+						    instigatorPlayer.Team != ETeam.None &&
+						    instigatorPlayer.Team == targetPlayer.Team &&
+						    hitData.InstigatorRef != targetHealth.Object.InputAuthority)
+						{
+							hitData.Amount = 0f;
+							return hitData;
+						}
+					}
+				}
+			}
+
 			hitData.Target.ProcessHit(ref hitData);
 
 			// For local debug targets we show hit feedback immediately

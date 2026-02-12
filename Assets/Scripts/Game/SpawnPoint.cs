@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Projectiles
 {
@@ -7,5 +7,9 @@ namespace Projectiles
 	/// </summary>
 	public sealed class SpawnPoint : MonoBehaviour
 	{
+		[SerializeField]
+		private ETeam _team = ETeam.None;
+
+		public ETeam Team => _team;
 	}
 }
