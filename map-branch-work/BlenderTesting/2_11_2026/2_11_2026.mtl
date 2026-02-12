@@ -1,0 +1,107 @@
+newmtl Material_1
+Kd 1.00 1.00 0.98
+Pr 1.00
+newmtl Material_2
+Kd 0.53 0.55 0.61
+Pr 1.00
+newmtl Material_3
+Kd 1.00 1.00 0.98
+Pr 1.00
+newmtl Material_4
+Kd 0.56 0.53 0.44
+Pr 1.00
+newmtl Material_5
+Kd 0.56 0.53 0.44
+Pr 1.00
+newmtl Material_6
+Kd 0.56 0.53 0.44
+Pr 1.00
+newmtl Material_7
+Kd 0.53 0.55 0.61
+Pr 1.00
+newmtl Material_8
+Kd 0.56 0.53 0.44
+Pr 1.00
+newmtl Material_9
+Kd 0.56 0.53 0.44
+Pr 1.00
+newmtl Material_10
+Kd 0.56 0.53 0.44
+Pr 1.00
+newmtl Material_11
+Kd 1.00 1.00 0.98
+Pr 1.00
+newmtl Material_12
+Kd 0.95 0.90 0.85
+Pr 1.00
+newmtl Material_13
+Kd 1.00 1.00 0.98
+Pr 1.00
+newmtl Material_14
+Kd 0.80 0.81 0.82
+Pr 1.00
+newmtl Material_15
+Kd 1.00 1.00 0.98
+Pr 1.00
+newmtl Material_16
+Kd 0.80 0.81 0.82
+Pr 1.00
+newmtl Material_17
+Kd 1.00 1.00 0.98
+Pr 1.00
+newmtl Material_18
+Kd 0.66 0.65 0.60
+Pr 1.00
+newmtl Material_19
+Kd 1.00 1.00 0.98
+Pr 1.00
+newmtl Material_20
+Kd 0.66 0.65 0.60
+Pr 1.00
+newmtl Material_21
+Kd 1.00 1.00 0.98
+Pr 1.00
+newmtl Material_22
+Kd 0.66 0.65 0.60
+Pr 1.00
+newmtl Material_23
+Kd 0.66 0.65 0.60
+Pr 1.00
+newmtl Material_24
+Kd 0.80 0.81 0.82
+Pr 1.00
+newmtl Material_25
+Kd 1.00 1.00 0.98
+Pr 1.00
+newmtl Material_26
+Kd 0.80 0.81 0.82
+Pr 1.00
+newmtl Material_27
+Kd 0.66 0.65 0.60
+Pr 1.00
+newmtl Material_28
+Kd 0.80 0.81 0.82
+Pr 1.00
+newmtl Material_29
+Kd 1.00 1.00 0.98
+Pr 1.00
+newmtl Material_30
+Kd 0.80 0.81 0.82
+Pr 1.00
+newmtl Material_31
+Kd 0.90 0.90 0.90
+d 0.40
+Pr 1.00
+newmtl Material_32
+Kd 0.86 0.80 0.73
+Pr 1.00
+newmtl Material_33
+map_Kd textures/floor_Bedroom_color.jpg
+Pr 1.00
+newmtl Material_34
+map_Kd textures/floor_Bathroom_color.jpg
+Pr 1.00
+newmtl Material_35
+Kd 0.80 0.80 0.80
+d 0.20
+Pr 1.00
