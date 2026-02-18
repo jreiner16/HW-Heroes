@@ -39,8 +39,7 @@ namespace Projectiles
 		private PlayerAgent _agent;
 		private HitboxRoot _hitboxRoot;
 
-		private SkinnedMeshRenderer[] _sourceSkinnedRenderers;
-		private readonly System.Collections.Generic.List<SkinnedMeshRenderer> _outlineRenderers = new();
+		private readonly System.Collections.Generic.List<Renderer> _outlineRenderers = new();
 		private Material _outlineMaterial;
 		private MaterialPropertyBlock _outlineBlock;
 
@@ -100,10 +99,6 @@ namespace Projectiles
 			if (_visual == null)
 				return;
 
-			_sourceSkinnedRenderers = _visual.GetComponentsInChildren<SkinnedMeshRenderer>(true);
-			if (_sourceSkinnedRenderers == null || _sourceSkinnedRenderers.Length == 0)
-				return;
-
 			_outlineBlock ??= new MaterialPropertyBlock();
 
 			// Create (or reuse) a shared outline material.
@@ -123,10 +118,13 @@ namespace Projectiles
 				};
 			}
 
-			// Duplicate each skinned mesh renderer so we can render an extruded silhouette.
-			for (int i = 0; i < _sourceSkinnedRenderers.Length; i++)
+			// Duplicate each renderer so we can render an extruded silhouette.
+			// Some characters use MeshRenderer, others SkinnedMeshRenderer.
+
+			var skinnedSources = _visual.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+			for (int i = 0; i < skinnedSources.Length; i++)
 			{
-				var source = _sourceSkinnedRenderers[i];
+				var source = skinnedSources[i];
 				if (source == null || source.sharedMesh == null)
 					continue;
 
@@ -152,6 +150,38 @@ namespace Projectiles
 
 				_outlineRenderers.Add(outline);
 			}
+
+			var meshSources = _visual.GetComponentsInChildren<MeshRenderer>(true);
+			for (int i = 0; i < meshSources.Length; i++)
+			{
+				var source = meshSources[i];
+				if (source == null)
+					continue;
+
+				// Avoid duplicating our own outlines (in case of re-setup).
+				if (source.gameObject.name.Contains("TeamOutline") == true)
+					continue;
+
+				// Need a mesh filter to duplicate the geometry.
+				var sourceFilter = source.GetComponent<MeshFilter>();
+				if (sourceFilter == null || sourceFilter.sharedMesh == null)
+					continue;
+
+				var outlineGO = new GameObject($"{source.gameObject.name}_TeamOutline");
+				outlineGO.layer = source.gameObject.layer;
+				outlineGO.transform.SetParent(source.transform, false);
+
+				var outlineFilter = outlineGO.AddComponent<MeshFilter>();
+				outlineFilter.sharedMesh = sourceFilter.sharedMesh;
+
+				var outline = outlineGO.AddComponent<MeshRenderer>();
+				outline.sharedMaterial = _outlineMaterial;
+				outline.shadowCastingMode = ShadowCastingMode.Off;
+				outline.receiveShadows = false;
+				outline.motionVectorGenerationMode = MotionVectorGenerationMode.ForceNoMotion;
+
+				_outlineRenderers.Add(outline);
+			}
 		}
 
 		private void UpdateTeamOutline()
@@ -167,15 +197,27 @@ namespace Projectiles
 				return;
 
 			// Need local player + both teams to decide ally/enemy colors.
-			var localPlayer = Context != null && Context.Gameplay != null ? Context.Gameplay.GetLocalPlayer() : null;
-			if (localPlayer == null || _agent == null || _agent.Owner == null)
+			var gameplay = Context != null ? Context.Gameplay : null;
+			var localPlayer = gameplay != null ? gameplay.GetLocalPlayer() : null;
+			if (localPlayer == null || _agent == null)
 			{
 				SetOutlineEnabled(false);
 				return;
 			}
 
 			var localTeam = localPlayer.Team;
-			var targetTeam = _agent.Owner.Team;
+			ETeam targetTeam = ETeam.None;
+
+			// IMPORTANT: PlayerAgent replicates networked properties only to its input authority (see PlayerAgent.Spawned()).
+			// That means proxies may not have _agent.Owner set. Use the replicated gameplay player dictionary instead.
+			if (gameplay != null && gameplay.Players.TryGet(_agent.Object.InputAuthority, out Player targetPlayer) == true && targetPlayer != null)
+			{
+				targetTeam = targetPlayer.Team;
+			}
+			else if (_agent.Owner != null)
+			{
+				targetTeam = _agent.Owner.Team;
+			}
 
 			if (localTeam == ETeam.None || targetTeam == ETeam.None)
 			{
@@ -188,7 +230,8 @@ namespace Projectiles
 
 			_outlineBlock.Clear();
 			_outlineBlock.SetColor(TeamOutlineIds.OutlineColor, outlineColor);
-			_outlineBlock.SetFloat(TeamOutlineIds.OutlineWidth, _outlineWidth);
+			// Keep width within shader’s expected range to avoid excessive extrusion and frustum culling artifacts.
+			_outlineBlock.SetFloat(TeamOutlineIds.OutlineWidth, Mathf.Clamp(_outlineWidth, 0f, 0.1f));
 
 			SetOutlineEnabled(true, _outlineBlock);
 		}
