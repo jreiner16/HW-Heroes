@@ -234,8 +234,8 @@ MonoBehaviour:
   _flyingCapPrefab: {fileID: 6411814381523849521, guid: 2cf998a7edf4a7c4cbcda4d4f94c3255, type: 3}
   _capImpulse: 1
   _deathEffectPrefab: {fileID: 6616163762673046193, guid: 89eb08fa431f13b4ca9f10526b54a27f, type: 3}
-  _enableTeamOutlines: 0
-  _outlineWidth: 0.1
+  _enableTeamOutlines: 1
+  _outlineWidth: 0.02
   _allyOutlineColor: {r: 0, g: 0.63, b: 1, a: 1}
   _enemyOutlineColor: {r: 1, g: 0.1, b: 0.1, a: 1}
 --- !u!114 &316060476010132159
