@@ -1,0 +1,48 @@
+Transmittal Report:
+Created by AutoCAD eTransmit Saturday, November 1, 2025, 8:06 AM.
+
+Drawing:
+This is a transmittal based on ID 4578 - 3700 Coldwater Canyon Ave - CAD Base.dwg.
+
+Files:
+
+Root Drawing:
+	ID 4578 - 3700 Coldwater Canyon Ave - CAD Base.dwg
+
+PNG File References:
+	Harvard Westlake School Logo.png
+
+AutoCAD Color-dependent Plot Style Table File References:
+	Jay Cad.ctb
+
+AutoCAD Plotter Configuration File References:
+	Jay Cad.pc3
+
+The following files were excluded from the transmittal:
+	acad.fmp
+	simplex.shx
+	arial.ttf
+	ARIALN.TTF
+	arialbd.ttf
+	txt.shx
+
+
+Conversion:
+All drawing files were converted to AutoCAD 2013/LT 2013 format.
+
+
+Notes for distribution:
+
+Raster image files:
+Image paths were removed, so all image files must be placed on the AutoCAD search path, a project search path or in the same directory as the root drawing.
+
+.PC3 printer configuration files:
+Please copy these files to the AutoCAD Printer Configuration Search Path directory.
+
+.CTB/.STB plot style tables:
+Please copy these files to the AutoCAD Plot Style Table Search Path directory.
+
+The AutoCAD variable FONTALT was set to:
+C:\Users\user\AppData\Roaming\Autodesk\AutoCAD 2020\R23.1\enu\support\simplex.shx
+Please make sure that the FONTALT variable is set to this file or an equivalent before opening any drawings.  All text styles with missing fonts are automatically set to this font.
+
