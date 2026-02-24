@@ -26,6 +26,7 @@ namespace Projectiles.UI
 		private UIWeapons _weapons;
 		private UIScreenEffects _screenEffects;
 		private UIMovementAbility _movementAbility;
+		private UIUltimateAbility _ultimateAbility;
 
 		private SceneContext _context;
 		private PlayerAgent _observedAgent;
@@ -47,6 +48,7 @@ namespace Projectiles.UI
 			_weapons = GetComponentInChildren<UIWeapons>(true);
 			_screenEffects = GetComponentInChildren<UIScreenEffects>(true);
 			_movementAbility = GetComponentInChildren<UIMovementAbility>(true);
+			_ultimateAbility = GetComponentInChildren<UIUltimateAbility>(true);
 
 			_aliveGroup.alpha = 0f;
 		}
@@ -69,6 +71,12 @@ namespace Projectiles.UI
 			{
 				var ability = _observedAgent.GetComponent<GeoddeMovementAbility>();
 				_movementAbility.UpdateAbility(ability);
+			}
+
+			if (_ultimateAbility != null)
+			{
+				var ultimate = _observedAgent.GetComponent<GeoddeUltimateAbility>();
+				_ultimateAbility.UpdateAbility(ultimate);
 			}
 
 			ShowAliveGroup(_observedAgent.Health.IsAlive);
