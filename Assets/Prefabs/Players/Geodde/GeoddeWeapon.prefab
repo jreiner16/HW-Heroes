@@ -251,7 +251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0578f350f734b73b0e080681c0e3cb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _projectilePrefab: {fileID: 6760726039705429157, guid: 1cbad648f9ef5cd4fbbdd4eb8d57129f, type: 3}
+  _projectilePrefab: {fileID: 6760726039705429157, guid: d967730e6b04d49c18f8d825f418ac43, type: 3}
   _standaloneProjectilePrefab: {fileID: 0}
   _standaloneProjectileBuffer: {fileID: 0}
   _projectilesPerShot: 1
@@ -269,7 +269,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787c9237c47d4becb62d11e3708bc38b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _fireParticle: {fileID: 1535879545770036, guid: 2cf07f47d48b32c41bbfa08c86426e38, type: 3}
+  _fireParticle: {fileID: 7581790248050129414}
   _fireParticleReturnTime: 1
   _fireAudioEffectsRoot: {fileID: 7922358712448589423}
   _fireSound:
@@ -580,9 +580,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d2e87423e6d46c79c124cb1e1c2e609, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cadence: 420
+  _cadence: 120
   _fireButton: 0
-  _fireOnKeyDownOnly: 0
+  _fireOnKeyDownOnly: 1
 --- !u!114 &620031470725458066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -595,7 +595,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0578f350f734b73b0e080681c0e3cb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _projectilePrefab: {fileID: 3893831311589886993, guid: 86844ce8beb21484896dec3d25e137ea, type: 3}
+  _projectilePrefab: {fileID: -2832796552667752844, guid: f722d04d7a3474942af5f632b79b81fc, type: 3}
   _standaloneProjectilePrefab: {fileID: 0}
   _standaloneProjectileBuffer: {fileID: 0}
   _projectilesPerShot: 1
@@ -700,7 +700,7 @@ GameObject:
   - component: {fileID: 8928631519250400089}
   - component: {fileID: 2436901878621067112}
   m_Layer: 7
-  m_Name: BaseCharacter_Weapon
+  m_Name: GeoddeWeapon
   m_TagString: Untagged
   m_Icon: {fileID: 6519382022992737161, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -738,7 +738,7 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 1769678466
+  SortKey: 43576968
   ObjectInterest: 1
   Flags: 264449
   NestedObjects: []
@@ -902,6 +902,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5501774896621642075, guid: 610f2de150d6a80499f60bde1767586f, type: 3}
   m_PrefabInstance: {fileID: 1770525776300408458}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7581790248050129414 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8189169061603738764, guid: 610f2de150d6a80499f60bde1767586f, type: 3}
+  m_PrefabInstance: {fileID: 1770525776300408458}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3694187502484549145
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -965,6 +970,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 029e69a1c2b86834e975d47412a82a07, type: 3}
       propertyPath: m_Layer
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 029e69a1c2b86834e975d47412a82a07, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
