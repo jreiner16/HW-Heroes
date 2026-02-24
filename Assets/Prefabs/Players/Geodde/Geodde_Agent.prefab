@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 316060476010132159}
   - component: {fileID: 750882487852086919}
   - component: {fileID: 1128444158403002831}
+  - component: {fileID: 1128444158403002832}
   m_Layer: 0
   m_Name: Geodde_Agent
   m_TagString: Untagged
@@ -69,6 +70,7 @@ MonoBehaviour:
   - {fileID: 316060476010132159}
   - {fileID: 750882487852086919}
   - {fileID: 1128444158403002831}
+  - {fileID: 1128444158403002832}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &2000174215685155523
 MonoBehaviour:
@@ -288,6 +290,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _lookSensitivity: 3
+--- !u!114 &1128444158403002832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 260199661339379077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 454a9c29e96e6456aad02a05c077204c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _duration: 2.5
+  _cooldown: 10
+  _visual: {fileID: 2526105640932925329}
+  _phaseEffect: {fileID: 0}
 --- !u!1 &504059032653147225
 GameObject:
   m_ObjectHideFlags: 0

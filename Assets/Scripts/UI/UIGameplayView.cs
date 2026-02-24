@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using Fusion;
 using UnityEngine;
 
@@ -25,6 +25,7 @@ namespace Projectiles.UI
 		private UIHealth _health;
 		private UIWeapons _weapons;
 		private UIScreenEffects _screenEffects;
+		private UIMovementAbility _movementAbility;
 
 		private SceneContext _context;
 		private PlayerAgent _observedAgent;
@@ -45,6 +46,7 @@ namespace Projectiles.UI
 			_health = GetComponentInChildren<UIHealth>(true);
 			_weapons = GetComponentInChildren<UIWeapons>(true);
 			_screenEffects = GetComponentInChildren<UIScreenEffects>(true);
+			_movementAbility = GetComponentInChildren<UIMovementAbility>(true);
 
 			_aliveGroup.alpha = 0f;
 		}
@@ -62,6 +64,12 @@ namespace Projectiles.UI
 			_health.UpdateHealth(_observedAgent.Health);
 			_weapons.UpdateWeapons(_observedAgent.Weapons);
 			_screenEffects.UpdateEffects(_observedAgent);
+
+			if (_movementAbility != null)
+			{
+				var ability = _observedAgent.GetComponent<GeoddeMovementAbility>();
+				_movementAbility.UpdateAbility(ability);
+			}
 
 			ShowAliveGroup(_observedAgent.Health.IsAlive);
 		}
