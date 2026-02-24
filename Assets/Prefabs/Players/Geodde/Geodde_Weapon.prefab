@@ -251,7 +251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0578f350f734b73b0e080681c0e3cb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _projectilePrefab: {fileID: 6760726039705429157, guid: 1cbad648f9ef5cd4fbbdd4eb8d57129f, type: 3}
+  _projectilePrefab: {fileID: 6760726039705429157, guid: d967730e6b04d49c18f8d825f418ac43, type: 3}
   _standaloneProjectilePrefab: {fileID: 0}
   _standaloneProjectileBuffer: {fileID: 0}
   _projectilesPerShot: 1
@@ -269,7 +269,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787c9237c47d4becb62d11e3708bc38b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _fireParticle: {fileID: 400400945302543096, guid: a49fdf7eccbe043969c3131e3b0fbb44, type: 3}
+  _fireParticle: {fileID: 7581790248050129414}
   _fireParticleReturnTime: 1
   _fireAudioEffectsRoot: {fileID: 7922358712448589423}
   _fireSound:
@@ -900,6 +900,11 @@ PrefabInstance:
 --- !u!4 &6109151373377773521 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5501774896621642075, guid: 610f2de150d6a80499f60bde1767586f, type: 3}
+  m_PrefabInstance: {fileID: 1770525776300408458}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7581790248050129414 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8189169061603738764, guid: 610f2de150d6a80499f60bde1767586f, type: 3}
   m_PrefabInstance: {fileID: 1770525776300408458}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3694187502484549145

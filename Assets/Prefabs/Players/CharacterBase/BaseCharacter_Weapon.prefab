@@ -251,7 +251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0578f350f734b73b0e080681c0e3cb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _projectilePrefab: {fileID: 6760726039705429157, guid: 1cbad648f9ef5cd4fbbdd4eb8d57129f, type: 3}
+  _projectilePrefab: {fileID: 3893831311589886993, guid: af026bd22801f47bc90e157d6ca38a0c, type: 3}
   _standaloneProjectilePrefab: {fileID: 0}
   _standaloneProjectileBuffer: {fileID: 0}
   _projectilesPerShot: 1
