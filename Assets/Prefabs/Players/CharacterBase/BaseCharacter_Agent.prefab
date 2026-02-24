@@ -234,6 +234,10 @@ MonoBehaviour:
   _flyingCapPrefab: {fileID: 6411814381523849521, guid: 2cf998a7edf4a7c4cbcda4d4f94c3255, type: 3}
   _capImpulse: 1
   _deathEffectPrefab: {fileID: 6616163762673046193, guid: 89eb08fa431f13b4ca9f10526b54a27f, type: 3}
+  _enableTeamOutlines: 1
+  _outlineWidth: 0.02
+  _allyOutlineColor: {r: 0, g: 0.63, b: 1, a: 1}
+  _enemyOutlineColor: {r: 1, g: 0.1, b: 0.1, a: 1}
 --- !u!114 &316060476010132159
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -249,6 +253,7 @@ MonoBehaviour:
   _projectilePrefabs:
   - {fileID: 8201653215476214794, guid: 95026cd3233f4bd48b1d3ad15e6d81b3, type: 3}
   - {fileID: -2832796552667752844, guid: 1468cb7f88df9984da1ed4486ce2c7e4, type: 3}
+  - {fileID: -2832796552667752844, guid: 5314c1301e63a804f9665c36b855a8eb, type: 3}
   - {fileID: -2832796552667752844, guid: 5314c1301e63a804f9665c36b855a8eb, type: 3}
 --- !u!114 &750882487852086919
 MonoBehaviour:

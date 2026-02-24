@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 
@@ -30,6 +30,7 @@ namespace Projectiles
 
 		public Weapon       CurrentWeapon           => _weapons[CurrentWeaponSlot];
 		public Weapon       PendingWeapon           => _weapons[PendingWeaponSlot];
+		public Transform    FireTransform           => _fireTransform;
 
 		[Networked, HideInInspector]
 		public int          CurrentWeaponSlot       { get; private set; }

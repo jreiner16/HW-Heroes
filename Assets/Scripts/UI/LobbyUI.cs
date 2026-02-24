@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Fusion;
+using UnityEngine.EventSystems;
 
 namespace Projectiles.UI
 {
@@ -29,6 +30,7 @@ namespace Projectiles.UI
 
         [Header("Settings")]
         [SerializeField] private bool _enableHotkeys = true;
+        [SerializeField] private bool _enableHotkeysInBuild = false;
         [SerializeField] private bool _autoHideWhenConnected = true;
         [SerializeField] private GameObject _mainPanel;
 
@@ -91,7 +93,8 @@ namespace Projectiles.UI
             if (_clientCountInput) _clientCountInput.interactable = disconnected;
 
             // Hotkeys
-            if (_enableHotkeys && disconnected)
+            bool allowHotkeys = Application.isEditor || _enableHotkeysInBuild;
+            if (_enableHotkeys && allowHotkeys && disconnected && IsTypingInInputField() == false)
             {
                 if (Input.GetKeyDown(KeyCode.I)) _bootstrap.StartSinglePlayer();
                 if (Input.GetKeyDown(KeyCode.H)) OnStartHost();
@@ -107,6 +110,26 @@ namespace Projectiles.UI
         }
 
         void SetInteractable(Button btn, bool state) { if (btn) btn.interactable = state; }
+
+        bool IsTypingInInputField()
+        {
+            if (_roomNameInput != null && _roomNameInput.isFocused)
+                return true;
+
+            if (_clientCountInput != null && _clientCountInput.isFocused)
+                return true;
+
+            // Fallback: if any input field is selected, don't treat keypresses as lobby hotkeys.
+            var es = EventSystem.current;
+            if (es == null)
+                return false;
+
+            var selected = es.currentSelectedGameObject;
+            if (selected == null)
+                return false;
+
+            return selected.GetComponent<TMP_InputField>() != null || selected.GetComponent<InputField>() != null;
+        }
 
         int GetClientCount() => int.TryParse(_clientCount, out int c) ? c : 1;
 
