@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 750882487852086919}
   - component: {fileID: 1128444158403002831}
   - component: {fileID: 1128444158403002832}
+  - component: {fileID: 1128444158403002833}
   m_Layer: 0
   m_Name: Geodde_Agent
   m_TagString: Untagged
@@ -71,6 +72,7 @@ MonoBehaviour:
   - {fileID: 750882487852086919}
   - {fileID: 1128444158403002831}
   - {fileID: 1128444158403002832}
+  - {fileID: 1128444158403002833}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &2000174215685155523
 MonoBehaviour:
@@ -277,6 +279,7 @@ MonoBehaviour:
   - {fileID: 3893831311589886993, guid: 86844ce8beb21484896dec3d25e137ea, type: 3}
   - {fileID: 198167511295504590, guid: 87ef2a7f78da50e4e9e8e4b4e9f23d22, type: 3}
   - {fileID: 6760726039705429157, guid: cf3229e04f198294095b5c3c00b7bc94, type: 3}
+  - {fileID: 6760726039705429157, guid: da076ccc65bd7491d8b9629b993b2f6e, type: 3}
 --- !u!114 &1128444158403002831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -305,7 +308,22 @@ MonoBehaviour:
   _duration: 2.5
   _cooldown: 10
   _visual: {fileID: 2526105640932925329}
-  _phaseEffect: {fileID: 0}
+  _phaseEffect: {fileID: 5762880852013441109, guid: 808cc5444dae25b4f8a8fa0d9230409e, type: 3}
+--- !u!114 &1128444158403002833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 260199661339379077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b3f2c1a9e8d4f56b2a1c0d5e6f7a8b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cooldown: 15
+  _kinematicProjectilePrefab: {fileID: 6760726039705429157, guid: da076ccc65bd7491d8b9629b993b2f6e, type: 3}
+  _standaloneProjectilePrefab: {fileID: 0}
 --- !u!1 &504059032653147225
 GameObject:
   m_ObjectHideFlags: 0
