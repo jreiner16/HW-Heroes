@@ -44,6 +44,16 @@ namespace Projectiles
 		}
 
 		// NetworkBehaviour INTERFACE
+		
+		public override void Spawned()
+		{
+			// Start uncharged: when the ability spawns, immediately put it on cooldown.
+			// Only state authority should set networked state.
+			if (HasStateAuthority == true && _cooldown > 0f)
+			{
+				_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
+			}
+		}
 
 		public override void FixedUpdateNetwork()
 		{
