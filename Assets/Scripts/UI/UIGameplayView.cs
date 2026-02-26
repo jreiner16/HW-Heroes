@@ -27,7 +27,6 @@ namespace Projectiles.UI
 		private UIScreenEffects _screenEffects;
 		private UIMovementAbility _movementAbility;
 		private UIUltimateAbility _ultimateAbility;
-
 		private SceneContext _context;
 		private PlayerAgent _observedAgent;
 		private NetworkBehaviourId _observedAgentId;

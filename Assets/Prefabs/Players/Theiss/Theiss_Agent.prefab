@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 750882487852086919}
   - component: {fileID: 1128444158403002831}
   - component: {fileID: -7772859504318545412}
+  - component: {fileID: -3504594320292253820}
   m_Layer: 0
   m_Name: Theiss_Agent
   m_TagString: Untagged
@@ -71,6 +72,7 @@ MonoBehaviour:
   - {fileID: 750882487852086919}
   - {fileID: 1128444158403002831}
   - {fileID: -7772859504318545412}
+  - {fileID: -3504594320292253820}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &2000174215685155523
 MonoBehaviour:
@@ -307,6 +309,23 @@ MonoBehaviour:
   _spawnDistance: 2.5
   _spawnHeightOffset: 0
   _shieldPrefab: {fileID: -4939455026513570011, guid: 7c2663757a8e8447db75e320a3fb5026, type: 3}
+--- !u!114 &-3504594320292253820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 260199661339379077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7b9534387b7840d8a1efc5baf80e8af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _duration: 5
+  _cooldown: 20
+  _speedMultiplier: 1.5
+  _jumpMultiplier: 1.4
+  _maxHealthBonus: 50
 --- !u!1 &504059032653147225
 GameObject:
   m_ObjectHideFlags: 0

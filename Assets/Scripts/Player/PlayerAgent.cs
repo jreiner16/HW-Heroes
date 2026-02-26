@@ -1,4 +1,4 @@
-﻿using Fusion;
+using Fusion;
 using UnityEngine;
 using Fusion.Addons.SimpleKCC;
 
@@ -21,6 +21,12 @@ namespace Projectiles
 		public PlayerInput Input         { get; private set; }
 
 		public bool        InputBlocked  => Health.IsAlive == false;
+
+		/// <summary>
+		/// Multipliers applied to movement (used by abilities). Default 1. Abilities with execution order before this should set these.
+		/// </summary>
+		public float MoveSpeedMultiplier { get; set; } = 1f;
+		public float JumpMultiplier { get; set; } = 1f;
 
 		// PRIVATE MEMBERS
 
@@ -133,7 +139,8 @@ namespace Projectiles
 			// Calculate input direction based on recently updated look rotation (the change propagates internally also to KCC.TransformRotation)
 			var inputDirection = KCC.TransformRotation * new Vector3(input.MoveDirection.x, 0f, input.MoveDirection.y);
 
-			var desiredMoveVelocity = inputDirection * _moveSpeed;
+			float moveSpeed = _moveSpeed * MoveSpeedMultiplier;
+			var desiredMoveVelocity = inputDirection * moveSpeed;
 			float acceleration = 1f;
 
 			if (desiredMoveVelocity == Vector3.zero)
@@ -148,7 +155,7 @@ namespace Projectiles
 
 			_moveVelocity = Vector3.Lerp(_moveVelocity, desiredMoveVelocity, acceleration * Runner.DeltaTime);
 
-			float jumpImpulse = input.Buttons.WasPressed(Input.PreviousButtons, EInputButton.Jump) && KCC.IsGrounded ? _jumpImpulse : 0f;
+			float jumpImpulse = input.Buttons.WasPressed(Input.PreviousButtons, EInputButton.Jump) && KCC.IsGrounded ? _jumpImpulse * JumpMultiplier : 0f;
 			KCC.Move(_moveVelocity, jumpImpulse);
 		}
 	}

@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 
 namespace Projectiles.UI
@@ -10,18 +10,21 @@ namespace Projectiles.UI
 		[SerializeField]
 		private TextMeshProUGUI _healthValue;
 
-		private int _lastValue = -1;
+		private int _lastCurrent = -1;
+		private int _lastMax = -1;
 
 		// PUBLIC METHODS
 
 		public void UpdateHealth(Health health)
 		{
-			int currentHealth = Mathf.RoundToInt(health.CurrentHealth);
-			if (currentHealth == _lastValue)
+			int current = Mathf.RoundToInt(health.CurrentHealth);
+			int max = Mathf.RoundToInt(health.MaxHealth);
+			if (current == _lastCurrent && max == _lastMax)
 				return;
 
-			_healthValue.text = currentHealth.ToString();
-			_lastValue = currentHealth;
+			_healthValue.text = $"{current} / {max}";
+			_lastCurrent = current;
+			_lastMax = max;
 		}
 	}
 }
