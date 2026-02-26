@@ -38000,6 +38000,10 @@ PrefabInstance:
       value: 888380777
       objectReference: {fileID: 0}
     - target: {fileID: 7022045583931168778, guid: bc45ec2cd5492e349a41e152239ebf26, type: 3}
+      propertyPath: NetworkedBehaviours.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7022045583931168778, guid: bc45ec2cd5492e349a41e152239ebf26, type: 3}
       propertyPath: NetworkGuid.RawGuidValue.Array.data[0]
       value: 8233516797612308190
       objectReference: {fileID: 0}
@@ -38851,6 +38855,10 @@ PrefabInstance:
     - target: {fileID: 7022045583931168778, guid: bc45ec2cd5492e349a41e152239ebf26, type: 3}
       propertyPath: SortKey
       value: 3435058910
+      objectReference: {fileID: 0}
+    - target: {fileID: 7022045583931168778, guid: bc45ec2cd5492e349a41e152239ebf26, type: 3}
+      propertyPath: NetworkedBehaviours.Array.size
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 7022045583931168778, guid: bc45ec2cd5492e349a41e152239ebf26, type: 3}
       propertyPath: NetworkGuid.RawGuidValue.Array.data[0]

@@ -20,8 +20,7 @@ GameObject:
   - component: {fileID: 316060476010132159}
   - component: {fileID: 750882487852086919}
   - component: {fileID: 1128444158403002831}
-  - component: {fileID: 1128444158403002832}
-  - component: {fileID: 1128444158403002833}
+  - component: {fileID: -7772859504318545412}
   m_Layer: 0
   m_Name: Theiss_Agent
   m_TagString: Untagged
@@ -71,8 +70,7 @@ MonoBehaviour:
   - {fileID: 316060476010132159}
   - {fileID: 750882487852086919}
   - {fileID: 1128444158403002831}
-  - {fileID: 1128444158403002832}
-  - {fileID: 1128444158403002833}
+  - {fileID: -7772859504318545412}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &2000174215685155523
 MonoBehaviour:
@@ -293,7 +291,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _lookSensitivity: 3
---- !u!114 &1128444158403002832
+--- !u!114 &-7772859504318545412
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -302,28 +300,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 260199661339379077}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 454a9c29e96e6456aad02a05c077204c, type: 3}
+  m_Script: {fileID: 11500000, guid: 8b9b778744c70478fb07bbf0b6fd9fc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _duration: 2.5
-  _cooldown: 10
-  _visual: {fileID: 2526105640932925329}
-  _phaseEffect: {fileID: 5762880852013441109, guid: 808cc5444dae25b4f8a8fa0d9230409e, type: 3}
---- !u!114 &1128444158403002833
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 260199661339379077}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b3f2c1a9e8d4f56b2a1c0d5e6f7a8b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _cooldown: 15
-  _kinematicProjectilePrefab: {fileID: 6760726039705429157, guid: da076ccc65bd7491d8b9629b993b2f6e, type: 3}
-  _standaloneProjectilePrefab: {fileID: 0}
+  _cooldown: 12
+  _spawnDistance: 2.5
+  _spawnHeightOffset: 0
+  _shieldPrefab: {fileID: -4939455026513570011, guid: 7c2663757a8e8447db75e320a3fb5026, type: 3}
 --- !u!1 &504059032653147225
 GameObject:
   m_ObjectHideFlags: 0
