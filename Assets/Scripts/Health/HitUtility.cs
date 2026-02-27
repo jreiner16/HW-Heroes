@@ -179,6 +179,14 @@ namespace Projectiles
 				}
 			}
 
+			if (hitData.Action == EHitAction.Damage && hitData.Amount > 0f)
+			{
+				var targetHealth = hitData.Target as Health;
+				var runner = targetHealth != null ? targetHealth.Runner : null;
+				float multiplier = TheissDamageDebuffField.GetOutgoingDamageMultiplier(runner, hitData.InstigatorRef);
+				hitData.Amount *= multiplier;
+			}
+
 			hitData.Target.ProcessHit(ref hitData);
 
 			// For local debug targets we show hit feedback immediately

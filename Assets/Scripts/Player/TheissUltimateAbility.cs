@@ -4,7 +4,8 @@ using UnityEngine;
 namespace Projectiles
 {
 	/// <summary>
-	/// Theiss's ultimate ability: fires an ultimate projectile in the aim direction. Triggered by the X key.
+	/// Theiss's ultimate ability: places a debuff field that reduces enemy outgoing damage.
+	/// Triggered by the X key.
 	/// </summary>
 	[DefaultExecutionOrder(5)]
 	public class TheissUltimateAbility : ContextBehaviour
@@ -22,15 +23,19 @@ namespace Projectiles
 		[Header("Ability Settings")]
 		[SerializeField]
 		private float _cooldown = 15f;
+		[SerializeField]
+		private float _spawnDistance = 2.5f;
+		[SerializeField]
+		private float _spawnHeightOffset = 0f;
 
 		[Header("References")]
-		[SerializeField, Tooltip("Use KinematicProjectile (add to buffer's prefab list) or StandaloneProjectile. Kinematic preferred if both set.")]
-		private KinematicProjectile _kinematicProjectilePrefab;
 		[SerializeField]
-		private StandaloneProjectile _standaloneProjectilePrefab;
+		private TheissDamageDebuffField _fieldPrefab;
 
 		[Networked]
 		private TickTimer _cooldownTimer { get; set; }
+		[Networked]
+		private NetworkId _activeFieldId { get; set; }
 
 		private PlayerAgent _agent;
 
@@ -53,15 +58,18 @@ namespace Projectiles
 
 			if (input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.X))
 			{
-				TryFire();
+				TryCastField();
 			}
 		}
 
 		// PRIVATE METHODS
 
-		private void TryFire()
+		private void TryCastField()
 		{
 			if (IsOnCooldown)
+				return;
+
+			if (_fieldPrefab == null)
 				return;
 
 			if (_agent.Weapons?.FireTransform == null)
@@ -70,25 +78,43 @@ namespace Projectiles
 			if (HasStateAuthority == false)
 				return;
 
-			var fireTransform = _agent.Weapons.FireTransform;
-			var firePosition = fireTransform.position;
-			var fireDirection = fireTransform.forward;
+			DespawnActiveFieldIfAny();
 
-			if (_kinematicProjectilePrefab != null)
+			var fireTransform = _agent.Weapons.FireTransform;
+			var forward = fireTransform.forward;
+			forward.y = 0f;
+			if (forward.sqrMagnitude < 0.0001f)
 			{
-				var buffer = GetComponent<KinematicProjectileBuffer>();
-				if (buffer != null)
-				{
-					buffer.AddProjectile(_kinematicProjectilePrefab, firePosition, fireDirection);
-					_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
-				}
+				forward = transform.forward;
+				forward.y = 0f;
 			}
-			else if (_standaloneProjectilePrefab != null)
+			forward.Normalize();
+
+			var spawnPosition = transform.position + forward * _spawnDistance + Vector3.up * _spawnHeightOffset;
+			var spawnRotation = Quaternion.identity;
+
+			var field = Runner.Spawn(_fieldPrefab, spawnPosition, spawnRotation, Object.InputAuthority);
+			if (field != null)
 			{
-				var projectile = Runner.Spawn(_standaloneProjectilePrefab, firePosition, Quaternion.LookRotation(fireDirection), Object.InputAuthority);
-				projectile.Fire(firePosition, fireDirection);
-				_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
+				field.Initialize(_agent.Owner);
+				_activeFieldId = field.Object.Id;
 			}
+
+			_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
+		}
+
+		private void DespawnActiveFieldIfAny()
+		{
+			if (_activeFieldId.IsValid == false)
+				return;
+
+			var existingObject = Runner.FindObject(_activeFieldId);
+			if (existingObject != null)
+			{
+				Runner.Despawn(existingObject);
+			}
+
+			_activeFieldId = default;
 		}
 	}
 }

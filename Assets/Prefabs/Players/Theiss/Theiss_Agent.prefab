@@ -329,6 +329,8 @@ MonoBehaviour:
   _cooldown: 30
   _speedMultiplier: 1.5
   _jumpMultiplier: 1.4
+  _maxHealthBonus: 50
+  _activationHeal: 50
 --- !u!114 &-3504594320292253821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -341,9 +343,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e2f0418a68d4a8eb4c920d801f2706a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cooldown: 15
-  _kinematicProjectilePrefab: {fileID: 6760726039705429157, guid: 85270d347bcc44f7b8066ef8eae75508, type: 3}
-  _standaloneProjectilePrefab: {fileID: 0}
+  _cooldown: 60
+  _spawnDistance: 0
+  _spawnHeightOffset: 0
+  _fieldPrefab: {fileID: 5319902149527495697, guid: 140f30b598d8f4541ba2186b60e5a17e, type: 3}
 --- !u!1 &504059032653147225
 GameObject:
   m_ObjectHideFlags: 0

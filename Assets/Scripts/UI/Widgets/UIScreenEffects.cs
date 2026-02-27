@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using UnityEngine;
 
 namespace Projectiles.UI
@@ -10,6 +10,8 @@ namespace Projectiles.UI
 		[SerializeField]
 		private CanvasGroup _hitGroup;
 		[SerializeField]
+		private CanvasGroup _debuffGroup;
+		[SerializeField]
 		private UIBehaviour _deathGroup;
 
 		[Header("Animation")]
@@ -17,6 +19,12 @@ namespace Projectiles.UI
 		private float _hitFadeInDuration = 0.1f;
 		[SerializeField]
 		private float _hitFadeOutDuration = 0.7f;
+
+		[Header("Debuff Overlay")]
+		[SerializeField]
+		private float _debuffTargetAlpha = 0.22f;
+		[SerializeField]
+		private float _debuffFadeSpeed = 4f;
 
 		[Header("Audio")]
 		[SerializeField]
@@ -48,6 +56,13 @@ namespace Projectiles.UI
 
 		public void UpdateEffects(PlayerAgent agent)
 		{
+			if (_debuffGroup != null)
+			{
+				bool inDebuffField = TheissDamageDebuffField.IsPlayerInsideField(agent.Runner, agent);
+				float targetDebuffAlpha = inDebuffField ? _debuffTargetAlpha : 0f;
+				_debuffGroup.alpha = Mathf.MoveTowards(_debuffGroup.alpha, targetDebuffAlpha, _debuffFadeSpeed * Time.deltaTime);
+			}
+
 			_deathGroup.SetActive(agent.Health.IsAlive == false);
 		}
 
@@ -57,6 +72,12 @@ namespace Projectiles.UI
 		{
 			_hitGroup.SetActive(true);
 			_hitGroup.alpha = 0f;
+
+			if (_debuffGroup != null)
+			{
+				_debuffGroup.SetActive(true);
+				_debuffGroup.alpha = 0f;
+			}
 
 			_deathGroup.SetActive(false);
 		}
