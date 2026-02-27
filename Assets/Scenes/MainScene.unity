@@ -15366,7 +15366,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 47, y: -47}
+  m_AnchoredPosition: {x: 438, y: -47}
   m_SizeDelta: {x: 94, y: 94}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &779133482
@@ -15809,7 +15809,7 @@ RectTransform:
   m_GameObject: {fileID: 786774639}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 779133481}
@@ -15818,7 +15818,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 142, y: 106.888306}
+  m_AnchoredPosition: {x: 687.9999, y: 263}
   m_SizeDelta: {x: 413.58472, y: 106.888306}
   m_Pivot: {x: 0.000000011175871, y: 1}
 --- !u!114 &786774641
@@ -15835,6 +15835,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cooldownFill: {fileID: 779133482}
   _statusText: {fileID: 1651876322}
+  _countdownTextOffsetX: 30
 --- !u!1001 &790620834
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17661,7 +17662,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: MVMT(E)
+  m_text: ABLT(E)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 62d4bf315d3fd674eb395190648cd25a, type: 2}
   m_sharedMaterial: {fileID: -5735335419461447778, guid: 62d4bf315d3fd674eb395190648cd25a, type: 2}
@@ -21927,7 +21928,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 59.552734, y: 0}
+  m_AnchoredPosition: {x: 86, y: 0}
   m_SizeDelta: {x: -123.10547, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1205505910
@@ -26656,7 +26657,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 47, y: -47}
+  m_AnchoredPosition: {x: 500, y: -47}
   m_SizeDelta: {x: 94, y: 94}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1418486507
@@ -27105,7 +27106,7 @@ RectTransform:
   m_GameObject: {fileID: 1439023209}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1418486506}
@@ -27114,7 +27115,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -413.58472, y: 106.888306}
+  m_AnchoredPosition: {x: -303, y: 188}
   m_SizeDelta: {x: 413.58472, y: 106.888306}
   m_Pivot: {x: 0.000000011175871, y: 1}
 --- !u!114 &1439023211
@@ -27131,6 +27132,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cooldownFill: {fileID: 1418486507}
   _statusText: {fileID: 890890127}
+  _countdownTextOffsetX: 100
 --- !u!1001 &1439286557
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -31045,7 +31047,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 47, y: -47}
+  m_AnchoredPosition: {x: 526, y: -47}
   m_SizeDelta: {x: 94, y: 94}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1659016342
@@ -31823,7 +31825,7 @@ RectTransform:
   m_GameObject: {fileID: 1709384222}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1659016341}
@@ -31832,7 +31834,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -315, y: 106.888306}
+  m_AnchoredPosition: {x: 646.9999, y: 106.888306}
   m_SizeDelta: {x: 413.58472, y: 106.888306}
   m_Pivot: {x: 0.000000011175871, y: 1}
 --- !u!114 &1709384224
@@ -31849,6 +31851,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cooldownFill: {fileID: 1659016342}
   _statusText: {fileID: 1205505910}
+  _countdownTextOffsetX: 100
 --- !u!1001 &1711557015
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -39270,6 +39273,18 @@ PrefabInstance:
     - target: {fileID: 6463862045961609313, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: -9.999512
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491006066114195849, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491006066114195849, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491006066114195849, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7099007087491931358, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
       propertyPath: m_Name
