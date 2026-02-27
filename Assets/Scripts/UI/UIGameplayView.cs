@@ -25,7 +25,11 @@ namespace Projectiles.UI
 		private UIHealth _health;
 		private UIWeapons _weapons;
 		private UIScreenEffects _screenEffects;
+		[SerializeField]
 		private UIMovementAbility _movementAbility;
+		[SerializeField]
+		private UIMovementAbility _secondaryAbility;
+		[SerializeField]
 		private UIUltimateAbility _ultimateAbility;
 		private SceneContext _context;
 		private PlayerAgent _observedAgent;
@@ -46,8 +50,23 @@ namespace Projectiles.UI
 			_health = GetComponentInChildren<UIHealth>(true);
 			_weapons = GetComponentInChildren<UIWeapons>(true);
 			_screenEffects = GetComponentInChildren<UIScreenEffects>(true);
-			_movementAbility = GetComponentInChildren<UIMovementAbility>(true);
-			_ultimateAbility = GetComponentInChildren<UIUltimateAbility>(true);
+			if (_movementAbility == null || _secondaryAbility == null)
+			{
+				var movementWidgets = GetComponentsInChildren<UIMovementAbility>(true);
+				if (_movementAbility == null && movementWidgets.Length > 0)
+				{
+					_movementAbility = movementWidgets[0];
+				}
+				if (_secondaryAbility == null && movementWidgets.Length > 1)
+				{
+					_secondaryAbility = movementWidgets[1];
+				}
+			}
+
+			if (_ultimateAbility == null)
+			{
+				_ultimateAbility = GetComponentInChildren<UIUltimateAbility>(true);
+			}
 
 			_aliveGroup.alpha = 0f;
 		}
@@ -68,14 +87,38 @@ namespace Projectiles.UI
 
 			if (_movementAbility != null)
 			{
-				var ability = _observedAgent.GetComponent<GeoddeMovementAbility>();
-				_movementAbility.UpdateAbility(ability);
+				var geoddeMovement = _observedAgent.GetComponent<GeoddeMovementAbility>();
+				var theissBuff = _observedAgent.GetComponent<TheissBuffAbility>();
+
+				if (geoddeMovement != null)
+				{
+					_movementAbility.UpdateAbility(geoddeMovement);
+				}
+				else
+				{
+					_movementAbility.UpdateAbility(theissBuff);
+				}
+			}
+
+			if (_secondaryAbility != null)
+			{
+				var theissShield = _observedAgent.GetComponent<TheissShieldAbility>();
+				_secondaryAbility.UpdateAbility(theissShield);
 			}
 
 			if (_ultimateAbility != null)
 			{
-				var ultimate = _observedAgent.GetComponent<GeoddeUltimateAbility>();
-				_ultimateAbility.UpdateAbility(ultimate);
+				var geoddeUltimate = _observedAgent.GetComponent<GeoddeUltimateAbility>();
+				var theissUltimate = _observedAgent.GetComponent<TheissUltimateAbility>();
+
+				if (geoddeUltimate != null)
+				{
+					_ultimateAbility.UpdateAbility(geoddeUltimate);
+				}
+				else
+				{
+					_ultimateAbility.UpdateAbility(theissUltimate);
+				}
 			}
 
 			ShowAliveGroup(_observedAgent.Health.IsAlive);
@@ -150,5 +193,6 @@ namespace Projectiles.UI
 				_aliveGroup.DOFade(0f, _aliveGroupFadeOut);
 			}
 		}
+
 	}
 }
