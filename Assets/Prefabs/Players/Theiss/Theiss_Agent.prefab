@@ -305,7 +305,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b9b778744c70478fb07bbf0b6fd9fc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cooldown: 12
+  _cooldown: 20
   _spawnDistance: 2.5
   _spawnHeightOffset: 0
   _shieldPrefab: {fileID: -4939455026513570011, guid: 7c2663757a8e8447db75e320a3fb5026, type: 3}
@@ -322,10 +322,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _duration: 5
-  _cooldown: 20
+  _cooldown: 30
   _speedMultiplier: 1.5
   _jumpMultiplier: 1.4
-  _maxHealthBonus: 50
 --- !u!1 &504059032653147225
 GameObject:
   m_ObjectHideFlags: 0

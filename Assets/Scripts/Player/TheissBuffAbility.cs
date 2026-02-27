@@ -33,6 +33,10 @@ namespace Projectiles
 		private float _speedMultiplier = 1.5f;
 		[SerializeField, Tooltip("Jump height multiplier while buff is active")]
 		private float _jumpMultiplier = 1.4f;
+		[SerializeField, Tooltip("Temporary max health bonus while buff is active")]
+		private float _maxHealthBonus = 50f;
+		[SerializeField, Tooltip("Immediate heal applied when buff activates")]
+		private float _activationHeal = 50f;
 
 		[Networked]
 		private NetworkBool _isActive { get; set; }
@@ -40,6 +44,8 @@ namespace Projectiles
 		private TickTimer _durationTimer { get; set; }
 		[Networked]
 		private TickTimer _cooldownTimer { get; set; }
+		[Networked]
+		private NetworkBool _healthBuffApplied { get; set; }
 
 		private PlayerAgent _agent;
 
@@ -105,19 +111,41 @@ namespace Projectiles
 		{
 			_isActive = true;
 			_durationTimer = TickTimer.CreateFromSeconds(Runner, _duration);
+			ApplyHealthBuff();
 		}
 
 		private void Deactivate()
 		{
+			RemoveHealthBuff();
 			_isActive = false;
 			_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
 		}
 
 		private void ForceDeactivate()
 		{
+			RemoveHealthBuff();
 			_isActive = false;
 			_durationTimer = default;
 			_cooldownTimer = default;
+		}
+
+		private void ApplyHealthBuff()
+		{
+			if (_healthBuffApplied || _agent?.Health == null)
+				return;
+
+			_agent.Health.ChangeMaxHealthBonus(_maxHealthBonus);
+			_agent.Health.Heal(_activationHeal);
+			_healthBuffApplied = true;
+		}
+
+		private void RemoveHealthBuff()
+		{
+			if (_healthBuffApplied == false || _agent?.Health == null)
+				return;
+
+			_agent.Health.ChangeMaxHealthBonus(-_maxHealthBonus);
+			_healthBuffApplied = false;
 		}
 	}
 

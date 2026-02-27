@@ -17,7 +17,7 @@ namespace Projectiles
 
 		public bool    IsAlive       => CurrentHealth > 0f;
 		public bool    IsImmortal    => _immortalCooldown.ExpiredOrNotRunning(Runner) == false;
-		public float   MaxHealth     => _maxHealth;
+		public float   MaxHealth     => _maxHealth + _maxHealthBonus;
 
 		[Networked]
 		public float   CurrentHealth { get; private set; }
@@ -42,6 +42,8 @@ namespace Projectiles
 
 		[Networked]
 		private TickTimer _immortalCooldown { get; set; }
+		[Networked]
+		private float _maxHealthBonus { get; set; }
 
 		private int _visibleHitCount;
 
@@ -60,7 +62,21 @@ namespace Projectiles
 
 		public void ResetHealth()
 		{
-			CurrentHealth = _maxHealth;
+			CurrentHealth = MaxHealth;
+		}
+
+		public void ChangeMaxHealthBonus(float amount)
+		{
+			_maxHealthBonus = Mathf.Max(0f, _maxHealthBonus + amount);
+			SetHealth(CurrentHealth);
+		}
+
+		public float Heal(float amount)
+		{
+			if (amount <= 0f)
+				return 0f;
+
+			return AddHealth(amount);
 		}
 
 		// NetworkBehaviour INTERFACE
@@ -94,7 +110,7 @@ namespace Projectiles
 			InvokeWeavedCode();
 			base.CopyBackingFieldsToState(firstTime);
 
-			CurrentHealth = _maxHealth;
+			CurrentHealth = MaxHealth;
 		}
 
 		// IHitTarget INTERFACE
@@ -189,7 +205,7 @@ namespace Projectiles
 
 		private void SetHealth(float health)
 		{
-			CurrentHealth = Mathf.Clamp(health, 0, _maxHealth);
+			CurrentHealth = Mathf.Clamp(health, 0, MaxHealth);
 		}
 
 		private void UpdateVisibleHits(int hitCount)

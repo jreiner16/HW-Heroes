@@ -498,7 +498,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _shotsPerBurst: 3
-  _burstCadence: 180
+  _burstCadence: 140
   _intraBurstCadence: 600
   _fireButton: 0
   _fireOnKeyDownOnly: 1
