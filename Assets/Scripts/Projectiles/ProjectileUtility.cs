@@ -1,4 +1,4 @@
-﻿using Fusion;
+using Fusion;
 using System.Collections.Generic;
 using Fusion.LagCompensation;
 using UnityEngine;
@@ -12,6 +12,8 @@ namespace Projectiles
 	{
 		public static bool ProjectileCast(NetworkRunner runner, PlayerRef owner, Vector3 firePosition, Vector3 direction, float distance, LayerMask hitMask, out LagCompensatedHit hit, bool ignoreInputAuthority = true)
 		{
+			hit = default;
+
 			var hitOptions = HitOptions.IncludePhysX | HitOptions.SubtickAccuracy;
 
 			if (ignoreInputAuthority == true)
@@ -19,7 +21,29 @@ namespace Projectiles
 				hitOptions |= HitOptions.IgnoreInputAuthority;
 			}
 
-			return runner.LagCompensation.Raycast(firePosition, direction, distance, owner, out hit, hitMask, hitOptions);
+			var hits = ListPool.Get<LagCompensatedHit>(16);
+			int hitCount = runner.LagCompensation.RaycastAll(firePosition, direction, distance, owner, hits, hitMask, true, hitOptions);
+			if (hitCount <= 0)
+			{
+				ListPool.Return(hits);
+				return false;
+			}
+
+			hits.SortDistance();
+
+			for (int i = 0; i < hits.Count; i++)
+			{
+				var currentHit = hits[i];
+				if (IsBlockedByProjectileFilter(runner, owner, currentHit) == false)
+					continue;
+
+				hit = currentHit;
+				ListPool.Return(hits);
+				return true;
+			}
+
+			ListPool.Return(hits);
+			return false;
 		}
 
 		public static bool ProjectileCastAll(NetworkRunner runner, PlayerRef owner, int ownerObjectInstanceID, Vector3 firePosition, Vector3 direction, float distance, LayerMask hitMask, List<LagCompensatedHit> validHits)
@@ -112,6 +136,29 @@ namespace Projectiles
 			}
 
 			return hit.Type != HitType.None;
+		}
+
+		private static bool IsBlockedByProjectileFilter(NetworkRunner runner, PlayerRef owner, LagCompensatedHit hit)
+		{
+			if (hit.Hitbox != null)
+			{
+				var blocker = hit.Hitbox.Root.GetComponent<IProjectileBlocker>();
+				if (blocker != null)
+				{
+					return blocker.ShouldBlockProjectile(runner, owner);
+				}
+			}
+
+			if (hit.Collider != null)
+			{
+				var blocker = hit.Collider.GetComponentInParent<IProjectileBlocker>();
+				if (blocker != null)
+				{
+					return blocker.ShouldBlockProjectile(runner, owner);
+				}
+			}
+
+			return true;
 		}
 	}
 }

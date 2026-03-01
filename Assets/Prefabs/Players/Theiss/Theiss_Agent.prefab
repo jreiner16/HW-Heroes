@@ -20,11 +20,12 @@ GameObject:
   - component: {fileID: 316060476010132159}
   - component: {fileID: 750882487852086919}
   - component: {fileID: 1128444158403002831}
-  - component: {fileID: 1128444158403002832}
-  - component: {fileID: 1128444158403002833}
-  - component: {fileID: 3733613388712259037}
+  - component: {fileID: -7772859504318545412}
+  - component: {fileID: -3504594320292253820}
+  - component: {fileID: -3504594320292253821}
+  - component: {fileID: 7410513065928345461}
   m_Layer: 0
-  m_Name: Geodde_Agent
+  m_Name: Theiss_Agent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -58,7 +59,7 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 3471154014
+  SortKey: 3973379527
   ObjectInterest: 1
   Flags: 264449
   NestedObjects: []
@@ -72,8 +73,9 @@ MonoBehaviour:
   - {fileID: 316060476010132159}
   - {fileID: 750882487852086919}
   - {fileID: 1128444158403002831}
-  - {fileID: 1128444158403002832}
-  - {fileID: 1128444158403002833}
+  - {fileID: -7772859504318545412}
+  - {fileID: -3504594320292253820}
+  - {fileID: -3504594320292253821}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &2000174215685155523
 MonoBehaviour:
@@ -90,7 +92,7 @@ MonoBehaviour:
   _Owner: {fileID: 0}
   _cameraPivot: {fileID: 5401675310905547977}
   _cameraHandle: {fileID: 2117859135794692440}
-  _moveSpeed: 6
+  _moveSpeed: 5
   _upGravity: -18
   _downGravity: -25
   _maxCameraAngle: 75
@@ -151,7 +153,7 @@ MonoBehaviour:
   _CurrentWeaponSlot: 0
   _PendingWeaponSlot: 0
   _initialWeapons:
-  - {fileID: 2436901878621067112, guid: 5f528935262974b0a8f01bd7805bf822, type: 3}
+  - {fileID: 2436901878621067112, guid: ad585ed83d9fa4246a3384d7455b8cf1, type: 3}
   _weaponsRoot: {fileID: 6249603782933705366}
   _fireTransform: {fileID: 2117859135794692440}
   _firstPersonWeaponOffset: {x: -0.15, y: 0, z: 0}
@@ -197,7 +199,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _CurrentHealth: 0
-  _maxHealth: 100
+  _maxHealth: 200
   _headPivot: {fileID: 7136782717251966427}
   _bodyPivot: {fileID: 6023693924253656717}
   _groundPivot: {fileID: 4327114067154968929}
@@ -260,6 +262,7 @@ MonoBehaviour:
   - {fileID: -2832796552667752844, guid: 1468cb7f88df9984da1ed4486ce2c7e4, type: 3}
   - {fileID: -2832796552667752844, guid: 5314c1301e63a804f9665c36b855a8eb, type: 3}
   - {fileID: -2832796552667752844, guid: f722d04d7a3474942af5f632b79b81fc, type: 3}
+  - {fileID: 6760726039705429157, guid: 85270d347bcc44f7b8066ef8eae75508, type: 3}
 --- !u!114 &750882487852086919
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -281,6 +284,7 @@ MonoBehaviour:
   - {fileID: 198167511295504590, guid: 87ef2a7f78da50e4e9e8e4b4e9f23d22, type: 3}
   - {fileID: 6760726039705429157, guid: cf3229e04f198294095b5c3c00b7bc94, type: 3}
   - {fileID: 6760726039705429157, guid: da076ccc65bd7491d8b9629b993b2f6e, type: 3}
+  - {fileID: 6760726039705429157, guid: 85270d347bcc44f7b8066ef8eae75508, type: 3}
 --- !u!114 &1128444158403002831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -294,7 +298,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _lookSensitivity: 3
---- !u!114 &1128444158403002832
+--- !u!114 &-7772859504318545412
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -303,14 +307,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 260199661339379077}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 454a9c29e96e6456aad02a05c077204c, type: 3}
+  m_Script: {fileID: 11500000, guid: 8b9b778744c70478fb07bbf0b6fd9fc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _duration: 2.5
-  _cooldown: 10
-  _visual: {fileID: 2526105640932925329}
-  _phaseEffect: {fileID: 5762880852013441109, guid: 808cc5444dae25b4f8a8fa0d9230409e, type: 3}
---- !u!114 &1128444158403002833
+  _cooldown: 20
+  _spawnDistance: 2.5
+  _spawnHeightOffset: 0
+  _shieldPrefab: {fileID: -4939455026513570011, guid: 7c2663757a8e8447db75e320a3fb5026, type: 3}
+--- !u!114 &-3504594320292253820
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -319,13 +323,32 @@ MonoBehaviour:
   m_GameObject: {fileID: 260199661339379077}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b3f2c1a9e8d4f56b2a1c0d5e6f7a8b9, type: 3}
+  m_Script: {fileID: 11500000, guid: c7b9534387b7840d8a1efc5baf80e8af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cooldown: 15
-  _kinematicProjectilePrefab: {fileID: 6760726039705429157, guid: da076ccc65bd7491d8b9629b993b2f6e, type: 3}
-  _standaloneProjectilePrefab: {fileID: 0}
---- !u!114 &3733613388712259037
+  _duration: 5
+  _cooldown: 30
+  _speedMultiplier: 1.5
+  _jumpMultiplier: 1.4
+  _maxHealthBonus: 50
+  _activationHeal: 50
+--- !u!114 &-3504594320292253821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 260199661339379077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e2f0418a68d4a8eb4c920d801f2706a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cooldown: 60
+  _spawnDistance: 0
+  _spawnHeightOffset: 0
+  _fieldPrefab: {fileID: 5319902149527495697, guid: 140f30b598d8f4541ba2186b60e5a17e, type: 3}
+--- !u!114 &7410513065928345461
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -337,7 +360,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ca364166c07e4592a2c56c6b56ad53b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _blurb: Dr. Geodde is a history teacher with a no-nonsense policy towards cheating.
+  _blurb: Mr. Theiss is a CS teacher with a passion for chocolate.
 --- !u!1 &504059032653147225
 GameObject:
   m_ObjectHideFlags: 0
