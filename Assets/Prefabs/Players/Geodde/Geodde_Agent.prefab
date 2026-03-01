@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 1128444158403002831}
   - component: {fileID: 1128444158403002832}
   - component: {fileID: 1128444158403002833}
+  - component: {fileID: 3733613388712259037}
   m_Layer: 0
   m_Name: Geodde_Agent
   m_TagString: Untagged
@@ -324,6 +325,19 @@ MonoBehaviour:
   _cooldown: 15
   _kinematicProjectilePrefab: {fileID: 6760726039705429157, guid: da076ccc65bd7491d8b9629b993b2f6e, type: 3}
   _standaloneProjectilePrefab: {fileID: 0}
+--- !u!114 &3733613388712259037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 260199661339379077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ca364166c07e4592a2c56c6b56ad53b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _blurb: Dr. Geodde is a history teacher with a no-nonsense policy towards cheating.
 --- !u!1 &504059032653147225
 GameObject:
   m_ObjectHideFlags: 0

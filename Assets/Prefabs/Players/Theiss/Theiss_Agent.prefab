@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: -7772859504318545412}
   - component: {fileID: -3504594320292253820}
   - component: {fileID: -3504594320292253821}
+  - component: {fileID: 7410513065928345461}
   m_Layer: 0
   m_Name: Theiss_Agent
   m_TagString: Untagged
@@ -347,6 +348,19 @@ MonoBehaviour:
   _spawnDistance: 0
   _spawnHeightOffset: 0
   _fieldPrefab: {fileID: 5319902149527495697, guid: 140f30b598d8f4541ba2186b60e5a17e, type: 3}
+--- !u!114 &7410513065928345461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 260199661339379077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ca364166c07e4592a2c56c6b56ad53b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _blurb: Mr. Theiss is a CS teacher with a passion for chocolate.
 --- !u!1 &504059032653147225
 GameObject:
   m_ObjectHideFlags: 0

@@ -130,5 +130,30 @@ namespace Projectiles.UI
 				SetStatusText(_readyText, false);
 			}
 		}
+
+		/// <summary>
+		/// Fallback mode: show a "secondary action" (RMB / AltFire) indicator based on weapon data.
+		/// </summary>
+		public void UpdateSecondaryAction(Weapon weapon)
+		{
+			CacheReadyText();
+
+			if (weapon == null)
+			{
+				gameObject.SetActive(false);
+				return;
+			}
+
+			// Only show this slot if the current weapon actually has a secondary action.
+			if (weapon.SecondaryActionDescription.HasValue() == false)
+			{
+				gameObject.SetActive(false);
+				return;
+			}
+
+			gameObject.SetActive(true);
+			if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
+			SetStatusText(_readyText, false);
+		}
 	}
 }
