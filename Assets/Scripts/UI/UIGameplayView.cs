@@ -110,11 +110,16 @@ namespace Projectiles.UI
 			if (_movementAbility != null)
 			{
 				var geoddeMovement = _observedAgent.GetComponent<GeoddeMovementAbility>();
+				var cohenMovement = _observedAgent.GetComponent<CohenMovementAbility>();
 				var theissBuff = _observedAgent.GetComponent<TheissBuffAbility>();
 
 				if (geoddeMovement != null)
 				{
 					_movementAbility.UpdateAbility(geoddeMovement);
+				}
+				else if (cohenMovement != null)
+				{
+					_movementAbility.UpdateAbility(cohenMovement);
 				}
 				else
 				{
@@ -140,11 +145,16 @@ namespace Projectiles.UI
 			if (_ultimateAbility != null)
 			{
 				var geoddeUltimate = _observedAgent.GetComponent<GeoddeUltimateAbility>();
+				var cohenUltimate = _observedAgent.GetComponent<CohenUltimateAbility>();
 				var theissUltimate = _observedAgent.GetComponent<TheissUltimateAbility>();
 
 				if (geoddeUltimate != null)
 				{
 					_ultimateAbility.UpdateAbility(geoddeUltimate);
+				}
+				else if (cohenUltimate != null)
+				{
+					_ultimateAbility.UpdateAbility(cohenUltimate);
 				}
 				else
 				{

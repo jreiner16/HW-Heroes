@@ -93,5 +93,30 @@ namespace Projectiles.UI
 				SetStatusText(_readyText, false);
 			}
 		}
+
+		public void UpdateAbility(CohenUltimateAbility ability)
+		{
+			CacheReadyText();
+
+			if (ability == null)
+			{
+				gameObject.SetActive(false);
+				return;
+			}
+
+			gameObject.SetActive(true);
+
+			if (ability.IsOnCooldown)
+			{
+				float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
+				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
+				SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
+			}
+			else
+			{
+				if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
+				SetStatusText(_readyText, false);
+			}
+		}
 	}
 }
