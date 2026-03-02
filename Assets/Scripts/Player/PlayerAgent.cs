@@ -57,8 +57,20 @@ namespace Projectiles
 
 		[Networked]
 		private Vector3 _moveVelocity { get; set; }
+		[Networked]
+		private float _pendingBounceImpulse { get; set; }
 
 		private Vector2 _lastFUNLookRotation;
+
+		/// <summary>
+		/// Applies an upward impulse to the player (e.g. from bouncers). Call from OnTriggerEnter/OnCollisionEnter.
+		/// </summary>
+		public void AddBounceImpulse(float impulse)
+		{
+			if (HasStateAuthority == false)
+				return;
+			_pendingBounceImpulse += impulse;
+		}
 
 		// NetworkBehaviour INTERFACE
 
@@ -127,7 +139,14 @@ namespace Projectiles
 		private void ProcessMovementInput()
 		{
 			if (GetInput(out GameplayInput input) == false)
+			{
+				if (_pendingBounceImpulse > 0f)
+				{
+					KCC.Move(_moveVelocity, _pendingBounceImpulse);
+					_pendingBounceImpulse = 0f;
+				}
 				return;
+			}
 
 			KCC.AddLookRotation(input.LookRotationDelta, -_maxCameraAngle, _maxCameraAngle);
 
@@ -154,6 +173,8 @@ namespace Projectiles
 			_moveVelocity = Vector3.Lerp(_moveVelocity, desiredMoveVelocity, acceleration * Runner.DeltaTime);
 
 			float jumpImpulse = input.Buttons.WasPressed(Input.PreviousButtons, EInputButton.Jump) && KCC.IsGrounded ? _jumpImpulse * JumpMultiplier : 0f;
+			jumpImpulse += _pendingBounceImpulse;
+			_pendingBounceImpulse = 0f;
 			KCC.Move(_moveVelocity, jumpImpulse);
 		}
 	}
