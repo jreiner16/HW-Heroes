@@ -244,6 +244,7 @@ MonoBehaviour:
     Ease: 0
     Axis: {x: 0, y: 0, z: 0}
     Target: 0
+  _globalShakeMultiplier: 1
 --- !u!1 &3903379431437223948
 GameObject:
   m_ObjectHideFlags: 0

@@ -114,11 +114,9 @@ namespace Projectiles
 			var pitchRotation = KCC.GetLookRotation(true, false);
 			_cameraPivot.localRotation = Quaternion.Euler(pitchRotation);
 
-			if (HasInputAuthority == true)
+			if (HasInputAuthority == true && Owner != null && Health.IsAlive == true)
 			{
 				var cameraTransform = Context.Camera.transform;
-
-				// Setting base camera transform based on handle
 				cameraTransform.position = _cameraHandle.position;
 				cameraTransform.rotation = _cameraHandle.rotation;
 			}

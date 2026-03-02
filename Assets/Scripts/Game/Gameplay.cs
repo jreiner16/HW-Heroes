@@ -14,15 +14,34 @@ namespace Projectiles
 		[Networked, Capacity(200)]
 		public NetworkDictionary<PlayerRef, Player> Players { get; }
 
-		// PRIVATE METHODS
+		/// <summary>Team 1 capture points. First team to PointsToWin wins.</summary>
+		[Networked]
+		public int Team1Score { get; private set; }
 
-		private SpawnPoint[] _spawnPoints;
+		/// <summary>Team 2 capture points.</summary>
+		[Networked]
+		public int Team2Score { get; private set; }
+
+		/// <summary>Points required to win. Default 100.</summary>
+		[Networked]
+		public int PointsToWin { get; set; }
+
+		/// <summary>Winning team when game ends. None = game still in progress.</summary>
+		[Networked]
+		public ETeam WinningTeam { get; private set; }
+
+		// PRIVATE MEMBERS
+
+		[SerializeField]
+		[Tooltip("Points required to win. First team to reach this wins.")]
+		private int _pointsToWin = 100;
+
+			private SpawnPoint[] _spawnPoints;
 		private int _lastSpawnPoint = -1;
+		private List<SpawnRequest> _spawnRequests = new();
+		private List<CharacterSwitchRequest> _characterSwitchRequests = new();
 
-	private List<SpawnRequest> _spawnRequests = new();
-	private List<CharacterSwitchRequest> _characterSwitchRequests = new();
-
-	// PUBLIC METHODS
+		// PUBLIC METHODS
 
 		public void Join(Player player)
 		{
@@ -127,6 +146,39 @@ namespace Projectiles
 		{
 			// Register to context
 			Context.Gameplay = this;
+
+			if (HasStateAuthority == true)
+			{
+				int target = _pointsToWin > 0 ? _pointsToWin : 100;
+				PointsToWin = target;
+			}
+		}
+
+		/// <summary>
+		/// Adds capture points to a team. Call from CapturePoint when players control the zone.
+		/// Checks win condition automatically.
+		/// </summary>
+		public void AddCapturePoints(ETeam team, int amount)
+		{
+			if (HasStateAuthority == false)
+				return;
+
+			if (WinningTeam != ETeam.None)
+				return; // Game over, no more points
+
+			if (amount <= 0)
+				return;
+
+			if (team == ETeam.Team1)
+				Team1Score = Mathf.Min(Team1Score + amount, PointsToWin);
+			else if (team == ETeam.Team2)
+				Team2Score = Mathf.Min(Team2Score + amount, PointsToWin);
+
+			// Check win condition
+			if (Team1Score >= PointsToWin)
+				WinningTeam = ETeam.Team1;
+			else if (Team2Score >= PointsToWin)
+				WinningTeam = ETeam.Team2;
 		}
 
 		public override void FixedUpdateNetwork()

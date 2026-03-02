@@ -490,6 +490,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 967111a994dc4daa8e3b6a4ae9220805, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _pointsToWin: 100
   _Players:
     _items: []
 --- !u!114 &5032529391828019867

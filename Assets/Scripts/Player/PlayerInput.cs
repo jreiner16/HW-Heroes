@@ -38,7 +38,7 @@ namespace Projectiles
 		// PRIVATE MEMBERS
 
 		[SerializeField]
-		private float _lookSensitivity = 3;
+		private float _lookSensitivity = 6;
 
 		[Networked]
 		private NetworkButtons _previousButtons { get; set; }

@@ -33,6 +33,10 @@ namespace Projectiles.UI
 		[SerializeField]
 		private UIUltimateAbility _ultimateAbility;
 		
+		[Header("Score Header (Capture Objective)")]
+		[SerializeField] private bool _showScoreHeader = true;
+		[SerializeField] private UIScoreHeader _scoreHeader;
+
 		[Header("Character Blurb (HUD)")]
 		[SerializeField] private bool _showCharacterBlurb = true;
 		[SerializeField] private Vector2 _characterBlurbOffset = new Vector2(18f, 18f);
@@ -65,6 +69,11 @@ namespace Projectiles.UI
 			if (_weapons != null)
 			{
 				_weapons.gameObject.SetActive(false);
+			}
+
+			if (_showScoreHeader == true)
+			{
+				EnsureScoreHeaderUI();
 			}
 
 			if (_showCharacterBlurb == true)
@@ -166,6 +175,25 @@ namespace Projectiles.UI
 		}
 
 		// PRIVATE METHODS
+
+		private void EnsureScoreHeaderUI()
+		{
+			if (_scoreHeader != null)
+				return;
+
+			var go = new GameObject("ScoreHeader");
+			go.layer = gameObject.layer;
+			go.transform.SetParent(transform, false);
+
+			var rect = go.AddComponent<RectTransform>();
+			rect.anchorMin = new Vector2(0.5f, 1f);
+			rect.anchorMax = new Vector2(0.5f, 1f);
+			rect.pivot = new Vector2(0.5f, 1f);
+			rect.anchoredPosition = new Vector2(0f, -10f);
+			rect.sizeDelta = new Vector2(480f, 80f);
+
+			_scoreHeader = go.AddComponent<UIScoreHeader>();
+		}
 
 		private void EnsureCharacterBlurbUI()
 		{

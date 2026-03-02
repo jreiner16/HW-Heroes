@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEasing;
@@ -44,6 +44,9 @@ namespace Projectiles
 
 		[SerializeField]
 		private ShakeSetup _defaultSetup;
+		[Tooltip("Scale all shake (0 = none, 1 = full). Reduces camera shake from weapons etc.")]
+		[SerializeField]
+		private float _globalShakeMultiplier = 1f;
 
 		private List<ShakeData> _activeShakes = new(32);
 
@@ -150,8 +153,9 @@ namespace Projectiles
 				}
 			}
 
-			transform.localPosition = _defaultPosition + positionOffset;
-			transform.localRotation = _defaultRotation * Quaternion.Euler(rotationOffset);
+			float mult = Mathf.Clamp01(_globalShakeMultiplier);
+			transform.localPosition = _defaultPosition + positionOffset * mult;
+			transform.localRotation = _defaultRotation * Quaternion.Euler(rotationOffset * mult);
 
 			for (int i = _activeShakes.Count - 1; i >= 0; i--)
 			{
