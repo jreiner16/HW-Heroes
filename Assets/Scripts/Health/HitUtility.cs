@@ -189,6 +189,29 @@ namespace Projectiles
 
 			hitData.Target.ProcessHit(ref hitData);
 
+			// Damage dealt accelerates ultimate cooldown (server/state authority only).
+			if (hitData.Action == EHitAction.Damage && hitData.Amount > 0f)
+			{
+				var targetHealth = hitData.Target as Health;
+				if (targetHealth != null && targetHealth.HasStateAuthority == true)
+				{
+					var runner = targetHealth.Runner;
+					if (runner != null && hitData.InstigatorRef != default && hitData.InstigatorRef != targetHealth.Object.InputAuthority)
+					{
+						var instigatorPlayerObject = runner.GetPlayerObject(hitData.InstigatorRef);
+						var instigatorPlayer = instigatorPlayerObject != null ? instigatorPlayerObject.GetComponent<Player>() : null;
+						var instigatorAgent = instigatorPlayer != null ? instigatorPlayer.ActiveAgent : null;
+
+						if (instigatorAgent != null)
+						{
+							instigatorAgent.GetComponent<GeoddeUltimateAbility>()?.AccelerateCooldownFromDamage(hitData.Amount);
+							instigatorAgent.GetComponent<TheissUltimateAbility>()?.AccelerateCooldownFromDamage(hitData.Amount);
+							instigatorAgent.GetComponent<CohenUltimateAbility>()?.AccelerateCooldownFromDamage(hitData.Amount);
+						}
+					}
+				}
+			}
+
 			// For local debug targets we show hit feedback immediately
 			// if (hitData.Instigator != null && hitData.Target is Health == false)
 			// {
