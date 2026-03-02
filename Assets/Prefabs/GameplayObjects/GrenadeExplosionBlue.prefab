@@ -80,7 +80,7 @@ MonoBehaviour:
   _outerRadius: 4
   _innerDamage: 90
   _outerDamage: 20
-  _canDamageOwner: 1
+  _canDamageOwner: 0
   _despawnDelay: 3
   _effectRoot: {fileID: 0}
 --- !u!114 &-4641811800484251662

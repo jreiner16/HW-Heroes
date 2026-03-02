@@ -638,6 +638,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _healthValue: {fileID: 8754293954965384281}
+  _fillImage: {fileID: 1393714127301950393}
 --- !u!1 &466105395903797343
 GameObject:
   m_ObjectHideFlags: 0

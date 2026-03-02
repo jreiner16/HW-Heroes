@@ -28,8 +28,8 @@ namespace Projectiles
 		private float _innerDamage = 100f;
 		[SerializeField]
 		private float _outerDamage = 10f;
-		[SerializeField]
-		private bool _canDamageOwner = true;
+		[SerializeField, Tooltip("If false, the player who fired this explosion (e.g. grenade) cannot damage themselves.")]
+		private bool _canDamageOwner = false;
 
 		[SerializeField]
 		private float _despawnDelay = 3f;
@@ -89,6 +89,11 @@ namespace Projectiles
 				var hitTarget = HitUtility.GetHitTarget(hit.Hitbox, hit.Collider);
 
 				if (hitTarget == null)
+					continue;
+
+				// Skip owner if self-damage is disabled (belt-and-suspenders: IgnoreInputAuthority may not filter PhysX colliders)
+				if (_canDamageOwner == false && hitTarget is NetworkBehaviour targetNetBehaviour &&
+				    targetNetBehaviour.Object != null && targetNetBehaviour.Object.InputAuthority == Object.InputAuthority)
 					continue;
 
 				int hitRootID = hit.Hitbox != null ? hit.Hitbox.Root.GetInstanceID() : 0;
