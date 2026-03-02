@@ -24,6 +24,8 @@ namespace Projectiles
 		[Header("Ability Settings")]
 		[SerializeField]
 		private float _cooldown = 15f;
+		[SerializeField, Tooltip("How many seconds of ultimate cooldown are removed per 1 damage dealt.")]
+		private float _cooldownSecondsPerDamage = 0.05f;
 
 		[Header("References")]
 		[SerializeField, Tooltip("Use KinematicProjectile (add to buffer's prefab list) or StandaloneProjectile. Kinematic preferred if both set.")]
@@ -70,6 +72,28 @@ namespace Projectiles
 		}
 
 		// PRIVATE METHODS
+
+		public void AccelerateCooldownFromDamage(float damageDealt)
+		{
+			if (HasStateAuthority == false)
+				return;
+			if (_cooldownSecondsPerDamage <= 0f || damageDealt <= 0f)
+				return;
+
+			ReduceCooldownSeconds(damageDealt * _cooldownSecondsPerDamage);
+		}
+
+		private void ReduceCooldownSeconds(float seconds)
+		{
+			if (seconds <= 0f)
+				return;
+			if (_cooldownTimer.ExpiredOrNotRunning(Runner))
+				return; // already ready
+
+			float remaining = _cooldownTimer.RemainingTime(Runner).GetValueOrDefault();
+			float newRemaining = Mathf.Max(0f, remaining - seconds);
+			_cooldownTimer = newRemaining > 0f ? TickTimer.CreateFromSeconds(Runner, newRemaining) : default;
+		}
 
 		private void TryFire()
 		{
