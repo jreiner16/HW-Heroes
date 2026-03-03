@@ -130,7 +130,8 @@ namespace Projectiles
 			{
 				var cameraTransform = Context.Camera.transform;
 				cameraTransform.position = _cameraHandle.position;
-				cameraTransform.rotation = _cameraHandle.rotation;
+				// Rotation from KCC look only (player input) - not head animation
+				cameraTransform.rotation = KCC.TransformRotation * Quaternion.Euler(pitchRotation.x, 0f, 0f);
 			}
 		}
 

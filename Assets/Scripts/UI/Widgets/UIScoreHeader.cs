@@ -226,7 +226,11 @@ namespace Projectiles.UI
 			{
 				var font = TMPro.TMP_Settings.defaultFontAsset;
 				_winPanel = new GameObject("GameOverPanel");
-				_winPanel.transform.SetParent(transform, false);
+				// Parent to Canvas (full-screen) so panel covers entire screen, not just score header
+				var canvas = GetComponentInParent<Canvas>();
+				var fullScreenParent = canvas != null ? canvas.transform : (transform.parent != null ? transform.parent : transform);
+				_winPanel.transform.SetParent(fullScreenParent, false);
+				_winPanel.transform.SetAsLastSibling();
 				var panelRect = _winPanel.AddComponent<RectTransform>();
 				panelRect.anchorMin = Vector2.zero;
 				panelRect.anchorMax = Vector2.one;
@@ -237,14 +241,14 @@ namespace Projectiles.UI
 				panelBg.color = new Color(0f, 0f, 0f, 0.75f);
 				panelBg.raycastTarget = true;
 
-				// Result text - center of screen
+				// Result text - centered vertically and horizontally
 				var textGo = new GameObject("ResultText");
 				textGo.transform.SetParent(_winPanel.transform, false);
 				var textRect = textGo.AddComponent<RectTransform>();
 				textRect.anchorMin = new Vector2(0.5f, 0.5f);
 				textRect.anchorMax = new Vector2(0.5f, 0.5f);
 				textRect.pivot = new Vector2(0.5f, 0.5f);
-				textRect.anchoredPosition = new Vector2(0f, 40f);
+				textRect.anchoredPosition = Vector2.zero;
 				textRect.sizeDelta = new Vector2(500f, 80f);
 				_winText = textGo.AddComponent<TextMeshProUGUI>();
 				if (font != null) _winText.font = font;
@@ -253,7 +257,7 @@ namespace Projectiles.UI
 				_winText.fontStyle = FontStyles.Bold;
 				_winText.raycastTarget = false;
 
-				// Exit Room button - below center, no overlap
+				// Exit Room button - 100px below center
 				var btnGo = new GameObject("ExitRoomButton");
 				btnGo.transform.SetParent(_winPanel.transform, false);
 				var btnRect = btnGo.AddComponent<RectTransform>();
@@ -284,14 +288,16 @@ namespace Projectiles.UI
 
 		private void OnExitRoomClicked()
 		{
-			var bootstrap = FindObjectOfType<Fusion.FusionBootstrap>();
+			var runner = _context?.Runner ?? FindObjectOfType<NetworkRunner>();
+			if (runner != null && runner.IsRunning)
+			{
+				runner.Shutdown();
+				return;
+			}
+			var bootstrap = FindObjectOfType<FusionBootstrap>();
 			if (bootstrap != null)
 			{
 				bootstrap.ShutdownAll();
-			}
-			else if (_context?.Runner != null && _context.Runner.IsRunning)
-			{
-				_context.Runner.Shutdown();
 			}
 		}
 
