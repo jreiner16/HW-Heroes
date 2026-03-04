@@ -48,7 +48,7 @@ MonoBehaviour:
   _Team: 0
   _ActiveAgent: {fileID: 0}
   _SelectedCharacterIndex: 0
-  _agentPrefab: {fileID: 2000174215685155523, guid: cda6f9ffdf25a4f1aa3c8feae8d1f382, type: 3}
+  _agentPrefab: {fileID: 0}
   _agentPrefabs:
   - {fileID: 2000174215685155523, guid: b47ea00244e764048a79160e487ee9d7, type: 3}
   - {fileID: 2000174215685155523, guid: cda6f9ffdf25a4f1aa3c8feae8d1f382, type: 3}
