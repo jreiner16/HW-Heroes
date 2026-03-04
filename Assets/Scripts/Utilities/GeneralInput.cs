@@ -1,4 +1,4 @@
-﻿using Fusion;
+using Fusion;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,6 +17,15 @@ namespace Projectiles
 
 		private static int _lastSingleInputChange;
 		private static int _cursorLockRequests;
+
+		private SceneContext _sceneContext;
+
+		// MONOBEHAVIOUR
+
+		private void Awake()
+		{
+			_sceneContext = GetComponentInParent<SceneContext>();
+		}
 
 		// PUBLIC METHODS
 
@@ -60,6 +69,13 @@ namespace Projectiles
 			if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame || keyboard.escapeKey.wasPressedThisFrame)
 			{
 				SetLockedState(Cursor.lockState != CursorLockMode.Locked);
+				_lastSingleInputChange = Time.frameCount;
+			}
+
+			// Tab cycles to the next character (works even when cursor is locked)
+			if (keyboard.tabKey.wasPressedThisFrame && _sceneContext?.Gameplay != null)
+			{
+				_sceneContext.Gameplay.SwitchLocalPlayerToNextCharacter();
 				_lastSingleInputChange = Time.frameCount;
 			}
 

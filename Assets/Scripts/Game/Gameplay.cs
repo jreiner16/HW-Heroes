@@ -86,25 +86,27 @@ namespace Projectiles
 	}
 
 	/// <summary>
-	/// Cycles to the next character for the local player. Can be called from UI buttons.
+	/// Cycles to the next valid (non-null) character for the local player. Can be called from UI buttons or Tab key.
 	/// </summary>
 	public void SwitchLocalPlayerToNextCharacter()
 	{
 		var player = GetLocalPlayer();
 		if (player == null)
-			return;
-
-		int currentIndex = player.SelectedCharacterIndex;
-		int characterCount = player.GetCharacterCount();
-		if (characterCount > 0)
 		{
-			int newIndex = (currentIndex + 1) % characterCount;
-			player.RPC_SelectCharacter(newIndex);
+			Debug.LogWarning("[CharSwitch] GetLocalPlayer() returned null. Context=" + (Context != null) + " Runner=" + (Context?.Runner != null) + " Running=" + (Context?.Runner?.IsRunning) + " PlayerObj=" + (Context?.Runner?.GetPlayerObject(Context.Runner.LocalPlayer) != null));
+			return;
+		}
+
+		int nextIndex = player.GetNextValidCharacterIndex(forward: true);
+		if (nextIndex >= 0)
+		{
+			Debug.Log($"[CharSwitch] Tab/Next → requesting index {nextIndex}");
+			player.RPC_SelectCharacter(nextIndex);
 		}
 	}
 
 	/// <summary>
-	/// Cycles to the previous character for the local player. Can be called from UI buttons.
+	/// Cycles to the previous valid (non-null) character for the local player. Can be called from UI buttons.
 	/// </summary>
 	public void SwitchLocalPlayerToPreviousCharacter()
 	{
@@ -112,13 +114,9 @@ namespace Projectiles
 		if (player == null)
 			return;
 
-		int currentIndex = player.SelectedCharacterIndex;
-		int characterCount = player.GetCharacterCount();
-		if (characterCount > 0)
-		{
-			int newIndex = (currentIndex - 1 + characterCount) % characterCount;
-			player.RPC_SelectCharacter(newIndex);
-		}
+		int prevIndex = player.GetNextValidCharacterIndex(forward: false);
+		if (prevIndex >= 0)
+			player.RPC_SelectCharacter(prevIndex);
 	}
 
 	// NetworkBehaviour INTERFACE

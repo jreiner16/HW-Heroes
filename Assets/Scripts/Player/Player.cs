@@ -82,18 +82,42 @@ namespace Projectiles
 			return _agentPrefab;
 		}
 
-		/// <summary>
-		/// Gets the number of available character prefabs.
-		/// </summary>
-		public int GetCharacterCount()
+	/// <summary>
+	/// Gets the number of available character prefabs (counts only non-null entries).
+	/// </summary>
+	public int GetCharacterCount()
+	{
+		if (_agentPrefabs != null && _agentPrefabs.Length > 0)
 		{
-			if (_agentPrefabs != null && _agentPrefabs.Length > 0)
-			{
-				return _agentPrefabs.Length;
-			}
-			// If no array set up, return 1 (single prefab)
-			return _agentPrefab != null ? 1 : 0;
+			int count = 0;
+			foreach (var p in _agentPrefabs)
+				if (p != null) count++;
+			return count;
 		}
+		return _agentPrefab != null ? 1 : 0;
+	}
+
+	/// <summary>
+	/// Returns the array index of the next (or previous) non-null character after the current selection.
+	/// Returns -1 if no valid characters exist.
+	/// </summary>
+	public int GetNextValidCharacterIndex(bool forward)
+	{
+		if (_agentPrefabs == null || _agentPrefabs.Length == 0)
+			return _agentPrefab != null ? 0 : -1;
+
+		int len = _agentPrefabs.Length;
+		int step = forward ? 1 : -1;
+		int start = (SelectedCharacterIndex + step + len) % len;
+
+		for (int i = 0; i < len; i++)
+		{
+			int idx = (start + i * step + len * len) % len;
+			if (_agentPrefabs[idx] != null)
+				return idx;
+		}
+		return -1;
+	}
 
 		/// <summary>
 		/// RPC to request character change. Only callable by input authority, executed on state authority.
@@ -103,23 +127,28 @@ namespace Projectiles
 		{
 			if (_agentPrefabs == null || _agentPrefabs.Length == 0)
 			{
-				Debug.LogWarning("No character prefabs array set up. Cannot switch character.");
+				Debug.LogWarning("[CharSwitch] No character prefabs array set up in Player prefab. Cannot switch character.");
 				return;
 			}
 
 			if (characterIndex < 0 || characterIndex >= _agentPrefabs.Length)
 			{
-				Debug.LogWarning($"Invalid character index: {characterIndex}. Must be between 0 and {_agentPrefabs.Length - 1}");
+				Debug.LogWarning($"[CharSwitch] Invalid character index: {characterIndex}. Must be between 0 and {_agentPrefabs.Length - 1}");
 				return;
 			}
 
 			if (_agentPrefabs[characterIndex] == null)
 			{
-				Debug.LogWarning($"Character prefab at index {characterIndex} is null.");
+				// Log all slot states to help diagnose which slots are missing
+				var slots = new System.Text.StringBuilder();
+				for (int i = 0; i < _agentPrefabs.Length; i++)
+					slots.Append($"[{i}]={(_agentPrefabs[i] != null ? _agentPrefabs[i].name : "NULL")} ");
+				Debug.LogWarning($"[CharSwitch] _agentPrefabs[{characterIndex}] is null. All slots: {slots} — Open Player.prefab in Inspector and reassign the missing slot.");
 				return;
 			}
 
 			SelectedCharacterIndex = characterIndex;
+			Debug.Log($"[CharSwitch] Switching to index {characterIndex} ({_agentPrefabs[characterIndex].name}). ActiveAgent={ActiveAgent != null}");
 
 			// If agent is already spawned, request respawn with new character
 			if (ActiveAgent != null && Context.Gameplay != null)
