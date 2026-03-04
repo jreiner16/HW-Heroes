@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
 namespace Projectiles
@@ -54,8 +54,8 @@ namespace Projectiles
 
 		public AudioSetup  DefaultSetup        => _defaultSetup;
 		public AudioSetup  CurrentSetup        => _currentSetup;
-		public AudioSource AudioSource         => _audioSource;
-		public bool        IsPlaying           => _audioSource.isPlaying == true || _delayedPlayRoutine != null;
+		public AudioSource AudioSource         => EnsureAudioSource();
+		public bool        IsPlaying           => (EnsureAudioSource()?.isPlaying ?? false) == true || _delayedPlayRoutine != null;
 
 		public int         LastPlayedClipIndex { get; set; }
 
@@ -72,6 +72,16 @@ namespace Projectiles
 
 		private AudioSetup  _currentSetup;
 
+		private AudioSource EnsureAudioSource()
+		{
+			if (_audioSource == null)
+			{
+				_audioSource = GetComponent<AudioSource>();
+			}
+
+			return _audioSource;
+		}
+
 		// PUBLIC METHODS
 
 		public void Play(EForceBehaviour force = EForceBehaviour.None)
@@ -81,6 +91,9 @@ namespace Projectiles
 
 		public void Play(AudioSetup setup, EForceBehaviour force = EForceBehaviour.None)
 		{
+			if (setup == null)
+				return;
+
 			if (IsPlaying == true)
 			{
 				if (force == EForceBehaviour.None)
@@ -103,13 +116,17 @@ namespace Projectiles
 		{
 			StopDelayedPlay();
 
+			var audioSource = EnsureAudioSource();
+			if (audioSource == null)
+				return;
+
 			if (forceImmediateStop == false && _currentSetup != null && _currentSetup.FadeOut > 0f)
 			{
-				_audioSource.FadeOut(this, _currentSetup.FadeOut);
+				audioSource.FadeOut(this, _currentSetup.FadeOut);
 			}
 			else
 			{
-				_audioSource.Stop();
+				audioSource.Stop();
 			}
 		}
 
@@ -118,14 +135,19 @@ namespace Projectiles
 		private void Awake()
 		{
 			_audioSource = GetComponent<AudioSource>();
+			if (_audioSource == null)
+				return;
 
 			_playOnAwake = _audioSource.playOnAwake;
 			_audioSource.playOnAwake = false;
 			_audioSource.Stop();
 
+			if (_defaultSetup == null)
+				_defaultSetup = new AudioSetup();
+
 			_defaultSetup.Loop |= _audioSource.loop;
 
-			if (_defaultSetup.Clips.Length == 0 && _audioSource.clip != null)
+			if ((_defaultSetup.Clips == null || _defaultSetup.Clips.Length == 0) && _audioSource.clip != null)
 			{
 				_defaultSetup.Clips = new AudioClip[] { _audioSource.clip };
 			}
@@ -133,7 +155,11 @@ namespace Projectiles
 
 		private void OnEnable()
 		{
-			_audioSource.enabled = true;
+			var audioSource = EnsureAudioSource();
+			if (audioSource == null)
+				return;
+
+			audioSource.enabled = true;
 
 			if (_playOnAwake == true)
 			{
@@ -144,7 +170,12 @@ namespace Projectiles
 		private void OnDisable()
 		{
 			StopDelayedPlay();
-			_audioSource.enabled = false;
+
+			var audioSource = EnsureAudioSource();
+			if (audioSource == null)
+				return;
+
+			audioSource.enabled = false;
 		}
 
 		// PRIVATE METHODS
@@ -187,30 +218,34 @@ namespace Projectiles
 
 		private void PlayClip(int clipIndex)
 		{
-			_audioSource.Stop();
+			var audioSource = EnsureAudioSource();
+			if (audioSource == null)
+				return;
+
+			audioSource.Stop();
 			StopAllCoroutines(); // Stop audiosource fadings
 
 			LastPlayedClipIndex = clipIndex;
 
-			_audioSource.clip = _currentSetup.Clips[clipIndex];
-			_audioSource.volume = _currentSetup.Volume;
-			_audioSource.loop = _currentSetup.Loop;
-			_audioSource.pitch = _currentSetup.Pitch + Random.Range(-_currentSetup.MaxPitchChange, _currentSetup.MaxPitchChange);
+			audioSource.clip = _currentSetup.Clips[clipIndex];
+			audioSource.volume = _currentSetup.Volume;
+			audioSource.loop = _currentSetup.Loop;
+			audioSource.pitch = _currentSetup.Pitch + Random.Range(-_currentSetup.MaxPitchChange, _currentSetup.MaxPitchChange);
 
 			if (_currentSetup.FadeIn > 0f)
 			{
-				_audioSource.FadeIn(this, _currentSetup.FadeIn, volume: _currentSetup.Volume);
+				audioSource.FadeIn(this, _currentSetup.FadeIn, volume: _currentSetup.Volume);
 			}
 			else
 			{
-				_audioSource.Play();
+				audioSource.Play();
 			}
 
 			_playCount++;
 
 			if (_currentSetup.Repeat == true && _playCount < _currentSetup.RepeatPlayCount)
 			{
-				_delayedPlayRoutine = StartCoroutine(PlayDelayed_Coroutine(_audioSource.clip.length + _currentSetup.RepeatDelay, clipIndex));
+				_delayedPlayRoutine = StartCoroutine(PlayDelayed_Coroutine(audioSource.clip.length + _currentSetup.RepeatDelay, clipIndex));
 			}
 		}
 

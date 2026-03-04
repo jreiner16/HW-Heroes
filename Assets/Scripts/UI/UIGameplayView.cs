@@ -168,17 +168,19 @@ namespace Projectiles.UI
 			go.transform.SetParent(transform, false);
 
 			var rect = go.AddComponent<RectTransform>();
-			rect.anchorMin = new Vector2(0f, 0f);
-			rect.anchorMax = new Vector2(0f, 0f);
-			rect.pivot = new Vector2(0f, 0f);
-			rect.anchoredPosition = _characterBlurbOffset;
+			rect.anchorMin = new Vector2(0f, 1f);
+			rect.anchorMax = new Vector2(0f, 1f);
+			rect.pivot = new Vector2(0f, 1f);
+			// Keep the serialized offset as "inset from corner" (positive numbers),
+			// while using top-left anchoring (negative Y moves down).
+			rect.anchoredPosition = new Vector2(_characterBlurbOffset.x, -_characterBlurbOffset.y);
 			rect.sizeDelta = _characterBlurbSize;
 
 			_characterBlurbText = go.AddComponent<TextMeshProUGUI>();
 			_characterBlurbText.raycastTarget = false;
 			_characterBlurbText.fontSize = _characterBlurbFontSize;
 			_characterBlurbText.color = _characterBlurbColor;
-			_characterBlurbText.alignment = TextAlignmentOptions.BottomLeft;
+			_characterBlurbText.alignment = TextAlignmentOptions.TopLeft;
 			_characterBlurbText.enableWordWrapping = true;
 			_characterBlurbText.text = string.Empty;
 			go.SetActive(false);
