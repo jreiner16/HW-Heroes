@@ -44,7 +44,7 @@ namespace Projectiles.UI
 			_statusText.rectTransform.anchoredPosition = _readyAnchoredPosition + offset;
 		}
 
-		public void UpdateAbility(GeoddeMovementAbility ability)
+		public void UpdateAbility(GoeddeMovementAbility ability)
 		{
 			CacheReadyText();
 
@@ -131,7 +131,32 @@ namespace Projectiles.UI
 			}
 		}
 
-		public void UpdateAbility(CohenMovementAbility ability)
+	public void UpdateAbility(CohenMovementAbility ability)
+	{
+		CacheReadyText();
+
+		if (ability == null)
+		{
+			gameObject.SetActive(false);
+			return;
+		}
+
+		gameObject.SetActive(true);
+
+		if (ability.IsOnCooldown)
+		{
+			float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
+			if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
+			SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
+		}
+		else
+		{
+			if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
+			SetStatusText(_readyText, false);
+		}
+	}
+
+		public void UpdateAbility(GoeddeSecondaryAbility ability)
 		{
 			CacheReadyText();
 
@@ -143,7 +168,7 @@ namespace Projectiles.UI
 
 			gameObject.SetActive(true);
 
-			if (ability.IsShrunk)
+			if (ability.IsActive)
 			{
 				float ratio = ability.DurationTotal > 0 ? ability.DurationRemainingTime / ability.DurationTotal : 0f;
 				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;

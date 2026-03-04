@@ -88,6 +88,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _Owner: {fileID: 0}
+  _characterClass: 0
   _cameraPivot: {fileID: 5401675310905547977}
   _cameraHandle: {fileID: 2117859135794692440}
   _moveSpeed: 6
@@ -197,7 +198,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _CurrentHealth: 0
-  _maxHealth: 100
+  _maxHealth: 400
   _headPivot: {fileID: 7136782717251966427}
   _bodyPivot: {fileID: 6023693924253656717}
   _groundPivot: {fileID: 4327114067154968929}
@@ -311,7 +312,9 @@ MonoBehaviour:
   _cooldown: 12
   _spawnDistance: 2.5
   _spawnHeightOffset: 0
+  _previewAlpha: 0.35
   _shieldPrefab: {fileID: -4939455026513570011, guid: 7c2663757a8e8447db75e320a3fb5026, type: 3}
+  _shieldPreviewPrefab: {fileID: 1000001, guid: f8e7d6c5b4a392418576657483920aaf, type: 3}
 --- !u!114 &1128444158403002833
 MonoBehaviour:
   m_ObjectHideFlags: 0

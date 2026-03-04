@@ -4,12 +4,12 @@ using UnityEngine;
 namespace Projectiles
 {
 	/// <summary>
-	/// Geodde's ultimate ability: fires a projectile in the aim direction. Triggered by the X key.
+	/// Goedde's ultimate ability: fires a projectile in the aim direction. Triggered by the X key.
 	/// Assign either a KinematicProjectile (must be in the agent's KinematicProjectileBuffer prefab list)
 	/// or a StandaloneProjectile prefab.
 	/// </summary>
 	[DefaultExecutionOrder(5)]
-	public class GeoddeUltimateAbility : ContextBehaviour
+	public class GoeddeUltimateAbility : ContextBehaviour
 	{
 		// PUBLIC MEMBERS
 

@@ -33,13 +33,21 @@ namespace Projectiles.UI
 		[SerializeField]
 		private UIUltimateAbility _ultimateAbility;
 		
-		[Header("Character Blurb (HUD)")]
-		[SerializeField] private bool _showCharacterBlurb = true;
-		[SerializeField] private Vector2 _characterBlurbOffset = new Vector2(18f, 18f);
-		[SerializeField] private Vector2 _characterBlurbSize = new Vector2(520f, 90f);
-		[SerializeField] private float _characterBlurbFontSize = 22f;
-		[SerializeField] private Color _characterBlurbColor = new Color(1f, 1f, 1f, 0.9f);
-		private TextMeshProUGUI _characterBlurbText;
+	[Header("Character Blurb (HUD)")]
+	[SerializeField] private bool _showCharacterBlurb = true;
+	[SerializeField] private Vector2 _characterBlurbOffset = new Vector2(18f, 18f);
+	[SerializeField] private Vector2 _characterBlurbSize = new Vector2(520f, 90f);
+	[SerializeField] private float _characterBlurbFontSize = 22f;
+	[SerializeField] private Color _characterBlurbColor = new Color(1f, 1f, 1f, 0.9f);
+	private TextMeshProUGUI _characterBlurbText;
+
+	[Header("Spawn Room TAB Hint")]
+	[SerializeField] private string _tabHintMessage = "Press TAB to swap teacher";
+	[SerializeField] private Vector2 _tabHintOffset = new Vector2(0f, 80f);
+	[SerializeField] private Vector2 _tabHintSize = new Vector2(600f, 50f);
+	[SerializeField] private float _tabHintFontSize = 20f;
+	[SerializeField] private Color _tabHintColor = new Color(1f, 1f, 0.6f, 0.9f);
+	private TextMeshProUGUI _tabHintText;
 
 		private SceneContext _context;
 		private PlayerAgent _observedAgent;
@@ -67,10 +75,12 @@ namespace Projectiles.UI
 				_weapons.gameObject.SetActive(false);
 			}
 
-			if (_showCharacterBlurb == true)
-			{
-				EnsureCharacterBlurbUI();
-			}
+		if (_showCharacterBlurb == true)
+		{
+			EnsureCharacterBlurbUI();
+		}
+
+		EnsureTabHintUI();
 			if (_movementAbility == null || _secondaryAbility == null)
 			{
 				var movementWidgets = GetComponentsInChildren<UIMovementAbility>(true);
@@ -106,16 +116,17 @@ namespace Projectiles.UI
 			_screenEffects.UpdateEffects(_observedAgent);
 
 			UpdateCharacterBlurb();
+		UpdateTabHint();
 
 			if (_movementAbility != null)
 			{
-				var geoddeMovement = _observedAgent.GetComponent<GeoddeMovementAbility>();
+				var goeddeMovement = _observedAgent.GetComponent<GoeddeMovementAbility>();
 				var cohenMovement = _observedAgent.GetComponent<CohenMovementAbility>();
 				var theissBuff = _observedAgent.GetComponent<TheissBuffAbility>();
 
-				if (geoddeMovement != null)
+				if (goeddeMovement != null)
 				{
-					_movementAbility.UpdateAbility(geoddeMovement);
+					_movementAbility.UpdateAbility(goeddeMovement);
 				}
 				else if (cohenMovement != null)
 				{
@@ -129,8 +140,13 @@ namespace Projectiles.UI
 
 			if (_secondaryAbility != null)
 			{
-				var theissShield = _observedAgent.GetComponent<TheissShieldAbility>();
-				if (theissShield != null)
+				var goeddeSecondary = _observedAgent.GetComponent<GoeddeSecondaryAbility>();
+				var theissShield    = _observedAgent.GetComponent<TheissShieldAbility>();
+				if (goeddeSecondary != null)
+				{
+					_secondaryAbility.UpdateAbility(goeddeSecondary);
+				}
+				else if (theissShield != null)
 				{
 					_secondaryAbility.UpdateAbility(theissShield);
 				}
@@ -144,13 +160,13 @@ namespace Projectiles.UI
 
 			if (_ultimateAbility != null)
 			{
-				var geoddeUltimate = _observedAgent.GetComponent<GeoddeUltimateAbility>();
+				var goeddeUltimate = _observedAgent.GetComponent<GoeddeUltimateAbility>();
 				var cohenUltimate = _observedAgent.GetComponent<CohenUltimateAbility>();
 				var theissUltimate = _observedAgent.GetComponent<TheissUltimateAbility>();
 
-				if (geoddeUltimate != null)
+				if (goeddeUltimate != null)
 				{
-					_ultimateAbility.UpdateAbility(geoddeUltimate);
+					_ultimateAbility.UpdateAbility(goeddeUltimate);
 				}
 				else if (cohenUltimate != null)
 				{
@@ -210,7 +226,41 @@ namespace Projectiles.UI
 			}
 		}
 
-		private void ClearObservedAgent(bool hideElements)
+		private void EnsureTabHintUI()
+	{
+		if (_tabHintText != null)
+			return;
+
+		var go = new GameObject("TabSwapHint");
+		go.layer = gameObject.layer;
+		go.transform.SetParent(transform, false);
+
+		var rect = go.AddComponent<RectTransform>();
+		rect.anchorMin = new Vector2(0.5f, 0f);
+		rect.anchorMax = new Vector2(0.5f, 0f);
+		rect.pivot = new Vector2(0.5f, 0f);
+		rect.anchoredPosition = _tabHintOffset;
+		rect.sizeDelta = _tabHintSize;
+
+		_tabHintText = go.AddComponent<TextMeshProUGUI>();
+		_tabHintText.raycastTarget = false;
+		_tabHintText.fontSize = _tabHintFontSize;
+		_tabHintText.color = _tabHintColor;
+		_tabHintText.alignment = TextAlignmentOptions.Center;
+		_tabHintText.enableWordWrapping = false;
+		_tabHintText.text = _tabHintMessage;
+		go.SetActive(false);
+	}
+
+	private void UpdateTabHint()
+	{
+		if (_tabHintText == null)
+			return;
+
+		_tabHintText.gameObject.SetActive(DisappearWhenPlayerNotInArea.IsLocalPlayerInside);
+	}
+
+	private void ClearObservedAgent(bool hideElements)
 		{
 			if (_observedAgent != null)
 			{

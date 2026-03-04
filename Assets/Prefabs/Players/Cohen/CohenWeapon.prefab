@@ -15,12 +15,12 @@ GameObject:
   - component: {fileID: 5619079538414019358}
   - component: {fileID: 4598274169144945357}
   m_Layer: 7
-  m_Name: UltimateAction
+  m_Name: PrimaryFireAction
   m_TagString: Untagged
   m_Icon: {fileID: 6519382022992737161, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1766610447929569253
 Transform:
   m_ObjectHideFlags: 0
@@ -80,8 +80,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d2e87423e6d46c79c124cb1e1c2e609, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cadence: 420
-  _fireButton: 4
+  _cadence: 120
+  _fireButton: 0
   _fireOnKeyDownOnly: 0
 --- !u!114 &5619079538414019358
 MonoBehaviour:
@@ -93,9 +93,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d0578f350f734b73b0e080681c0e3cb5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _projectilePrefab: {fileID: 3893831311589886993, guid: 86844ce8beb21484896dec3d25e137ea, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  _projectilePrefab: {fileID: 3893831311589886994, guid: a4b5c6d7e8f94051b2c3d4e5f6a7b8c9, type: 3}
   _standaloneProjectilePrefab: {fileID: 0}
   _standaloneProjectileBuffer: {fileID: 0}
   _projectilesPerShot: 1
@@ -520,7 +520,7 @@ GameObject:
   m_Icon: {fileID: 6519382022992737161, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7300351370420222651
 Transform:
   m_ObjectHideFlags: 0

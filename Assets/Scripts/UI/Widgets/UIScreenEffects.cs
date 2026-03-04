@@ -1,11 +1,12 @@
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Projectiles.UI
 {
 	public class UIScreenEffects : UIBehaviour
 	{
-		// PRIVATE METHODS
+		// PRIVATE MEMBERS
 
 		[SerializeField]
 		private CanvasGroup _hitGroup;
@@ -26,11 +27,21 @@ namespace Projectiles.UI
 		[SerializeField]
 		private float _debuffFadeSpeed = 4f;
 
+		[Header("Goedde Phase Overlay")]
+		[SerializeField]
+		private Color _phaseOverlayColor = new Color(0.42f, 0f, 0.72f, 0.38f);
+		[SerializeField]
+		private float _phaseFadeSpeed = 5f;
+
 		[Header("Audio")]
 		[SerializeField]
 		private AudioSetup _hitSound;
 		[SerializeField]
 		private AudioSetup _deathSound;
+
+		private CanvasGroup _phaseGroup;
+		private PlayerAgent _lastEffectsAgent;
+		private GoeddeMovementAbility _cachedGoedde;
 
 		// PUBLIC METHODS
 
@@ -64,6 +75,19 @@ namespace Projectiles.UI
 			}
 
 			_deathGroup.SetActive(agent.Health.IsAlive == false);
+
+			if (_phaseGroup != null)
+			{
+				// Refresh the cached GoeddeMovementAbility when the observed agent changes.
+				if (agent != _lastEffectsAgent)
+				{
+					_lastEffectsAgent = agent;
+					_cachedGoedde = agent != null ? agent.GetComponent<GoeddeMovementAbility>() : null;
+				}
+
+				float targetAlpha = _cachedGoedde != null && _cachedGoedde.IsPhased ? 1f : 0f;
+				_phaseGroup.alpha = Mathf.MoveTowards(_phaseGroup.alpha, targetAlpha, _phaseFadeSpeed * Time.deltaTime);
+			}
 		}
 
 		// MONOBEHAVIOUR
@@ -80,9 +104,43 @@ namespace Projectiles.UI
 			}
 
 			_deathGroup.SetActive(false);
+
+			EnsurePhaseOverlay();
+			if (_phaseGroup != null)
+			{
+				_phaseGroup.alpha = 0f;
+			}
 		}
 
 		// PRIVATE METHODS
+
+		private void EnsurePhaseOverlay()
+		{
+			if (_phaseGroup != null)
+				return;
+
+			var go = new GameObject("GoeddePhaseOverlay");
+			go.layer = gameObject.layer;
+			go.transform.SetParent(transform, false);
+
+			var rect = go.AddComponent<RectTransform>();
+			rect.anchorMin = Vector2.zero;
+			rect.anchorMax = Vector2.one;
+			rect.offsetMin = Vector2.zero;
+			rect.offsetMax = Vector2.zero;
+
+			var img = go.AddComponent<Image>();
+			img.color = _phaseOverlayColor;
+			img.raycastTarget = false;
+
+			_phaseGroup = go.AddComponent<CanvasGroup>();
+			_phaseGroup.alpha = 0f;
+			_phaseGroup.blocksRaycasts = false;
+			_phaseGroup.interactable = false;
+
+			// Render behind the hit flash and death overlays.
+			go.transform.SetAsFirstSibling();
+		}
 
 		private void ShowHit(CanvasGroup group, float targetAlpha)
 		{

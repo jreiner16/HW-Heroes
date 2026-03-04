@@ -50,11 +50,19 @@ namespace Projectiles
 			_root.SetActive(_agent.Health.IsAlive);
 			_agent.Health.FatalHitTaken += OnFatalHit;
 
-			// Disable visual for local player
-			var renderers = _visual.GetComponentsInChildren<MeshRenderer>();
-			for (int i = 0; i < renderers.Length; i++)
+			// Disable visual for local player (applies to both MeshRenderer and SkinnedMeshRenderer body/hair parts)
+			var shadowMode = HasInputAuthority ? ShadowCastingMode.ShadowsOnly : ShadowCastingMode.On;
+
+			var meshRenderers = _visual.GetComponentsInChildren<MeshRenderer>();
+			for (int i = 0; i < meshRenderers.Length; i++)
 			{
-				renderers[i].shadowCastingMode = HasInputAuthority ? ShadowCastingMode.ShadowsOnly : ShadowCastingMode.On;
+				meshRenderers[i].shadowCastingMode = shadowMode;
+			}
+
+			var skinnedRenderers = _visual.GetComponentsInChildren<SkinnedMeshRenderer>();
+			for (int i = 0; i < skinnedRenderers.Length; i++)
+			{
+				skinnedRenderers[i].shadowCastingMode = shadowMode;
 			}
 
 			if (_enableTeamOutlines == true)
