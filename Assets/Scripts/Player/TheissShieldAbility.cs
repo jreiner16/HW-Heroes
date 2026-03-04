@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 namespace Projectiles
 {
 	/// <summary>
-	/// Theiss right-click ability. Hold RMB to preview shield placement, release to lock it in place.
+	/// Theiss's right-click ability: hold to preview shield placement, release to lock it in place.
 	/// </summary>
 	[AddComponentMenu("Projectiles/Abilities/Theiss Shield Ability")]
 	[DisallowMultipleComponent]
@@ -83,23 +83,29 @@ namespace Projectiles
 			}
 		}
 
-		public override void FixedUpdateNetwork()
+	public override void FixedUpdateNetwork()
+	{
+		if (_agent == null || _agent.Owner == null || _agent.Health.IsAlive == false)
+			return;
+
+		if (GetInput(out GameplayInput input) == false)
+			return;
+
+		bool abilityPressed = input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.Ability);
+		if (abilityPressed && HasStateAuthority)
 		{
-			if (_agent == null || _agent.Owner == null || _agent.Health.IsAlive == false)
-				return;
-
-			if (GetInput(out GameplayInput input) == false)
-				return;
-
-			// Cast shield when RMB is released (hold to aim, release to place)
-			bool altFireReleased = _agent.Input.PreviousButtons.IsSet(EInputButton.AltFire)
-			                    && input.Buttons.IsSet(EInputButton.AltFire) == false;
-
-			if (altFireReleased)
-			{
-				TryCastShield();
-			}
+			DespawnActiveShieldIfAny();
 		}
+
+		// Cast shield when right-click is released (hold to aim, release to place).
+		bool abilityReleased = _agent.Input.PreviousButtons.IsSet(EInputButton.Ability)
+		                    && input.Buttons.IsSet(EInputButton.Ability) == false;
+
+		if (abilityReleased)
+		{
+			TryCastShield();
+		}
+	}
 
 		public override void Render()
 		{

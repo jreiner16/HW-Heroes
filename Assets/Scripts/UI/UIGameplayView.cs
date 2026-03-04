@@ -28,26 +28,26 @@ namespace Projectiles.UI
 		private UIScreenEffects _screenEffects;
 		[SerializeField]
 		private UIMovementAbility _movementAbility;
-		[SerializeField]
-		private UIMovementAbility _secondaryAbility;
+	[SerializeField]
+	private UIMovementAbility _rightClickAbility;
 		[SerializeField]
 		private UIUltimateAbility _ultimateAbility;
 		
-	[Header("Character Blurb (HUD)")]
-	[SerializeField] private bool _showCharacterBlurb = true;
-	[SerializeField] private Vector2 _characterBlurbOffset = new Vector2(18f, 18f);
-	[SerializeField] private Vector2 _characterBlurbSize = new Vector2(520f, 90f);
-	[SerializeField] private float _characterBlurbFontSize = 22f;
-	[SerializeField] private Color _characterBlurbColor = new Color(1f, 1f, 1f, 0.9f);
-	private TextMeshProUGUI _characterBlurbText;
+		[Header("Character Blurb (HUD)")]
+		[SerializeField] private bool _showCharacterBlurb = true;
+		[SerializeField] private Vector2 _characterBlurbOffset = new Vector2(18f, 18f);
+		[SerializeField] private Vector2 _characterBlurbSize = new Vector2(520f, 90f);
+		[SerializeField] private float _characterBlurbFontSize = 22f;
+		[SerializeField] private Color _characterBlurbColor = new Color(1f, 1f, 1f, 0.9f);
+		private TextMeshProUGUI _characterBlurbText;
 
-	[Header("Spawn Room TAB Hint")]
-	[SerializeField] private string _tabHintMessage = "Press TAB to swap teacher";
-	[SerializeField] private Vector2 _tabHintOffset = new Vector2(0f, 80f);
-	[SerializeField] private Vector2 _tabHintSize = new Vector2(600f, 50f);
-	[SerializeField] private float _tabHintFontSize = 20f;
-	[SerializeField] private Color _tabHintColor = new Color(1f, 1f, 0.6f, 0.9f);
-	private TextMeshProUGUI _tabHintText;
+		[Header("Spawn Room TAB Hint")]
+		[SerializeField] private string _tabHintMessage = "Press TAB to swap teacher";
+		[SerializeField] private Vector2 _tabHintOffset = new Vector2(0f, 80f);
+		[SerializeField] private Vector2 _tabHintSize = new Vector2(600f, 50f);
+		[SerializeField] private float _tabHintFontSize = 20f;
+		[SerializeField] private Color _tabHintColor = new Color(1f, 1f, 0.6f, 0.9f);
+		private TextMeshProUGUI _tabHintText;
 
 		private SceneContext _context;
 		private PlayerAgent _observedAgent;
@@ -81,18 +81,19 @@ namespace Projectiles.UI
 		}
 
 		EnsureTabHintUI();
-			if (_movementAbility == null || _secondaryAbility == null)
+
+		if (_movementAbility == null || _rightClickAbility == null)
+		{
+			var movementWidgets = GetComponentsInChildren<UIMovementAbility>(true);
+			if (_movementAbility == null && movementWidgets.Length > 0)
 			{
-				var movementWidgets = GetComponentsInChildren<UIMovementAbility>(true);
-				if (_movementAbility == null && movementWidgets.Length > 0)
-				{
-					_movementAbility = movementWidgets[0];
-				}
-				if (_secondaryAbility == null && movementWidgets.Length > 1)
-				{
-					_secondaryAbility = movementWidgets[1];
-				}
+				_movementAbility = movementWidgets[0];
 			}
+			if (_rightClickAbility == null && movementWidgets.Length > 1)
+			{
+				_rightClickAbility = movementWidgets[1];
+			}
+		}
 
 			if (_ultimateAbility == null)
 			{
@@ -112,10 +113,10 @@ namespace Projectiles.UI
 			if (_observedAgent == null)
 				return;
 
-			_health.UpdateHealth(_observedAgent.Health);
-			_screenEffects.UpdateEffects(_observedAgent);
+		_health.UpdateHealth(_observedAgent.Health);
+		_screenEffects.UpdateEffects(_observedAgent);
 
-			UpdateCharacterBlurb();
+		UpdateCharacterBlurb();
 		UpdateTabHint();
 
 			if (_movementAbility != null)
@@ -138,23 +139,27 @@ namespace Projectiles.UI
 				}
 			}
 
-			if (_secondaryAbility != null)
+			if (_rightClickAbility != null)
 			{
-				var goeddeSecondary = _observedAgent.GetComponent<GoeddeSecondaryAbility>();
-				var theissShield    = _observedAgent.GetComponent<TheissShieldAbility>();
-				if (goeddeSecondary != null)
+				var goeddeFlamethrower = _observedAgent.GetComponent<GoeddeFlamethrowerAbility>();
+				var cohenRicochet      = _observedAgent.GetComponent<CohenRicochetAbility>();
+				var theissShield       = _observedAgent.GetComponent<TheissShieldAbility>();
+
+				if (goeddeFlamethrower != null)
 				{
-					_secondaryAbility.UpdateAbility(goeddeSecondary);
+					_rightClickAbility.UpdateAbility(goeddeFlamethrower);
+				}
+				else if (cohenRicochet != null)
+				{
+					_rightClickAbility.UpdateAbility(cohenRicochet);
 				}
 				else if (theissShield != null)
 				{
-					_secondaryAbility.UpdateAbility(theissShield);
+					_rightClickAbility.UpdateAbility(theissShield);
 				}
 				else
 				{
-					// Keep UI consistent across characters:
-					// if there's no character-specific RMB ability, show RMB/AltFire availability from the current weapon.
-					_secondaryAbility.UpdateSecondaryAction(_observedAgent.Weapons != null ? _observedAgent.Weapons.CurrentWeapon : null);
+					_rightClickAbility.UpdateSecondaryAction(_observedAgent.Weapons != null ? _observedAgent.Weapons.CurrentWeapon : null);
 				}
 			}
 
@@ -227,30 +232,30 @@ namespace Projectiles.UI
 		}
 
 		private void EnsureTabHintUI()
-	{
-		if (_tabHintText != null)
-			return;
+		{
+			if (_tabHintText != null)
+				return;
 
-		var go = new GameObject("TabSwapHint");
-		go.layer = gameObject.layer;
-		go.transform.SetParent(transform, false);
+			var go = new GameObject("TabSwapHint");
+			go.layer = gameObject.layer;
+			go.transform.SetParent(transform, false);
 
-		var rect = go.AddComponent<RectTransform>();
-		rect.anchorMin = new Vector2(0.5f, 0f);
-		rect.anchorMax = new Vector2(0.5f, 0f);
-		rect.pivot = new Vector2(0.5f, 0f);
-		rect.anchoredPosition = _tabHintOffset;
-		rect.sizeDelta = _tabHintSize;
+			var rect = go.AddComponent<RectTransform>();
+			rect.anchorMin = new Vector2(0.5f, 0f);
+			rect.anchorMax = new Vector2(0.5f, 0f);
+			rect.pivot = new Vector2(0.5f, 0f);
+			rect.anchoredPosition = _tabHintOffset;
+			rect.sizeDelta = _tabHintSize;
 
-		_tabHintText = go.AddComponent<TextMeshProUGUI>();
-		_tabHintText.raycastTarget = false;
-		_tabHintText.fontSize = _tabHintFontSize;
-		_tabHintText.color = _tabHintColor;
-		_tabHintText.alignment = TextAlignmentOptions.Center;
-		_tabHintText.enableWordWrapping = false;
-		_tabHintText.text = _tabHintMessage;
-		go.SetActive(false);
-	}
+			_tabHintText = go.AddComponent<TextMeshProUGUI>();
+			_tabHintText.raycastTarget = false;
+			_tabHintText.fontSize = _tabHintFontSize;
+			_tabHintText.color = _tabHintColor;
+			_tabHintText.alignment = TextAlignmentOptions.Center;
+			_tabHintText.enableWordWrapping = false;
+			_tabHintText.text = _tabHintMessage;
+			go.SetActive(false);
+		}
 
 	private void UpdateTabHint()
 	{

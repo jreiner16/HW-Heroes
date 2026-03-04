@@ -143,6 +143,68 @@ namespace Projectiles.UI
 
 		gameObject.SetActive(true);
 
+		if (ability.IsShrunk)
+		{
+			float ratio = ability.DurationTotal > 0 ? ability.DurationRemainingTime / ability.DurationTotal : 0f;
+			if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
+			SetStatusText($"{ability.DurationRemainingTime:F1}s", true);
+		}
+		else if (ability.IsOnCooldown)
+		{
+			float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
+			if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
+			SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
+		}
+		else
+		{
+			if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
+			SetStatusText(_readyText, false);
+		}
+	}
+
+	public void UpdateAbility(GoeddeFlamethrowerAbility ability)
+	{
+		CacheReadyText();
+
+		if (ability == null)
+		{
+			gameObject.SetActive(false);
+			return;
+		}
+
+		gameObject.SetActive(true);
+
+		if (ability.IsActive)
+		{
+			float ratio = ability.DurationTotal > 0 ? ability.DurationRemainingTime / ability.DurationTotal : 0f;
+			if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
+			SetStatusText($"{ability.DurationRemainingTime:F1}s", true);
+		}
+		else if (ability.IsOnCooldown)
+		{
+			float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
+			if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
+			SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
+		}
+		else
+		{
+			if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
+			SetStatusText(_readyText, false);
+		}
+	}
+
+	public void UpdateAbility(CohenRicochetAbility ability)
+	{
+		CacheReadyText();
+
+		if (ability == null)
+		{
+			gameObject.SetActive(false);
+			return;
+		}
+
+		gameObject.SetActive(true);
+
 		if (ability.IsOnCooldown)
 		{
 			float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
@@ -156,39 +218,8 @@ namespace Projectiles.UI
 		}
 	}
 
-		public void UpdateAbility(GoeddeSecondaryAbility ability)
-		{
-			CacheReadyText();
-
-			if (ability == null)
-			{
-				gameObject.SetActive(false);
-				return;
-			}
-
-			gameObject.SetActive(true);
-
-			if (ability.IsActive)
-			{
-				float ratio = ability.DurationTotal > 0 ? ability.DurationRemainingTime / ability.DurationTotal : 0f;
-				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-				SetStatusText($"{ability.DurationRemainingTime:F1}s", true);
-			}
-			else if (ability.IsOnCooldown)
-			{
-				float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
-				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-				SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
-			}
-			else
-			{
-				if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
-				SetStatusText(_readyText, false);
-			}
-		}
-
 		/// <summary>
-		/// Fallback mode: show a "secondary action" (RMB / AltFire) indicator based on weapon data.
+		/// Fallback: show the right-click ability slot based on the current weapon's secondary action.
 		/// </summary>
 		public void UpdateSecondaryAction(Weapon weapon)
 		{

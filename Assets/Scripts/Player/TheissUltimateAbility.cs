@@ -64,7 +64,7 @@ namespace Projectiles
 			}
 		}
 
-		// PRIVATE METHODS
+		// PUBLIC METHODS
 
 		public void AccelerateCooldownFromDamage(float damageDealt)
 		{
@@ -75,6 +75,8 @@ namespace Projectiles
 
 			ReduceCooldownSeconds(damageDealt * _cooldownSecondsPerDamage);
 		}
+
+		// PRIVATE METHODS
 
 		private void ReduceCooldownSeconds(float seconds)
 		{

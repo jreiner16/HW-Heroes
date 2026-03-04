@@ -4,15 +4,15 @@ using UnityEngine;
 namespace Projectiles
 {
 	/// <summary>
-	/// Goedde's secondary ability (right-click / AltFire): aim at a floor surface, then press
-	/// right-click to summon a flamethrower at that spot.
+	/// Goedde's right-click ability: aim at a floor surface, then press right-click to summon
+	/// a flamethrower at that spot.
 	/// The flamethrower burns enemies inside its radius for <see cref="_burnDuration"/> seconds.
 	/// The aim ray from the weapon barrel provides line-of-sight — if anything blocks the view to
 	/// the floor point, the target is rejected. Any distance is valid as long as the floor is visible.
 	/// The cooldown starts immediately on activation.
 	/// </summary>
 	[DefaultExecutionOrder(5)]
-	public class GoeddeSecondaryAbility : ContextBehaviour
+	public class GoeddeFlamethrowerAbility : ContextBehaviour
 	{
 		// PUBLIC MEMBERS
 
@@ -92,7 +92,7 @@ namespace Projectiles
 			if (GetInput(out GameplayInput input) == false)
 				return;
 
-			if (input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.AltFire))
+			if (input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.Ability))
 			{
 				TryActivate();
 			}

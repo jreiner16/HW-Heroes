@@ -51,7 +51,7 @@ namespace Projectiles
 		{
 			// Start uncharged: when the ability spawns, immediately put it on cooldown.
 			// Only state authority should set networked state.
-			if (HasStateAuthority == true && _cooldown > 0f)
+			if (HasStateAuthority && _cooldown > 0f)
 			{
 				_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
 			}
@@ -71,7 +71,7 @@ namespace Projectiles
 			}
 		}
 
-		// PRIVATE METHODS
+		// PUBLIC METHODS
 
 		public void AccelerateCooldownFromDamage(float damageDealt)
 		{
@@ -82,6 +82,8 @@ namespace Projectiles
 
 			ReduceCooldownSeconds(damageDealt * _cooldownSecondsPerDamage);
 		}
+
+		// PRIVATE METHODS
 
 		private void ReduceCooldownSeconds(float seconds)
 		{

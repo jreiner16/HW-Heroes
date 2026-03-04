@@ -33,9 +33,9 @@ namespace Projectiles
 		[Tooltip("Maximum teleport distance (roughly 2 character heights).")]
 		[SerializeField]
 		private float _teleportDistance = 4f;
-		[Tooltip("How long the smooth glide to the destination takes (must be less than duration).")]
+		[Tooltip("How long the smooth glide to the destination takes (must be less than or equal to duration).")]
 		[SerializeField]
-		private float _slideDuration = 0.4f;
+		private float _slideDuration = 2f;
 
 		[Header("Teleport Wall Detection")]
 		[Tooltip("Radius of the capsule used to check for walls during teleport. Should match the character's capsule collider radius.")]
@@ -184,21 +184,24 @@ namespace Projectiles
 				teleportDir = new Vector3(forward.x, 0f, forward.z).normalized;
 			}
 
-			// Build a capsule matching the character's collider, centred at the player's feet.
-			float halfHeight = Mathf.Max(0f, _capsuleHeight * 0.5f - _capsuleRadius);
-			Vector3 origin    = transform.position;
-			Vector3 capBottom = origin + Vector3.up * _capsuleRadius;
-			Vector3 capTop    = origin + Vector3.up * (_capsuleRadius + halfHeight * 2f);
+		// Start the sweep just past the player's own capsule surface so the cast never
+		// begins inside the player's own collider. This lets us cast against ALL wall
+		// layers without needing to know which layer the player is on, avoiding the bug
+		// where player and walls share the same layer (e.g. both on Default).
+		float halfHeight   = Mathf.Max(0f, _capsuleHeight * 0.5f - _capsuleRadius);
+		Vector3 origin     = transform.position;
+		float sweepOffset  = _capsuleRadius + 0.02f;
+		Vector3 sweepStart = origin + teleportDir * sweepOffset;
+		Vector3 capBottom  = sweepStart + Vector3.up * _capsuleRadius;
+		Vector3 capTop     = sweepStart + Vector3.up * (_capsuleRadius + halfHeight * 2f);
+		float sweepMaxDist = Mathf.Max(0f, _teleportDistance - sweepOffset);
 
-			// Exclude the player's own layer from wall detection.
-			LayerMask mask = _wallLayers & ~(1 << gameObject.layer);
-
-			float travelDistance = _teleportDistance;
-			if (Physics.CapsuleCast(capBottom, capTop, _capsuleRadius, teleportDir, out RaycastHit hit, _teleportDistance, mask, QueryTriggerInteraction.Ignore))
-			{
-				// Stop just before the surface so the character doesn't clip through.
-				travelDistance = Mathf.Max(0f, hit.distance - 0.05f);
-			}
+		float travelDistance = _teleportDistance;
+		if (sweepMaxDist > 0f && Physics.CapsuleCast(capBottom, capTop, _capsuleRadius, teleportDir, out RaycastHit hit, sweepMaxDist, _wallLayers, QueryTriggerInteraction.Ignore))
+		{
+			// Offset back by sweepOffset so travelDistance is relative to the real origin.
+			travelDistance = Mathf.Max(0f, sweepOffset + hit.distance - 0.05f);
+		}
 
 			// Store start/end for the smooth glide and start the slide timer.
 			_slideStartPos = origin;

@@ -51,6 +51,20 @@ namespace Projectiles
 			}
 		}
 
+		// PUBLIC METHODS
+
+		public void AccelerateCooldownFromDamage(float damageDealt)
+		{
+			if (HasStateAuthority == false)
+				return;
+			if (_cooldownSecondsPerDamage <= 0f || damageDealt <= 0f)
+				return;
+
+			ReduceCooldownSeconds(damageDealt * _cooldownSecondsPerDamage);
+		}
+
+		// PRIVATE METHODS
+
 		private void TryThrowSphere()
 		{
 			if (IsOnCooldown)
@@ -88,16 +102,6 @@ namespace Projectiles
 			}
 
 			_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
-		}
-
-		public void AccelerateCooldownFromDamage(float damageDealt)
-		{
-			if (HasStateAuthority == false)
-				return;
-			if (_cooldownSecondsPerDamage <= 0f || damageDealt <= 0f)
-				return;
-
-			ReduceCooldownSeconds(damageDealt * _cooldownSecondsPerDamage);
 		}
 
 		private void ReduceCooldownSeconds(float seconds)

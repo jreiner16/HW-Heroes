@@ -152,7 +152,7 @@ MonoBehaviour:
   _CurrentWeaponSlot: 0
   _PendingWeaponSlot: 0
   _initialWeapons:
-  - {fileID: 2436901878621067112, guid: 5f528935262974b0a8f01bd7805bf822, type: 3}
+  - {fileID: 2436901878621067112, guid: ad585ed83d9fa4246a3384d7455b8cf1, type: 3}
   _weaponsRoot: {fileID: 6249603782933705366}
   _fireTransform: {fileID: 2117859135794692440}
   _firstPersonWeaponOffset: {x: -0.15, y: 0, z: 0}
