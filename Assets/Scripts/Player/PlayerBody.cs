@@ -50,11 +50,22 @@ namespace Projectiles
 			_root.SetActive(_agent.Health.IsAlive);
 			_agent.Health.FatalHitTaken += OnFatalHit;
 
-			// Disable visual for local player
-			var renderers = _visual.GetComponentsInChildren<MeshRenderer>();
-			for (int i = 0; i < renderers.Length; i++)
+			// Local player: body shadows only, hide head/hair entirely (avoids glitchy first-person view)
+			if (HasInputAuthority == true)
 			{
-				renderers[i].shadowCastingMode = HasInputAuthority ? ShadowCastingMode.ShadowsOnly : ShadowCastingMode.On;
+				var allRenderers = _visual.GetComponentsInChildren<Renderer>(true);
+				for (int i = 0; i < allRenderers.Length; i++)
+				{
+					var r = allRenderers[i];
+					if (IsHeadOrHair(r.transform))
+					{
+						r.enabled = false;
+					}
+					else
+					{
+						r.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+					}
+				}
 			}
 
 			if (_enableTeamOutlines == true)
@@ -250,6 +261,18 @@ namespace Projectiles
 					r.SetPropertyBlock(block);
 				}
 			}
+		}
+
+		private static bool IsHeadOrHair(Transform t)
+		{
+			while (t != null)
+			{
+				var name = t.gameObject.name.ToLowerInvariant();
+				if (name.Contains("head") || name.Contains("hair") || name.Contains("face") || name.Contains("cap"))
+					return true;
+				t = t.parent;
+			}
+			return false;
 		}
 
 		private void OnFatalHit(HitData hit)
