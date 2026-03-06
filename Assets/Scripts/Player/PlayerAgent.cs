@@ -48,11 +48,6 @@ namespace Projectiles
 		[SerializeField]
 		private Transform _cameraHandle;
 
-		[Header("Camera")]
-		[SerializeField]
-		[Tooltip("How quickly the camera catches up to the handle position. Lower = smoother but more lag. 0.04-0.08 is a good range.")]
-		private float _cameraPositionSmoothTime = 0.05f;
-
 		[Header("Movement")]
 	[SerializeField]
 	private float _moveSpeed = 6f;
@@ -79,8 +74,6 @@ namespace Projectiles
 		private float _pendingBounceImpulse { get; set; }
 
 		private Vector2 _lastFUNLookRotation;
-		private Vector3 _cameraVelocity;
-		private bool    _cameraInitialized;
 
 		/// <summary>
 		/// Applies an upward impulse to the player (e.g. from bouncers). Call from OnTriggerEnter/OnCollisionEnter.
@@ -103,20 +96,11 @@ namespace Projectiles
 			ReplicateToAll(false);
 			ReplicateTo(Object.InputAuthority, true);
 
-			// Snap the camera immediately on spawn so it doesn't lerp from a stale position.
-			if (HasInputAuthority == true && Context != null && Context.Camera != null)
-			{
-				Context.Camera.transform.position = _cameraHandle.position;
-				_cameraVelocity    = Vector3.zero;
-				_cameraInitialized = true;
-			}
 		}
 
 		public override void Despawned(NetworkRunner runner, bool hasState)
 		{
-			Owner              = null;
-			_cameraInitialized = false;
-			_cameraVelocity    = Vector3.zero;
+			Owner = null;
 		}
 
 		public override void FixedUpdateNetwork()
@@ -156,24 +140,13 @@ namespace Projectiles
 			var pitchRotation = KCC.GetLookRotation(true, false);
 			_cameraPivot.localRotation = Quaternion.Euler(pitchRotation);
 
-		var cameraTransform = Context.Camera.transform;
-		if (HasInputAuthority == true && Owner != null && Health.IsAlive == true)
-		{
-			cameraTransform.position = _cameraHandle.position;
-			// Rotation from KCC look only (player input) - not head animation
-			cameraTransform.rotation = KCC.TransformRotation * Quaternion.Euler(pitchRotation.x, 0f, 0f);
-		}
-		else
-		{
-			// Smooth the position so physics corrections and body movement
-			// don't jerk the camera around, while rotation stays direct for responsive aiming.
-			cameraTransform.position = Vector3.SmoothDamp(
-				cameraTransform.position,
-				_cameraHandle.position,
-				ref _cameraVelocity,
-				_cameraPositionSmoothTime);
-			cameraTransform.rotation = _cameraHandle.rotation;
-		}
+			// Only the local player's agent controls the camera - never let remote agents touch it
+			if (HasInputAuthority == true && Owner != null && Health.IsAlive == true && Context?.Camera != null)
+			{
+				var cameraTransform = Context.Camera.transform;
+				cameraTransform.position = _cameraHandle.position;
+				cameraTransform.rotation = KCC.TransformRotation * Quaternion.Euler(pitchRotation.x, 0f, 0f);
+			}
 	}
 
 	// PRIVATE METHODS
