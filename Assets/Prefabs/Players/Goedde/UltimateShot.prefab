@@ -48,7 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _impactEffectPrefab: {fileID: 0}
   _impactEffectReturnTime: 2
-  _impactObjectPrefab: {fileID: 2971405447164247505, guid: fb1f6c926579ce449add3f69e9c33d7a, type: 3}
+  _impactObjectPrefab: {fileID: 2971405447164247506, guid: b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0, type: 3}
   _startSpeed: 25
   _length: 2
   _maxDistance: 200

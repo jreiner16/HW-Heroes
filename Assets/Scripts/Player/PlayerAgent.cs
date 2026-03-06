@@ -4,6 +4,13 @@ using Fusion.Addons.SimpleKCC;
 
 namespace Projectiles
 {
+	public enum CharacterClass
+	{
+		Tank,
+		DPS,
+		Support,
+	}
+
 	/// <summary>
 	/// Main script handling player agent. It provides access to common components and handles movement input processing and camera.
 	/// </summary>
@@ -22,6 +29,8 @@ namespace Projectiles
 
 		public bool        InputBlocked  => Health.IsAlive == false;
 
+		public CharacterClass Class => _characterClass;
+
 		/// <summary>
 		/// Multipliers applied to movement (used by abilities). Default 1. Abilities with execution order before this should set these.
 		/// </summary>
@@ -30,14 +39,23 @@ namespace Projectiles
 
 		// PRIVATE MEMBERS
 
+		[Header("Character")]
+		[SerializeField]
+		private CharacterClass _characterClass;
+
 		[SerializeField]
 		private Transform _cameraPivot;
 		[SerializeField]
 		private Transform _cameraHandle;
 
-		[Header("Movement")]
+		[Header("Camera")]
 		[SerializeField]
-		private float _moveSpeed = 6f;
+		[Tooltip("How quickly the camera catches up to the handle position. Lower = smoother but more lag. 0.04-0.08 is a good range.")]
+		private float _cameraPositionSmoothTime = 0.05f;
+
+		[Header("Movement")]
+	[SerializeField]
+	private float _moveSpeed = 6f;
 		[SerializeField]
 		public float _upGravity = 15f;
 		[SerializeField]
@@ -61,6 +79,8 @@ namespace Projectiles
 		private float _pendingBounceImpulse { get; set; }
 
 		private Vector2 _lastFUNLookRotation;
+		private Vector3 _cameraVelocity;
+		private bool    _cameraInitialized;
 
 		/// <summary>
 		/// Applies an upward impulse to the player (e.g. from bouncers). Call from OnTriggerEnter/OnCollisionEnter.
@@ -82,11 +102,21 @@ namespace Projectiles
 			// This saves network traffic by not synchronizing networked properties to other clients except local player.
 			ReplicateToAll(false);
 			ReplicateTo(Object.InputAuthority, true);
+
+			// Snap the camera immediately on spawn so it doesn't lerp from a stale position.
+			if (HasInputAuthority == true && Context != null && Context.Camera != null)
+			{
+				Context.Camera.transform.position = _cameraHandle.position;
+				_cameraVelocity    = Vector3.zero;
+				_cameraInitialized = true;
+			}
 		}
 
 		public override void Despawned(NetworkRunner runner, bool hasState)
 		{
-			Owner = null;
+			Owner              = null;
+			_cameraInitialized = false;
+			_cameraVelocity    = Vector3.zero;
 		}
 
 		public override void FixedUpdateNetwork()
@@ -126,16 +156,27 @@ namespace Projectiles
 			var pitchRotation = KCC.GetLookRotation(true, false);
 			_cameraPivot.localRotation = Quaternion.Euler(pitchRotation);
 
-			if (HasInputAuthority == true && Owner != null && Health.IsAlive == true)
-			{
-				var cameraTransform = Context.Camera.transform;
-				cameraTransform.position = _cameraHandle.position;
-				// Rotation from KCC look only (player input) - not head animation
-				cameraTransform.rotation = KCC.TransformRotation * Quaternion.Euler(pitchRotation.x, 0f, 0f);
-			}
+		var cameraTransform = Context.Camera.transform;
+		if (HasInputAuthority == true && Owner != null && Health.IsAlive == true)
+		{
+			cameraTransform.position = _cameraHandle.position;
+			// Rotation from KCC look only (player input) - not head animation
+			cameraTransform.rotation = KCC.TransformRotation * Quaternion.Euler(pitchRotation.x, 0f, 0f);
 		}
+		else
+		{
+			// Smooth the position so physics corrections and body movement
+			// don't jerk the camera around, while rotation stays direct for responsive aiming.
+			cameraTransform.position = Vector3.SmoothDamp(
+				cameraTransform.position,
+				_cameraHandle.position,
+				ref _cameraVelocity,
+				_cameraPositionSmoothTime);
+			cameraTransform.rotation = _cameraHandle.rotation;
+		}
+	}
 
-		// PRIVATE METHODS
+	// PRIVATE METHODS
 
 		private void ProcessMovementInput()
 		{

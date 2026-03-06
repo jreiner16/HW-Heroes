@@ -28,8 +28,10 @@ namespace Projectiles.UI
 		private UIScreenEffects _screenEffects;
 		[SerializeField]
 		private UIMovementAbility _movementAbility;
+	[SerializeField]
+	private UIMovementAbility _rightClickAbility;
 		[SerializeField]
-		private UIMovementAbility _secondaryAbility;
+		private UIMovementAbility[] _movementWidgets;
 		[SerializeField]
 		private UIUltimateAbility _ultimateAbility;
 		
@@ -44,6 +46,14 @@ namespace Projectiles.UI
 		[SerializeField] private float _characterBlurbFontSize = 22f;
 		[SerializeField] private Color _characterBlurbColor = new Color(1f, 1f, 1f, 0.9f);
 		private TextMeshProUGUI _characterBlurbText;
+
+		[Header("Spawn Room TAB Hint")]
+		[SerializeField] private string _tabHintMessage = "Press TAB to swap teacher";
+		[SerializeField] private Vector2 _tabHintOffset = new Vector2(0f, 80f);
+		[SerializeField] private Vector2 _tabHintSize = new Vector2(600f, 50f);
+		[SerializeField] private float _tabHintFontSize = 20f;
+		[SerializeField] private Color _tabHintColor = new Color(1f, 1f, 0.6f, 0.9f);
+		private TextMeshProUGUI _tabHintText;
 
 		private SceneContext _context;
 		private PlayerAgent _observedAgent;
@@ -76,30 +86,29 @@ namespace Projectiles.UI
 				EnsureScoreHeaderUI();
 			}
 
-			if (_showCharacterBlurb == true)
-			{
-				EnsureCharacterBlurbUI();
-			}
-			if (_movementAbility == null || _secondaryAbility == null)
-			{
-				var movementWidgets = GetComponentsInChildren<UIMovementAbility>(true);
-				if (_movementAbility == null && movementWidgets.Length > 0)
-				{
-					_movementAbility = movementWidgets[0];
-				}
-				if (_secondaryAbility == null && movementWidgets.Length > 1)
-				{
-					_secondaryAbility = movementWidgets[1];
-				}
-			}
+		    if (_showCharacterBlurb == true)
+		    {
+			    EnsureCharacterBlurbUI();
+		    }
 
-			if (_ultimateAbility == null)
-			{
-				_ultimateAbility = GetComponentInChildren<UIUltimateAbility>(true);
-			}
+		    EnsureTabHintUI();
 
-			_aliveGroup.alpha = 0f;
+		if (_movementAbility == null && _movementWidgets != null && _movementWidgets.Length > 0)
+		{
+			_movementAbility = _movementWidgets[0];
 		}
+		if (_rightClickAbility == null && _movementWidgets != null && _movementWidgets.Length > 1)
+		{
+			_rightClickAbility = _movementWidgets[1];
+		}
+
+		if (_ultimateAbility == null)
+		{
+			_ultimateAbility = GetComponentInChildren<UIUltimateAbility>(true);
+		}
+
+		_aliveGroup.alpha = 0f;
+	}
 
 		protected void Update()
 		{
@@ -111,20 +120,21 @@ namespace Projectiles.UI
 			if (_observedAgent == null)
 				return;
 
-			_health.UpdateHealth(_observedAgent.Health);
-			_screenEffects.UpdateEffects(_observedAgent);
+		_health.UpdateHealth(_observedAgent.Health);
+		_screenEffects.UpdateEffects(_observedAgent);
 
-			UpdateCharacterBlurb();
+		UpdateCharacterBlurb();
+		UpdateTabHint();
 
 			if (_movementAbility != null)
 			{
-				var geoddeMovement = _observedAgent.GetComponent<GeoddeMovementAbility>();
+				var goeddeMovement = _observedAgent.GetComponent<GoeddeMovementAbility>();
 				var cohenMovement = _observedAgent.GetComponent<CohenMovementAbility>();
 				var theissBuff = _observedAgent.GetComponent<TheissBuffAbility>();
 
-				if (geoddeMovement != null)
+				if (goeddeMovement != null)
 				{
-					_movementAbility.UpdateAbility(geoddeMovement);
+					_movementAbility.UpdateAbility(goeddeMovement);
 				}
 				else if (cohenMovement != null)
 				{
@@ -136,30 +146,39 @@ namespace Projectiles.UI
 				}
 			}
 
-			if (_secondaryAbility != null)
+			if (_rightClickAbility != null)
 			{
-				var theissShield = _observedAgent.GetComponent<TheissShieldAbility>();
-				if (theissShield != null)
+				var goeddeFlamethrower = _observedAgent.GetComponent<GoeddeFlamethrowerAbility>();
+				var cohenRicochet      = _observedAgent.GetComponent<CohenRicochetAbility>();
+				var theissShield       = _observedAgent.GetComponent<TheissShieldAbility>();
+
+				if (goeddeFlamethrower != null)
 				{
-					_secondaryAbility.UpdateAbility(theissShield);
+					_rightClickAbility.UpdateAbility(goeddeFlamethrower);
+				}
+				else if (cohenRicochet != null)
+				{
+					_rightClickAbility.UpdateAbility(cohenRicochet);
+				}
+				else if (theissShield != null)
+				{
+					_rightClickAbility.UpdateAbility(theissShield);
 				}
 				else
 				{
-					// Keep UI consistent across characters:
-					// if there's no character-specific RMB ability, show RMB/AltFire availability from the current weapon.
-					_secondaryAbility.UpdateSecondaryAction(_observedAgent.Weapons != null ? _observedAgent.Weapons.CurrentWeapon : null);
+					_rightClickAbility.UpdateSecondaryAction(_observedAgent.Weapons != null ? _observedAgent.Weapons.CurrentWeapon : null);
 				}
 			}
 
 			if (_ultimateAbility != null)
 			{
-				var geoddeUltimate = _observedAgent.GetComponent<GeoddeUltimateAbility>();
+				var goeddeUltimate = _observedAgent.GetComponent<GoeddeUltimateAbility>();
 				var cohenUltimate = _observedAgent.GetComponent<CohenUltimateAbility>();
 				var theissUltimate = _observedAgent.GetComponent<TheissUltimateAbility>();
 
-				if (geoddeUltimate != null)
+				if (goeddeUltimate != null)
 				{
-					_ultimateAbility.UpdateAbility(geoddeUltimate);
+					_ultimateAbility.UpdateAbility(goeddeUltimate);
 				}
 				else if (cohenUltimate != null)
 				{
@@ -238,7 +257,41 @@ namespace Projectiles.UI
 			}
 		}
 
-		private void ClearObservedAgent(bool hideElements)
+		private void EnsureTabHintUI()
+		{
+			if (_tabHintText != null)
+				return;
+
+			var go = new GameObject("TabSwapHint");
+			go.layer = gameObject.layer;
+			go.transform.SetParent(transform, false);
+
+			var rect = go.AddComponent<RectTransform>();
+			rect.anchorMin = new Vector2(0.5f, 0f);
+			rect.anchorMax = new Vector2(0.5f, 0f);
+			rect.pivot = new Vector2(0.5f, 0f);
+			rect.anchoredPosition = _tabHintOffset;
+			rect.sizeDelta = _tabHintSize;
+
+			_tabHintText = go.AddComponent<TextMeshProUGUI>();
+			_tabHintText.raycastTarget = false;
+			_tabHintText.fontSize = _tabHintFontSize;
+			_tabHintText.color = _tabHintColor;
+			_tabHintText.alignment = TextAlignmentOptions.Center;
+			_tabHintText.enableWordWrapping = false;
+			_tabHintText.text = _tabHintMessage;
+			go.SetActive(false);
+		}
+
+	private void UpdateTabHint()
+	{
+		if (_tabHintText == null)
+			return;
+
+		_tabHintText.gameObject.SetActive(DisappearWhenPlayerNotInArea.IsLocalPlayerInside);
+	}
+
+	private void ClearObservedAgent(bool hideElements)
 		{
 			if (_observedAgent != null)
 			{

@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 1128444158403002833}
   - component: {fileID: 3733613388712259037}
   m_Layer: 0
-  m_Name: Geodde_Agent
+  m_Name: Goedde_Agent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -197,7 +197,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _CurrentHealth: 0
-  _maxHealth: 100
+  _maxHealth: 250
   _headPivot: {fileID: 7136782717251966427}
   _bodyPivot: {fileID: 6023693924253656717}
   _groundPivot: {fileID: 4327114067154968929}

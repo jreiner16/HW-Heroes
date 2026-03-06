@@ -8,7 +8,7 @@ namespace Projectiles
 	public enum EInputButton
 	{
 		Fire     = 0,
-		AltFire  = 1,
+		Ability  = 1,
 		Jump     = 2,
 		Reload   = 3,
 		X        = 4,
@@ -106,7 +106,7 @@ namespace Projectiles
 				_lookRotationAccumulator.Accumulate(lookRotationDelta);
 
 				_accumulatedInput.Buttons.Set(EInputButton.Fire, mouse.leftButton.isPressed);
-				_accumulatedInput.Buttons.Set(EInputButton.AltFire, mouse.rightButton.isPressed);
+				_accumulatedInput.Buttons.Set(EInputButton.Ability, mouse.rightButton.isPressed);
 			}
 
 			var keyboard = Keyboard.current;

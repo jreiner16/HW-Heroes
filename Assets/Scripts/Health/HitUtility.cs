@@ -151,7 +151,7 @@ namespace Projectiles
 
 		public static HitData ProcessHit(ref HitData hitData)
 		{
-			if (FRIENDLY_FIRE_ENABLED == false)
+			if (FRIENDLY_FIRE_ENABLED == false && hitData.Action == EHitAction.Damage)
 			{
 				// Only enforce team rules for player-vs-player hits (Health targets).
 				var targetHealth = hitData.Target as Health;
@@ -160,17 +160,23 @@ namespace Projectiles
 					var runner = targetHealth.Runner;
 					if (runner != null)
 					{
+						// Block self-damage: a player cannot hurt themselves.
+						if (hitData.InstigatorRef == targetHealth.Object.InputAuthority)
+						{
+							hitData.Amount = 0f;
+							return hitData;
+						}
+
 						var instigatorPlayerObject = runner.GetPlayerObject(hitData.InstigatorRef);
 						var targetPlayerObject = runner.GetPlayerObject(targetHealth.Object.InputAuthority);
 
 						var instigatorPlayer = instigatorPlayerObject != null ? instigatorPlayerObject.GetComponent<Player>() : null;
 						var targetPlayer = targetPlayerObject != null ? targetPlayerObject.GetComponent<Player>() : null;
 
-						// If both are players and on the same (non-none) team, ignore damage.
+						// Block same-team damage.
 						if (instigatorPlayer != null && targetPlayer != null &&
 						    instigatorPlayer.Team != ETeam.None &&
-						    instigatorPlayer.Team == targetPlayer.Team &&
-						    hitData.InstigatorRef != targetHealth.Object.InputAuthority)
+						    instigatorPlayer.Team == targetPlayer.Team)
 						{
 							hitData.Amount = 0f;
 							return hitData;
@@ -204,7 +210,7 @@ namespace Projectiles
 
 						if (instigatorAgent != null)
 						{
-							instigatorAgent.GetComponent<GeoddeUltimateAbility>()?.AccelerateCooldownFromDamage(hitData.Amount);
+							instigatorAgent.GetComponent<GoeddeUltimateAbility>()?.AccelerateCooldownFromDamage(hitData.Amount);
 							instigatorAgent.GetComponent<TheissUltimateAbility>()?.AccelerateCooldownFromDamage(hitData.Amount);
 							instigatorAgent.GetComponent<CohenUltimateAbility>()?.AccelerateCooldownFromDamage(hitData.Amount);
 						}

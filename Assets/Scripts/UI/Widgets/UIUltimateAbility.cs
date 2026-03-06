@@ -44,7 +44,7 @@ namespace Projectiles.UI
 			_statusText.rectTransform.anchoredPosition = _readyAnchoredPosition + offset;
 		}
 
-		public void UpdateAbility(GeoddeUltimateAbility ability)
+		public void UpdateAbility(GoeddeUltimateAbility ability)
 		{
 			CacheReadyText();
 

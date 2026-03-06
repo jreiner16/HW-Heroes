@@ -72,8 +72,8 @@ namespace Projectiles
 				_lastSingleInputChange = Time.frameCount;
 			}
 
-			// Tab cycles to the next character (works even when cursor is locked)
-			if (keyboard.tabKey.wasPressedThisFrame && _sceneContext?.Gameplay != null)
+			// Tab cycles to the next character, but only when the player is inside the spawn room.
+			if (keyboard.tabKey.wasPressedThisFrame && _sceneContext?.Gameplay != null && DisappearWhenPlayerNotInArea.IsLocalPlayerInside)
 			{
 				_sceneContext.Gameplay.SwitchLocalPlayerToNextCharacter();
 				_lastSingleInputChange = Time.frameCount;

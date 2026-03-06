@@ -68,6 +68,15 @@ namespace Projectiles
 				}
 			}
 
+		else
+		{
+			var skinnedRenderers = _visual.GetComponentsInChildren<SkinnedMeshRenderer>();
+			for (int i = 0; i < skinnedRenderers.Length; i++)
+			{
+				skinnedRenderers[i].shadowCastingMode = ShadowCastingMode.On;
+			}
+		}
+
 			if (_enableTeamOutlines == true)
 			{
 				SetupTeamOutlineRenderers();
