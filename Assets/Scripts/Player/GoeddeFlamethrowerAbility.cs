@@ -130,15 +130,15 @@ namespace Projectiles
 			if (HasStateAuthority == false)
 				return;
 
-			var fireTransform = _agent.Weapons?.FireTransform;
-			if (fireTransform == null)
+			var weapons = _agent.Weapons;
+			if (weapons?.FireTransform == null)
 			{
 				_hasValidTarget = false;
 				return;
 			}
 
-			var origin    = fireTransform.position;
-			var direction = fireTransform.forward;
+			var origin    = weapons.FireTransform.position;
+			var direction = weapons.AimDirection;
 
 			// Exclude the player's own layer so they can't target their own feet.
 			LayerMask mask = _groundLayers & ~(1 << gameObject.layer);

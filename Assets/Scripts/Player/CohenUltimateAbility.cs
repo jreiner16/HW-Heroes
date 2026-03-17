@@ -81,8 +81,7 @@ namespace Projectiles
 
 			DespawnActiveSphereIfAny();
 
-			var fireTransform = _agent.Weapons.FireTransform;
-			var forward = fireTransform.forward;
+			var forward = _agent.Weapons.AimDirection;
 			forward.y = 0f;
 			if (forward.sqrMagnitude < 0.0001f)
 			{

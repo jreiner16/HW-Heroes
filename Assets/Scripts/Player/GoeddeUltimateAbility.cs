@@ -108,9 +108,9 @@ namespace Projectiles
 			if (HasStateAuthority == false)
 				return;
 
-			var fireTransform = _agent.Weapons.FireTransform;
-			var firePosition = fireTransform.position;
-			var fireDirection = fireTransform.forward;
+			var weapons = _agent.Weapons;
+			var firePosition = weapons.FireTransform.position;
+			var fireDirection = weapons.AimDirection;
 
 			if (_kinematicProjectilePrefab != null)
 			{
