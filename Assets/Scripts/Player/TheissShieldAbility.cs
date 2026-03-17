@@ -133,11 +133,11 @@ namespace Projectiles
 			if (isHolding == false)
 				return;
 
-			var fireTransform = _agent.Weapons?.FireTransform;
-			if (fireTransform == null)
+			var weapons = _agent.Weapons;
+			if (weapons?.FireTransform == null)
 				return;
 
-			var forward = fireTransform.forward;
+			var forward = weapons.AimDirection;
 			forward.y = 0f;
 			if (forward.sqrMagnitude < 0.0001f)
 			{
@@ -203,8 +203,7 @@ namespace Projectiles
 
 			DespawnActiveShieldIfAny();
 
-			var fireTransform = _agent.Weapons.FireTransform;
-			var forward = fireTransform.forward;
+			var forward = _agent.Weapons.AimDirection;
 			forward.y = 0f;
 			if (forward.sqrMagnitude < 0.0001f)
 			{

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Fusion;
 using UnityEngine;
 
@@ -59,7 +59,7 @@ namespace Projectiles
 			var hit = ProcessBeamHit();
 			if (hit.Distance > 0f)
 			{
-				HitUtility.ProcessHit(Object.InputAuthority, FireTransform.forward, hit, _damage, _hitType);
+				HitUtility.ProcessHit(Object.InputAuthority, AimDirection, hit, _damage, _hitType);
 			}
 		}
 
@@ -101,7 +101,7 @@ namespace Projectiles
 		{
 			_beamDistance = _maxDistance;
 
-			if (ProjectileUtility.CircleCast(Runner, Object.InputAuthority, FireTransform.position, FireTransform.forward, _maxDistance, _beamRadius, _raycastAmount, _hitMask, out LagCompensatedHit hit) == true)
+			if (ProjectileUtility.CircleCast(Runner, Object.InputAuthority, FireTransform.position, AimDirection, _maxDistance, _beamRadius, _raycastAmount, _hitMask, out LagCompensatedHit hit) == true)
 			{
 				_beamDistance = hit.Distance;
 				return hit;
@@ -122,7 +122,7 @@ namespace Projectiles
 				return;
 
 			var startPosition = _beamStart.transform.position;
-			var targetPosition = FireTransform.position + FireTransform.forward * _beamDistance;
+			var targetPosition = FireTransform.position + AimDirection * _beamDistance;
 
 			var visualDirection = targetPosition - startPosition;
 			float visualDistance = visualDirection.magnitude;

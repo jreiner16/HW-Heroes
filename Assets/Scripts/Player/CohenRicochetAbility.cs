@@ -75,8 +75,11 @@ namespace Projectiles
 			if (_projectilePrefab == null || _projectileBuffer == null)
 				return;
 
-			var fireTransform = _agent.Weapons.FireTransform;
-			_projectileBuffer.AddProjectile(_projectilePrefab, fireTransform.position, fireTransform.forward);
+			var weapons = _agent.Weapons;
+			if (weapons == null || weapons.FireTransform == null)
+				return;
+
+			_projectileBuffer.AddProjectile(_projectilePrefab, weapons.FireTransform.position, weapons.AimDirection);
 
 			_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
 		}
