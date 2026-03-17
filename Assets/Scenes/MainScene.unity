@@ -10019,6 +10019,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _bounceForce: 15
+  _duplicateBounceFrameWindow: 1
 --- !u!136 &250486672
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -13578,6 +13579,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _bounceForce: 15
+  _duplicateBounceFrameWindow: 1
 --- !u!136 &365215109
 CapsuleCollider:
   m_ObjectHideFlags: 0
