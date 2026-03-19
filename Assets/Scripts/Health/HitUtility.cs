@@ -166,17 +166,20 @@ namespace Projectiles
 						var instigatorPlayer = instigatorPlayerObject != null ? instigatorPlayerObject.GetComponent<Player>() : null;
 						var targetPlayer = targetPlayerObject != null ? targetPlayerObject.GetComponent<Player>() : null;
 
+						// Block self-damage: a player cannot hurt themselves.
+						if (hitData.InstigatorRef == targetHealth.Object.InputAuthority)
+						{
+							hitData.Amount = 0f;
+							return hitData;
+						}
+
 						// Block same-team damage.
 						if (instigatorPlayer != null && targetPlayer != null &&
 						    instigatorPlayer.Team != ETeam.None &&
 						    instigatorPlayer.Team == targetPlayer.Team)
 						{
-							// Allow self-damage while still blocking teammate damage.
-							if (hitData.InstigatorRef != targetHealth.Object.InputAuthority)
-							{
-								hitData.Amount = 0f;
-								return hitData;
-							}
+							hitData.Amount = 0f;
+							return hitData;
 						}
 					}
 				}

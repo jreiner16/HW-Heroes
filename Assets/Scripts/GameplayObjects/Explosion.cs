@@ -29,8 +29,7 @@ namespace Projectiles
 		[SerializeField]
 		private float _outerDamage = 10f;
 		[SerializeField, Tooltip("If false, the player who fired this explosion (e.g. grenade) cannot damage themselves.")]
-		// Default to true so grenades can hurt the thrower during playtests.
-		private bool _canDamageOwner = true;
+		private bool _canDamageOwner = false;
 
 		[SerializeField]
 		private float _despawnDelay = 3f;
@@ -73,10 +72,11 @@ namespace Projectiles
 
 			var position = transform.position + _explosionCheckOffset;
 
-			// Include the firing player in overlap checks.
-			// Team/self damage rules are handled in HitUtility, so we don't need to
-			// pre-filter the owner out here (prefabs may have _canDamageOwner set).
 			var hitOptions = HitOptions.IncludePhysX;
+			if (_canDamageOwner == false)
+			{
+				hitOptions |= HitOptions.IgnoreInputAuthority;
+			}
 
 			int count = Runner.LagCompensation.OverlapSphere(position, _outerRadius, Object.InputAuthority, hits, _targetMask, hitOptions);
 
@@ -91,7 +91,10 @@ namespace Projectiles
 				if (hitTarget == null)
 					continue;
 
-				// Don't skip owner here; HitUtility controls whether self damage is allowed.
+				// Skip owner if self-damage is disabled (belt-and-suspenders: IgnoreInputAuthority may not filter PhysX colliders)
+				if (_canDamageOwner == false && hitTarget is NetworkBehaviour targetNetBehaviour &&
+				    targetNetBehaviour.Object != null && targetNetBehaviour.Object.InputAuthority == Object.InputAuthority)
+					continue;
 
 				int hitRootID = hit.Hitbox != null ? hit.Hitbox.Root.GetInstanceID() : 0;
 				if (hitRoots.Contains(hitRootID) == true)
