@@ -1,6 +1,7 @@
 using System;
 using Fusion;
 using UnityEngine;
+using Projectiles.UI;
 
 namespace Projectiles
 {
@@ -81,9 +82,23 @@ namespace Projectiles
 
 		// NetworkBehaviour INTERFACE
 
+		private void OnEnable()
+		{
+			if (Application.isPlaying == false)
+				return;
+			EnsureWorldSpaceHealthBar();
+		}
+
 		public override void Spawned()
 		{
 			_visibleHitCount = _hitCount;
+			EnsureWorldSpaceHealthBar();
+		}
+
+		private void EnsureWorldSpaceHealthBar()
+		{
+			if (GetComponent<WorldSpaceHealthBar>() == null)
+				gameObject.AddComponent<WorldSpaceHealthBar>();
 		}
 
 		public override void Despawned(NetworkRunner runner, bool hasState)

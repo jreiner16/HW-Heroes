@@ -55,7 +55,7 @@ namespace Projectiles
 	/// </summary>
 	public static class HitUtility
 	{
-		// Friendly fire is disabled by default for simple team gameplay.
+		// Friendly fire is disabled by default for team gameplay.
 		private const bool FRIENDLY_FIRE_ENABLED = false;
 
 		// PUBLIC METHODS
@@ -160,13 +160,6 @@ namespace Projectiles
 					var runner = targetHealth.Runner;
 					if (runner != null)
 					{
-						// Block self-damage: a player cannot hurt themselves.
-						if (hitData.InstigatorRef == targetHealth.Object.InputAuthority)
-						{
-							hitData.Amount = 0f;
-							return hitData;
-						}
-
 						var instigatorPlayerObject = runner.GetPlayerObject(hitData.InstigatorRef);
 						var targetPlayerObject = runner.GetPlayerObject(targetHealth.Object.InputAuthority);
 
@@ -178,8 +171,12 @@ namespace Projectiles
 						    instigatorPlayer.Team != ETeam.None &&
 						    instigatorPlayer.Team == targetPlayer.Team)
 						{
-							hitData.Amount = 0f;
-							return hitData;
+							// Allow self-damage while still blocking teammate damage.
+							if (hitData.InstigatorRef != targetHealth.Object.InputAuthority)
+							{
+								hitData.Amount = 0f;
+								return hitData;
+							}
 						}
 					}
 				}

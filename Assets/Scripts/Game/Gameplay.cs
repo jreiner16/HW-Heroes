@@ -30,11 +30,27 @@ namespace Projectiles
 		[Networked]
 		public ETeam WinningTeam { get; private set; }
 
+		/// <summary>True when the round has officially started (after the initial countdown).</summary>
+		[Networked]
+		public bool RoundStarted { get; private set; }
+
+		/// <summary>Tick at which the round should start on the server.</summary>
+		[Networked]
+		public int RoundStartTick { get; private set; }
+
 		// PRIVATE MEMBERS
 
 		[SerializeField]
 		[Tooltip("Points required to win. First team to reach this wins.")]
 		private int _pointsToWin = 100;
+
+		[SerializeField]
+		[Tooltip("Seconds from room creation to round start.")]
+		private float _roundStartDelaySeconds = 60f;
+
+		[SerializeField]
+		[Tooltip("Doors or blockers that should disappear when the round starts.")]
+		private GameObject[] _roundStartDoors;
 
 			private SpawnPoint[] _spawnPoints;
 		private int _lastSpawnPoint = -1;
@@ -147,8 +163,24 @@ namespace Projectiles
 
 			if (HasStateAuthority == true)
 			{
+				// Configure win condition
 				int target = _pointsToWin > 0 ? _pointsToWin : 100;
 				PointsToWin = target;
+
+				// Schedule round start countdown from room creation, but only
+				// if a positive delay was configured. If delay is zero or negative,
+				// keep RoundStarted = false and RoundStartTick = 0 and let designer
+				// control start timing manually (or via future logic).
+				RoundStarted = false;
+				if (_roundStartDelaySeconds > 0f)
+				{
+					int delayTicks = Mathf.Max(1, Mathf.RoundToInt(Runner.TickRate * _roundStartDelaySeconds));
+					RoundStartTick = Runner.Tick + delayTicks;
+				}
+				else
+				{
+					RoundStartTick = int.MaxValue;
+				}
 			}
 		}
 
@@ -185,6 +217,13 @@ namespace Projectiles
 				return;
 
 			int currentTick = Runner.Tick;
+
+			// Handle round start countdown and trigger.
+			if (RoundStarted == false && currentTick >= RoundStartTick)
+			{
+				RoundStarted = true;
+				OnRoundStarted();
+			}
 
 			for (int i = _spawnRequests.Count - 1; i >= 0; i--)
 			{
@@ -269,6 +308,24 @@ namespace Projectiles
 
 		protected virtual void OnPlayerAgentDespawned(PlayerAgent agent)
 		{
+		}
+
+		/// <summary>
+		/// Called once when the round starts after the initial countdown.
+		/// Responsible for opening the arena (disabling start doors).
+		/// </summary>
+		protected virtual void OnRoundStarted()
+		{
+			if (_roundStartDoors == null)
+				return;
+
+			for (int i = 0; i < _roundStartDoors.Length; i++)
+			{
+				if (_roundStartDoors[i] != null)
+				{
+					_roundStartDoors[i].SetActive(false);
+				}
+			}
 		}
 
 	protected void SpawnPlayerAgent(Player player)
