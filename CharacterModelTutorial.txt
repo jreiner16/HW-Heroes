@@ -1,0 +1,4 @@
+https://drive.google.com/file/d/1sDqu-e9J6MlTEAE1w9xEV9QQtjvqfEJY/view?usp=sharing
+
+additional notes: if the prefab already exists but is still using the "base character model", this still applies, just do it all in the already created character prefab, aka switch out the base model in Reiner then customize.
+customize AFTER duplicating into the new prefab.
