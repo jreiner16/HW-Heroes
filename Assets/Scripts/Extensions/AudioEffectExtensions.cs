@@ -17,6 +17,9 @@ namespace Projectiles
 			{
 				var audioEffect = effects[i];
 
+				if (audioEffect == null || audioEffect.AudioSource == null)
+					continue;
+
 				if (audioEffect.IsPlaying == false)
 				{
 					audioEffect.Play(setup);

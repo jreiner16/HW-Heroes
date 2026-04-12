@@ -69,7 +69,10 @@ namespace Projectiles
 				fireParticle.transform.SetParent(BarrelTransform, false);
 			}
 
-			_fireAudioEffects.PlaySound(_fireSound, EForceBehaviour.ForceAny);
+			if (_fireAudioEffects != null)
+			{
+				_fireAudioEffects.PlaySound(_fireSound, EForceBehaviour.ForceAny);
+			}
 
 			if (HasInputAuthority == true)
 			{

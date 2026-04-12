@@ -59,6 +59,10 @@ namespace Projectiles.UI
 		private PlayerAgent _observedAgent;
 		private NetworkBehaviourId _observedAgentId;
 
+		private IAbility _cachedMovement;
+		private IAbility _cachedRightClick;
+		private IAbility _cachedUltimate;
+
 		private bool _aliveGroupVisible;
 
 		// MONOBEHAVIOUR
@@ -117,7 +121,8 @@ namespace Projectiles.UI
 
 			SetObservedAgent(_context.LocalAgent);
 
-			if (_observedAgent == null)
+			// Guard against accessing a despawned agent during character switch.
+			if (_observedAgent == null || _observedAgent.Object == null || _observedAgent.Object.IsValid == false)
 				return;
 
 		_health.UpdateHealth(_observedAgent.Health);
@@ -128,41 +133,14 @@ namespace Projectiles.UI
 
 			if (_movementAbility != null)
 			{
-				var goeddeMovement = _observedAgent.GetComponent<GoeddeMovementAbility>();
-				var cohenMovement = _observedAgent.GetComponent<CohenMovementAbility>();
-				var theissBuff = _observedAgent.GetComponent<TheissBuffAbility>();
-
-				if (goeddeMovement != null)
-				{
-					_movementAbility.UpdateAbility(goeddeMovement);
-				}
-				else if (cohenMovement != null)
-				{
-					_movementAbility.UpdateAbility(cohenMovement);
-				}
-				else
-				{
-					_movementAbility.UpdateAbility(theissBuff);
-				}
+				_movementAbility.UpdateAbility(_cachedMovement);
 			}
 
 			if (_rightClickAbility != null)
 			{
-				var goeddeFlamethrower = _observedAgent.GetComponent<GoeddeFlamethrowerAbility>();
-				var cohenRicochet      = _observedAgent.GetComponent<CohenRicochetAbility>();
-				var theissShield       = _observedAgent.GetComponent<TheissShieldAbility>();
-
-				if (goeddeFlamethrower != null)
+				if (_cachedRightClick != null)
 				{
-					_rightClickAbility.UpdateAbility(goeddeFlamethrower);
-				}
-				else if (cohenRicochet != null)
-				{
-					_rightClickAbility.UpdateAbility(cohenRicochet);
-				}
-				else if (theissShield != null)
-				{
-					_rightClickAbility.UpdateAbility(theissShield);
+					_rightClickAbility.UpdateAbility(_cachedRightClick);
 				}
 				else
 				{
@@ -172,22 +150,7 @@ namespace Projectiles.UI
 
 			if (_ultimateAbility != null)
 			{
-				var goeddeUltimate = _observedAgent.GetComponent<GoeddeUltimateAbility>();
-				var cohenUltimate = _observedAgent.GetComponent<CohenUltimateAbility>();
-				var theissUltimate = _observedAgent.GetComponent<TheissUltimateAbility>();
-
-				if (goeddeUltimate != null)
-				{
-					_ultimateAbility.UpdateAbility(goeddeUltimate);
-				}
-				else if (cohenUltimate != null)
-				{
-					_ultimateAbility.UpdateAbility(cohenUltimate);
-				}
-				else
-				{
-					_ultimateAbility.UpdateAbility(theissUltimate);
-				}
+				_ultimateAbility.UpdateAbility(_cachedUltimate);
 			}
 
 			ShowAliveGroup(_observedAgent.Health.IsAlive);
@@ -310,20 +273,50 @@ namespace Projectiles.UI
 
 		private void SetObservedAgent(PlayerAgent agent, bool force = false)
 		{
-			if (agent == _observedAgent && agent.Id == _observedAgentId && force == false)
-				return;
+			// Short-circuit if nothing changed.
+			if (agent == _observedAgent && force == false)
+			{
+				if (agent == null)
+					return;
+				if (agent.Id == _observedAgentId)
+					return;
+			}
 
 			ClearObservedAgent(false);
+
+			if (agent == null)
+			{
+				_observedAgentId = default;
+				_observedAgent = null;
+				_cachedMovement = null;
+				_cachedRightClick = null;
+				_cachedUltimate = null;
+				if (_observedAgentRoot != null) _observedAgentRoot.SetActive(false);
+				return;
+			}
 
 			// Same object can be reused from cache so storing NB Id is needed to detect
 			// that object was despawned and immediately spawned again
 			_observedAgentId = agent.Id;
 			_observedAgent = agent;
 
-			if (agent != null)
+			// Cache ability references by slot
+			_cachedMovement = null;
+			_cachedRightClick = null;
+			_cachedUltimate = null;
+
+			agent.Health.HitPerformed += OnHitPerformed;
+			agent.Health.HitTaken += OnHitTaken;
+
+			var abilities = agent.GetComponents<IAbility>();
+			foreach (var ability in abilities)
 			{
-				agent.Health.HitPerformed += OnHitPerformed;
-				agent.Health.HitTaken += OnHitTaken;
+				switch (ability.Slot)
+				{
+					case EAbilitySlot.Movement:  _cachedMovement = ability; break;
+					case EAbilitySlot.RightClick: _cachedRightClick = ability; break;
+					case EAbilitySlot.Ultimate:   _cachedUltimate = ability; break;
+				}
 			}
 
 			_observedAgentRoot.SetActive(true);

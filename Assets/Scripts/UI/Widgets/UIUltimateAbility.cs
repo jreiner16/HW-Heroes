@@ -44,7 +44,7 @@ namespace Projectiles.UI
 			_statusText.rectTransform.anchoredPosition = _readyAnchoredPosition + offset;
 		}
 
-		public void UpdateAbility(GoeddeUltimateAbility ability)
+		public void UpdateAbility(IAbility ability)
 		{
 			CacheReadyText();
 
@@ -56,57 +56,13 @@ namespace Projectiles.UI
 
 			gameObject.SetActive(true);
 
-			if (ability.IsOnCooldown)
+			if (ability.IsActive && ability.HasDuration)
 			{
-				float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
+				float ratio = ability.DurationTotal > 0 ? ability.DurationRemainingTime / ability.DurationTotal : 0f;
 				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-				SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
+				SetStatusText($"{ability.DurationRemainingTime:F1}s", true);
 			}
-			else
-			{
-				if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
-				SetStatusText(_readyText, false);
-			}
-		}
-
-		public void UpdateAbility(TheissUltimateAbility ability)
-		{
-			CacheReadyText();
-
-			if (ability == null)
-			{
-				gameObject.SetActive(false);
-				return;
-			}
-
-			gameObject.SetActive(true);
-
-			if (ability.IsOnCooldown)
-			{
-				float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
-				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-				SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
-			}
-			else
-			{
-				if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
-				SetStatusText(_readyText, false);
-			}
-		}
-
-		public void UpdateAbility(CohenUltimateAbility ability)
-		{
-			CacheReadyText();
-
-			if (ability == null)
-			{
-				gameObject.SetActive(false);
-				return;
-			}
-
-			gameObject.SetActive(true);
-
-			if (ability.IsOnCooldown)
+			else if (ability.IsOnCooldown)
 			{
 				float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
 				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;

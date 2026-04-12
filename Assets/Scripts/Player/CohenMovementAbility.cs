@@ -10,20 +10,18 @@ namespace Projectiles
 	[AddComponentMenu("Projectiles/Abilities/Cohen Movement Ability")]
 	[DisallowMultipleComponent]
 	[DefaultExecutionOrder(5)]
-	public class CohenMovementAbility : ContextBehaviour
+	public class CohenMovementAbility : AbilityBase
 	{
-		public bool  IsShrunk    => _isShrunk;
-		public bool  IsOnCooldown => _cooldownTimer.ExpiredOrNotRunning(Runner) == false;
-		public bool  IsReady      => _cooldownTimer.ExpiredOrNotRunning(Runner) && _isShrunk == false;
+		public override EAbilitySlot Slot => EAbilitySlot.Movement;
+		public bool IsShrunk => _isShrunk;
+		public override bool IsActive => _isShrunk;
+		public override bool IsReady => base.IsReady && _isShrunk == false;
+		public override bool HasDuration => true;
+		public override float DurationRemainingTime => _durationTimer.RemainingTime(Runner).GetValueOrDefault();
+		public override float DurationTotal => _duration;
 
-		public float CooldownRemainingTime => _cooldownTimer.RemainingTime(Runner).GetValueOrDefault();
-		public float CooldownTotal         => _cooldown;
-		public float DurationRemainingTime => _durationTimer.RemainingTime(Runner).GetValueOrDefault();
-		public float DurationTotal         => _duration;
-
-		[Header("Ability Settings")]
+		[Header("Shrink Settings")]
 		[SerializeField] private float _duration = 3.0f;
-		[SerializeField] private float _cooldown = 10.0f;
 		[SerializeField, Range(0.2f, 1f)] private float _shrinkScale = 0.55f;
 
 		[Header("References")]
@@ -31,15 +29,13 @@ namespace Projectiles
 
 		[Networked] private NetworkBool _isShrunk { get; set; }
 		[Networked] private TickTimer _durationTimer { get; set; }
-		[Networked] private TickTimer _cooldownTimer { get; set; }
 
-		private PlayerAgent _agent;
 		private Vector3 _visualOriginalScale = Vector3.one;
 		private bool _visualOriginalScaleCached;
 
-		protected void Awake()
+		protected override void Awake()
 		{
-			_agent = GetComponent<PlayerAgent>();
+			base.Awake();
 
 			if (_visualRoot != null)
 			{
@@ -50,9 +46,9 @@ namespace Projectiles
 
 		public override void FixedUpdateNetwork()
 		{
-			if (_agent == null || _agent.Owner == null || _agent.Health.IsAlive == false)
+			if (!ValidateCanAct())
 			{
-				if (_isShrunk == true)
+				if (_isShrunk && HasStateAuthority)
 				{
 					ForceDeactivate();
 				}
@@ -90,10 +86,7 @@ namespace Projectiles
 
 		private void TryActivate()
 		{
-			if (_isShrunk || IsOnCooldown)
-				return;
-
-			if (HasStateAuthority == false)
+			if (_isShrunk || IsOnCooldown || HasStateAuthority == false)
 				return;
 
 			_isShrunk = true;
@@ -106,14 +99,11 @@ namespace Projectiles
 				return;
 
 			_isShrunk = false;
-			_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
+			StartCooldown();
 		}
 
 		private void ForceDeactivate()
 		{
-			if (HasStateAuthority == false)
-				return;
-
 			_isShrunk = false;
 			_durationTimer = default;
 			_cooldownTimer = default;

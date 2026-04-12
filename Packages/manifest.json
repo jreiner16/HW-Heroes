@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.coplaydev.unity-mcp": "9.4.6",
     "com.unity.burst": "1.8.21",
     "com.unity.cinemachine": "2.10.3",
     "com.unity.collab-proxy": "2.11.3",
@@ -58,5 +59,14 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "scopedRegistries": [
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.coplaydev.unity-mcp"
+      ]
+    }
+  ]
 }

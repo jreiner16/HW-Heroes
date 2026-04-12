@@ -29,8 +29,8 @@ namespace Projectiles
 			if (_damagePerSecond <= 0f)
 				return;
 
-			// Remove invalid targets
-			_targets.RemoveWhere(t => t.IsActive == false);
+			// Remove invalid or destroyed targets
+			_targets.RemoveWhere(t => t == null || (t as MonoBehaviour) == null || t.IsActive == false);
 
 			if (_cooldown.ExpiredOrNotRunning(Runner) == true)
 			{

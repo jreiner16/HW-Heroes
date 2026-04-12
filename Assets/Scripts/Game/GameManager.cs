@@ -1,5 +1,6 @@
 ﻿using System;
 using Fusion.Sockets;
+using Projectiles.UI;
 
 namespace Projectiles
 {
@@ -23,6 +24,8 @@ namespace Projectiles
 		private Player _playerPrefab;
 
 		private bool _gameplaySpawned;
+		private bool _loadingScreenDismissed;
+		private SceneContext _loadedContext;
 
 		// INetworkRunnerCallbacks INTERFACE
 
@@ -60,6 +63,7 @@ namespace Projectiles
 
 			var context = scene.Context;
 			context.Runner = Runner;
+			_loadedContext = context;
 
 			// Assign context
 			var contextBehaviours = runner.SimulationUnityScene.GetComponents<IContextBehaviour>(true);
@@ -77,6 +81,32 @@ namespace Projectiles
 				var renderSettingsUpdated = scene.GetComponent<RenderSettingsUpdater>();
 				renderSettingsUpdated.ApplySettings();
 			}
+
+			// Keep the loading screen visible until the local player's agent is actually spawned.
+			// We poll for this in Update() below via _loadedContext.
+			_loadingScreenDismissed = false;
+			var loading = LoadingScreen.Instance;
+			if (loading != null)
+				loading.SetMessage("Spawning player...");
+		}
+
+		private void Update()
+		{
+			// Hide the loading screen once the local player has a live agent in the scene.
+			if (_loadingScreenDismissed == true || _loadedContext == null)
+				return;
+
+			if (Runner == null || Runner.IsRunning == false)
+				return;
+
+			if (_loadedContext.LocalAgent == null)
+				return;
+
+			var loading = LoadingScreen.Instance;
+			if (loading != null)
+				loading.Hide();
+
+			_loadingScreenDismissed = true;
 		}
 
 		void INetworkRunnerCallbacks.OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) {}
@@ -94,6 +124,11 @@ namespace Projectiles
 		void INetworkRunnerCallbacks.OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) {}
 		void INetworkRunnerCallbacks.OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) {}
 		void INetworkRunnerCallbacks.OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) {}
-		void INetworkRunnerCallbacks.OnSceneLoadStart(NetworkRunner runner) {}
+		void INetworkRunnerCallbacks.OnSceneLoadStart(NetworkRunner runner)
+		{
+			LoadingScreen.GetOrCreate().Show("Loading map...");
+			_loadingScreenDismissed = false;
+			_loadedContext = null;
+		}
 	}
 }

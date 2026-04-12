@@ -41,7 +41,7 @@ namespace Projectiles.UI
 
 		private CanvasGroup _phaseGroup;
 		private PlayerAgent _lastEffectsAgent;
-		private GoeddeMovementAbility _cachedGoedde;
+		private IAbility _cachedMovementAbility;
 
 		// PUBLIC METHODS
 
@@ -78,14 +78,22 @@ namespace Projectiles.UI
 
 			if (_phaseGroup != null)
 			{
-				// Refresh the cached GoeddeMovementAbility when the observed agent changes.
+				// Refresh cached movement ability when the observed agent changes.
 				if (agent != _lastEffectsAgent)
 				{
 					_lastEffectsAgent = agent;
-					_cachedGoedde = agent != null ? agent.GetComponent<GoeddeMovementAbility>() : null;
+					_cachedMovementAbility = null;
+					if (agent != null)
+					{
+						var abilities = agent.GetComponents<IAbility>();
+						foreach (var a in abilities)
+						{
+							if (a.Slot == EAbilitySlot.Movement) { _cachedMovementAbility = a; break; }
+						}
+					}
 				}
 
-				float targetAlpha = _cachedGoedde != null && _cachedGoedde.IsPhased ? 1f : 0f;
+				float targetAlpha = _cachedMovementAbility != null && _cachedMovementAbility.IsActive ? 1f : 0f;
 				_phaseGroup.alpha = Mathf.MoveTowards(_phaseGroup.alpha, targetAlpha, _phaseFadeSpeed * Time.deltaTime);
 			}
 		}

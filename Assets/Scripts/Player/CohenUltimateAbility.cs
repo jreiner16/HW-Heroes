@@ -10,15 +10,11 @@ namespace Projectiles
 	[AddComponentMenu("Projectiles/Abilities/Cohen Ultimate Ability")]
 	[DisallowMultipleComponent]
 	[DefaultExecutionOrder(5)]
-	public class CohenUltimateAbility : ContextBehaviour
+	public class CohenUltimateAbility : AbilityBase, IUltimateAbility
 	{
-		public bool  IsOnCooldown => _cooldownTimer.ExpiredOrNotRunning(Runner) == false;
-		public bool  IsReady      => _cooldownTimer.ExpiredOrNotRunning(Runner);
-		public float CooldownRemainingTime => _cooldownTimer.RemainingTime(Runner).GetValueOrDefault();
-		public float CooldownTotal         => _cooldown;
+		public override EAbilitySlot Slot => EAbilitySlot.Ultimate;
 
-		[Header("Ability Settings")]
-		[SerializeField] private float _cooldown = 20f;
+		[Header("Ultimate Settings")]
 		[SerializeField, Tooltip("How many seconds of ultimate cooldown are removed per 1 damage dealt.")]
 		private float _cooldownSecondsPerDamage = 0.05f;
 		[SerializeField] private float _spawnDistance = 4.0f;
@@ -27,19 +23,11 @@ namespace Projectiles
 		[Header("References")]
 		[SerializeField] private CohenLoSSphere _spherePrefab;
 
-		[Networked] private TickTimer _cooldownTimer { get; set; }
 		[Networked] private NetworkId _activeSphereId { get; set; }
-
-		private PlayerAgent _agent;
-
-		protected void Awake()
-		{
-			_agent = GetComponent<PlayerAgent>();
-		}
 
 		public override void FixedUpdateNetwork()
 		{
-			if (_agent == null || _agent.Owner == null || _agent.Health.IsAlive == false)
+			if (!ValidateCanAct())
 				return;
 
 			if (GetInput(out GameplayInput input) == false)
@@ -51,8 +39,6 @@ namespace Projectiles
 			}
 		}
 
-		// PUBLIC METHODS
-
 		public void AccelerateCooldownFromDamage(float damageDealt)
 		{
 			if (HasStateAuthority == false)
@@ -63,71 +49,29 @@ namespace Projectiles
 			ReduceCooldownSeconds(damageDealt * _cooldownSecondsPerDamage);
 		}
 
-		// PRIVATE METHODS
-
 		private void TryThrowSphere()
 		{
-			if (IsOnCooldown)
+			if (IsOnCooldown || HasStateAuthority == false)
 				return;
 
-			if (_spherePrefab == null)
+			if (_spherePrefab == null || _agent.Weapons?.FireTransform == null)
 				return;
 
-			if (_agent.Weapons?.FireTransform == null)
-				return;
+			var id = _activeSphereId;
+			DespawnActiveObjectIfAny(ref id);
+			_activeSphereId = id;
 
-			if (HasStateAuthority == false)
-				return;
-
-			DespawnActiveSphereIfAny();
-
-			var forward = _agent.Weapons.AimDirection;
-			forward.y = 0f;
-			if (forward.sqrMagnitude < 0.0001f)
-			{
-				forward = transform.forward;
-				forward.y = 0f;
-			}
-			forward.Normalize();
-
+			var forward = GetHorizontalAimForward();
 			var spawnPosition = transform.position + forward * _spawnDistance + Vector3.up * _spawnHeightOffset;
-			var spawnRotation = Quaternion.identity;
 
-			var sphere = Runner.Spawn(_spherePrefab, spawnPosition, spawnRotation, Object.InputAuthority);
+			var sphere = Runner.Spawn(_spherePrefab, spawnPosition, Quaternion.identity, Object.InputAuthority);
 			if (sphere != null)
 			{
 				sphere.Initialize(_agent.Owner);
 				_activeSphereId = sphere.Object.Id;
 			}
 
-			_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
-		}
-
-		private void ReduceCooldownSeconds(float seconds)
-		{
-			if (seconds <= 0f)
-				return;
-			if (_cooldownTimer.ExpiredOrNotRunning(Runner))
-				return; // already ready
-
-			float remaining = _cooldownTimer.RemainingTime(Runner).GetValueOrDefault();
-			float newRemaining = Mathf.Max(0f, remaining - seconds);
-			_cooldownTimer = newRemaining > 0f ? TickTimer.CreateFromSeconds(Runner, newRemaining) : default;
-		}
-
-		private void DespawnActiveSphereIfAny()
-		{
-			if (_activeSphereId.IsValid == false)
-				return;
-
-			var existingObject = Runner.FindObject(_activeSphereId);
-			if (existingObject != null)
-			{
-				Runner.Despawn(existingObject);
-			}
-
-			_activeSphereId = default;
+			StartCooldown();
 		}
 	}
 }
-

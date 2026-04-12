@@ -24,16 +24,13 @@ namespace Projectiles
 
 			var direction = nextPosition - previousPosition;
 			float distance = direction.magnitude;
+
+			if (distance <= 0f)
+				return;
+
 			direction /= distance;
 
-			if (_length > 0f)
-			{
-				float elapsedDistanceSqr = (previousPosition - data.Position).sqrMagnitude;
-				float projectileLength   = elapsedDistanceSqr > _length * _length ? _length : Mathf.Sqrt(elapsedDistanceSqr);
-
-				previousPosition -= direction * projectileLength;
-				distance         += projectileLength;
-			}
+			AdjustForProjectileLength(ref previousPosition, ref distance, direction, data.Position);
 
 			if (ProjectileUtility.ProjectileCast(runner, Context.Owner, previousPosition, direction, distance, _hitMask, out LagCompensatedHit hit) == true)
 			{
