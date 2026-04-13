@@ -113,10 +113,10 @@ namespace Projectiles.UI
 			float rowY = -40f;
 			float barW = 180f;
 			float barH = 24f;
-			float gap = 12f;
+			float gap = 8f;
 			float scoreW = 56f;
 
-			// Team1: [45] [bar] - score left of bar
+			// Team1: [45] [bar] - score fully outside bar
 			if (_team1ScoreText == null)
 			{
 				var t1Go = new GameObject("Team1Score");
@@ -125,7 +125,7 @@ namespace Projectiles.UI
 				t1Rect.anchorMin = new Vector2(0.5f, 1f);
 				t1Rect.anchorMax = new Vector2(0.5f, 1f);
 				t1Rect.pivot = new Vector2(1f, 1f);
-				t1Rect.anchoredPosition = new Vector2(-gap - barW * 0.5f - scoreW * 0.5f, rowY);
+				t1Rect.anchoredPosition = new Vector2(-gap * 2 - barW, rowY);
 				t1Rect.sizeDelta = new Vector2(scoreW, 28f);
 				_team1ScoreText = t1Go.AddComponent<TextMeshProUGUI>();
 				if (defaultFont != null) _team1ScoreText.font = defaultFont;
@@ -142,8 +142,8 @@ namespace Projectiles.UI
 				var barRect = barGo.AddComponent<RectTransform>();
 				barRect.anchorMin = new Vector2(0.5f, 1f);
 				barRect.anchorMax = new Vector2(0.5f, 1f);
-				barRect.pivot = new Vector2(0.5f, 1f);
-				barRect.anchoredPosition = new Vector2(-gap - barW * 0.5f, rowY);
+				barRect.pivot = new Vector2(1f, 1f);
+				barRect.anchoredPosition = new Vector2(-gap, rowY);
 				barRect.sizeDelta = new Vector2(barW, barH);
 
 				var bg = barGo.AddComponent<Image>();
@@ -165,7 +165,7 @@ namespace Projectiles.UI
 				_team1Fill.fillOrigin = (int)Image.OriginHorizontal.Left;
 			}
 
-			// Team2: [bar] [45] - bar left of score
+			// Team2: [bar] [45] - score fully outside bar
 			if (_team2ScoreText == null)
 			{
 				var t2Go = new GameObject("Team2Score");
@@ -174,7 +174,7 @@ namespace Projectiles.UI
 				t2Rect.anchorMin = new Vector2(0.5f, 1f);
 				t2Rect.anchorMax = new Vector2(0.5f, 1f);
 				t2Rect.pivot = new Vector2(0f, 1f);
-				t2Rect.anchoredPosition = new Vector2(gap + barW * 0.5f + scoreW * 0.5f, rowY);
+				t2Rect.anchoredPosition = new Vector2(gap * 2 + barW, rowY);
 				t2Rect.sizeDelta = new Vector2(scoreW, 28f);
 				_team2ScoreText = t2Go.AddComponent<TextMeshProUGUI>();
 				if (defaultFont != null) _team2ScoreText.font = defaultFont;
@@ -191,8 +191,8 @@ namespace Projectiles.UI
 				var barRect = barGo.AddComponent<RectTransform>();
 				barRect.anchorMin = new Vector2(0.5f, 1f);
 				barRect.anchorMax = new Vector2(0.5f, 1f);
-				barRect.pivot = new Vector2(0.5f, 1f);
-				barRect.anchoredPosition = new Vector2(gap + barW * 0.5f, rowY);
+				barRect.pivot = new Vector2(0f, 1f);
+				barRect.anchoredPosition = new Vector2(gap, rowY);
 				barRect.sizeDelta = new Vector2(barW, barH);
 
 				var bg = barGo.AddComponent<Image>();
@@ -213,6 +213,10 @@ namespace Projectiles.UI
 				_team2Fill.fillMethod = Image.FillMethod.Horizontal;
 				_team2Fill.fillOrigin = (int)Image.OriginHorizontal.Right;
 			}
+
+			// Ensure score text renders above bars
+			if (_team1ScoreText != null) _team1ScoreText.transform.SetAsLastSibling();
+			if (_team2ScoreText != null) _team2ScoreText.transform.SetAsLastSibling();
 		}
 
 		private static Sprite CreateWhiteSprite()

@@ -18,6 +18,8 @@ namespace Projectiles
 		public bool    IsAlive       => CurrentHealth > 0f;
 		public bool    IsImmortal    => _immortalCooldown.ExpiredOrNotRunning(Runner) == false;
 		public float   MaxHealth     => _maxHealth + _maxHealthBonus;
+		public float   BaseMaxHealth => _maxHealth;
+		public float   MaxHealthBonus => _maxHealthBonus;
 
 		[Networked]
 		public float   CurrentHealth { get; private set; }
