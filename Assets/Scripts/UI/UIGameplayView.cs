@@ -26,6 +26,7 @@ namespace Projectiles.UI
 		private UIHealth _health;
 		private UIWeapons _weapons;
 		private UIScreenEffects _screenEffects;
+		private UIAmmoDisplay _ammoDisplay;
 		[SerializeField]
 		private UIMovementAbility _movementAbility;
 	[SerializeField]
@@ -86,11 +87,13 @@ namespace Projectiles.UI
 			_weapons = GetComponentInChildren<UIWeapons>(true);
 			_screenEffects = GetComponentInChildren<UIScreenEffects>(true);
 
-			// Remove gun/weapon info UI entirely.
+			// Remove gun/weapon info UI entirely (placeholder text).
 			if (_weapons != null)
 			{
 				_weapons.gameObject.SetActive(false);
 			}
+
+			EnsureAmmoDisplay();
 
 			if (_showScoreHeader == true)
 			{
@@ -134,6 +137,9 @@ namespace Projectiles.UI
 
 		_health.UpdateHealth(_observedAgent.Health);
 		_screenEffects.UpdateEffects(_observedAgent);
+
+		if (_ammoDisplay != null && _observedAgent.Weapons != null)
+			_ammoDisplay.UpdateWeapon(_observedAgent.Weapons.CurrentWeapon);
 
 		UpdateCharacterBlurb();
 		UpdateTabHint();
@@ -184,6 +190,25 @@ namespace Projectiles.UI
 			rect.sizeDelta = new Vector2(480f, 80f);
 
 			_scoreHeader = go.AddComponent<UIScoreHeader>();
+		}
+
+		private void EnsureAmmoDisplay()
+		{
+			if (_ammoDisplay != null)
+				return;
+
+			var go = new GameObject("AmmoDisplay");
+			go.layer = gameObject.layer;
+			go.transform.SetParent(transform, false);
+
+			var rect = go.AddComponent<RectTransform>();
+			rect.anchorMin = new Vector2(1f, 0f);
+			rect.anchorMax = new Vector2(1f, 0f);
+			rect.pivot = new Vector2(1f, 0f);
+			rect.anchoredPosition = new Vector2(-18f, 120f);
+			rect.sizeDelta = new Vector2(120f, 36f);
+
+			_ammoDisplay = go.AddComponent<UIAmmoDisplay>();
 		}
 
 		private void EnsureCharacterBlurbUI()
