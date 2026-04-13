@@ -32,6 +32,12 @@ namespace Projectiles
 		public CharacterClass Class => _characterClass;
 
 		/// <summary>
+		/// When set, overrides the first-person camera position/rotation each LateUpdate.
+		/// Set by abilities (e.g. Cohen burrow) that need a custom camera angle.
+		/// </summary>
+		public Transform CameraOverride { get; set; }
+
+		/// <summary>
 		/// Multipliers applied to movement (used by abilities). Default 1. Abilities with execution order before this should set these.
 		/// </summary>
 		public float MoveSpeedMultiplier { get; set; } = 1f;
@@ -144,8 +150,16 @@ namespace Projectiles
 			if (HasInputAuthority == true && Owner != null && Health.IsAlive == true && Context?.Camera != null)
 			{
 				var cameraTransform = Context.Camera.transform;
-				cameraTransform.position = _cameraHandle.position;
-				cameraTransform.rotation = KCC.TransformRotation * Quaternion.Euler(pitchRotation.x, 0f, 0f);
+				if (CameraOverride != null)
+				{
+					cameraTransform.position = CameraOverride.position;
+					cameraTransform.rotation = CameraOverride.rotation;
+				}
+				else
+				{
+					cameraTransform.position = _cameraHandle.position;
+					cameraTransform.rotation = KCC.TransformRotation * Quaternion.Euler(pitchRotation.x, 0f, 0f);
+				}
 			}
 	}
 
