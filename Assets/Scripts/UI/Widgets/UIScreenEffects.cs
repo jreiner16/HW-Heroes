@@ -1,4 +1,5 @@
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,15 +34,40 @@ namespace Projectiles.UI
 		[SerializeField]
 		private float _phaseFadeSpeed = 5f;
 
+		[Header("Camera Shake on Hit")]
+		[SerializeField]
+		private ShakeSetup _hitShakePosition = new ShakeSetup
+		{
+			Duration = 0.25f, Magnitude = 0.04f, Frequency = 18f,
+			FadeIn = 0.02f, FadeOut = 0.15f, Axis = new Vector3(1f, 1f, 0f),
+			Target = EShakeTarget.Position
+		};
+		[SerializeField]
+		private ShakeSetup _hitShakeRotation = new ShakeSetup
+		{
+			Duration = 0.2f, Magnitude = 1.5f, Frequency = 14f,
+			FadeIn = 0.02f, FadeOut = 0.12f, Axis = new Vector3(1f, 0.6f, 0.3f),
+			Target = EShakeTarget.Rotation
+		};
+
 		[Header("Audio")]
 		[SerializeField]
 		private AudioSetup _hitSound;
 		[SerializeField]
 		private AudioSetup _deathSound;
 
+		[Header("Respawn Countdown")]
+		[SerializeField]
+		private float _respawnDuration = 3f;
+
 		private CanvasGroup _phaseGroup;
 		private PlayerAgent _lastEffectsAgent;
 		private IAbility _cachedMovementAbility;
+
+		private TextMeshProUGUI _respawnText;
+		private CanvasGroup _respawnGroup;
+		private float _deathTime;
+		private bool _isDead;
 
 		// PUBLIC METHODS
 
@@ -57,9 +83,13 @@ namespace Projectiles.UI
 				ShowHit(_hitGroup, alpha);
 				GameUI.PlaySound(_hitSound, EForceBehaviour.ForceAny);
 
+				PlayHitShake(hit.Amount);
+
 				if (hit.IsFatal == true)
 				{
 					_deathGroup.SetActive(true);
+					_isDead = true;
+					_deathTime = Time.time;
 					GameUI.PlaySound(_deathSound, EForceBehaviour.ForceAny);
 				}
 			}
@@ -74,7 +104,20 @@ namespace Projectiles.UI
 				_debuffGroup.alpha = Mathf.MoveTowards(_debuffGroup.alpha, targetDebuffAlpha, _debuffFadeSpeed * Time.deltaTime);
 			}
 
-			_deathGroup.SetActive(agent.Health.IsAlive == false);
+			bool dead = agent.Health.IsAlive == false;
+			_deathGroup.SetActive(dead);
+
+			// Respawn countdown
+			if (dead && _isDead)
+			{
+				UpdateRespawnCountdown();
+			}
+			else if (_isDead && !dead)
+			{
+				_isDead = false;
+				if (_respawnGroup != null)
+					_respawnGroup.alpha = 0f;
+			}
 
 			if (_phaseGroup != null)
 			{
@@ -148,6 +191,75 @@ namespace Projectiles.UI
 
 			// Render behind the hit flash and death overlays.
 			go.transform.SetAsFirstSibling();
+		}
+
+		private void EnsureRespawnOverlay()
+		{
+			if (_respawnGroup != null)
+				return;
+
+			var go = new GameObject("RespawnOverlay");
+			go.layer = gameObject.layer;
+			go.transform.SetParent(transform, false);
+
+			var rect = go.AddComponent<RectTransform>();
+			rect.anchorMin = new Vector2(0.5f, 0.5f);
+			rect.anchorMax = new Vector2(0.5f, 0.5f);
+			rect.pivot = new Vector2(0.5f, 0.5f);
+			rect.anchoredPosition = new Vector2(0f, -40f);
+			rect.sizeDelta = new Vector2(400f, 120f);
+
+			_respawnGroup = go.AddComponent<CanvasGroup>();
+			_respawnGroup.alpha = 0f;
+			_respawnGroup.blocksRaycasts = false;
+			_respawnGroup.interactable = false;
+
+			_respawnText = go.AddComponent<TextMeshProUGUI>();
+			_respawnText.fontSize = 48f;
+			_respawnText.fontStyle = FontStyles.Bold;
+			_respawnText.alignment = TextAlignmentOptions.Center;
+			_respawnText.color = new Color(0.9f, 0.9f, 1f, 1f);
+			_respawnText.raycastTarget = false;
+		}
+
+		private void UpdateRespawnCountdown()
+		{
+			EnsureRespawnOverlay();
+			if (_respawnGroup == null)
+				return;
+
+			float elapsed = Time.time - _deathTime;
+			float remaining = Mathf.Max(0f, _respawnDuration - elapsed);
+
+			_respawnGroup.alpha = 1f;
+			_respawnText.text = remaining > 0.1f
+				? $"Respawning in {Mathf.CeilToInt(remaining)}"
+				: "Respawning...";
+		}
+
+		private void PlayHitShake(float damageAmount)
+		{
+			var camera = GameUI.Context?.Camera;
+			if (camera == null)
+				return;
+
+			var shake = camera.ShakeEffect;
+			if (shake == null)
+				return;
+
+			float intensity = Mathf.Clamp01(damageAmount / 40f);
+
+			if (_hitShakePosition != null)
+			{
+				_hitShakePosition.Magnitude = Mathf.Lerp(0.02f, 0.08f, intensity);
+				shake.Play(_hitShakePosition, EShakeForce.ReplaceSame);
+			}
+
+			if (_hitShakeRotation != null)
+			{
+				_hitShakeRotation.Magnitude = Mathf.Lerp(0.5f, 3f, intensity);
+				shake.Play(_hitShakeRotation, EShakeForce.ReplaceSame);
+			}
 		}
 
 		private void ShowHit(CanvasGroup group, float targetAlpha)

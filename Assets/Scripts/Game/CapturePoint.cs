@@ -37,12 +37,35 @@ namespace Projectiles
 		[SerializeField]
 		private Color _neutralColor = new Color(0.5f, 0.5f, 0.5f);
 
+		[Header("Beam VFX")]
+		[SerializeField]
+		private float _beamHeight = 20f;
+		[SerializeField]
+		private float _beamWidth = 0.4f;
+		[SerializeField]
+		private float _pulseSpeed = 2f;
+		[SerializeField]
+		private float _pulseMinAlpha = 0.3f;
+		[SerializeField]
+		private float _pulseMaxAlpha = 0.7f;
+
+		[Header("Zone Light")]
+		[SerializeField]
+		private float _lightIntensity = 3f;
+		[SerializeField]
+		private float _lightRange = 12f;
+		[SerializeField]
+		private float _lightHeight = 4f;
+
 		// PRIVATE MEMBERS
 
 		private TickTimer _nextTick;
 		private ETeam _lastControllingTeam = ETeam.None;
 		private MaterialPropertyBlock _propBlock;
 		private Collider _zoneCollider;
+		private LineRenderer _beamRenderer;
+		private Light _zoneLight;
+		private Color _currentBeamColor;
 
 		// NetworkBehaviour INTERFACE
 
@@ -53,6 +76,9 @@ namespace Projectiles
 			_zoneCollider = GetComponent<Collider>();
 			if (_zoneCollider != null && _zoneCollider.isTrigger == false)
 				_zoneCollider.isTrigger = true;
+
+			CreateBeam();
+			CreateZoneLight();
 		}
 
 		public override void FixedUpdateNetwork()
@@ -104,6 +130,20 @@ namespace Projectiles
 			return _zoneCollider.bounds.Contains(worldPos);
 		}
 
+		public override void Render()
+		{
+			if (_beamRenderer != null)
+			{
+				float pulse = Mathf.Lerp(_pulseMinAlpha, _pulseMaxAlpha,
+					(Mathf.Sin(Time.time * _pulseSpeed) + 1f) * 0.5f);
+				Color c = _currentBeamColor;
+				c.a = pulse;
+				_beamRenderer.startColor = c;
+				c.a = pulse * 0.3f;
+				_beamRenderer.endColor = c;
+			}
+		}
+
 		private void UpdateZoneColor(ETeam controllingTeam)
 		{
 			if (controllingTeam == _lastControllingTeam) return;
@@ -113,12 +153,59 @@ namespace Projectiles
 				: controllingTeam == ETeam.Team2 ? _team2Color
 				: _neutralColor;
 
+			_currentBeamColor = c;
+
 			if (_zoneRenderer != null)
 			{
 				_propBlock.SetColor("_BaseColor", c);
 				_propBlock.SetColor("_Color", c);
 				_zoneRenderer.SetPropertyBlock(_propBlock);
 			}
+
+			if (_zoneLight != null)
+			{
+				_zoneLight.color = c;
+			}
+		}
+
+		private void CreateBeam()
+		{
+			var beamGo = new GameObject("CaptureBeam");
+			beamGo.transform.SetParent(transform, false);
+			beamGo.transform.localPosition = Vector3.zero;
+
+			_beamRenderer = beamGo.AddComponent<LineRenderer>();
+			_beamRenderer.useWorldSpace = false;
+			_beamRenderer.positionCount = 2;
+			_beamRenderer.SetPosition(0, Vector3.zero);
+			_beamRenderer.SetPosition(1, Vector3.up * _beamHeight);
+			_beamRenderer.startWidth = _beamWidth;
+			_beamRenderer.endWidth = _beamWidth * 0.1f;
+			_beamRenderer.material = new Material(Shader.Find("Sprites/Default"));
+			_beamRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+			_beamRenderer.receiveShadows = false;
+
+			_currentBeamColor = _neutralColor;
+			Color startC = _neutralColor;
+			startC.a = _pulseMaxAlpha;
+			Color endC = _neutralColor;
+			endC.a = _pulseMaxAlpha * 0.3f;
+			_beamRenderer.startColor = startC;
+			_beamRenderer.endColor = endC;
+		}
+
+		private void CreateZoneLight()
+		{
+			var lightGo = new GameObject("CaptureLight");
+			lightGo.transform.SetParent(transform, false);
+			lightGo.transform.localPosition = Vector3.up * _lightHeight;
+
+			_zoneLight = lightGo.AddComponent<Light>();
+			_zoneLight.type = LightType.Point;
+			_zoneLight.color = _neutralColor;
+			_zoneLight.intensity = _lightIntensity;
+			_zoneLight.range = _lightRange;
+			_zoneLight.shadows = LightShadows.None;
 		}
 	}
 }

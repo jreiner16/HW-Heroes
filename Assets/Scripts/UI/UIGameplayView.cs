@@ -65,6 +65,13 @@ namespace Projectiles.UI
 
 		private bool _aliveGroupVisible;
 
+		// Spawn-in countdown
+		private TextMeshProUGUI _spawnCountdownText;
+		private float _spawnTime;
+		private bool _showingSpawnCountdown;
+		private int _lastCountdownValue;
+		private static readonly float SpawnCountdownDuration = 3f;
+
 		// MONOBEHAVIOUR
 
 		protected void Awake()
@@ -154,6 +161,8 @@ namespace Projectiles.UI
 			}
 
 			ShowAliveGroup(_observedAgent.Health.IsAlive);
+
+			UpdateSpawnCountdown();
 		}
 
 		// PRIVATE METHODS
@@ -320,6 +329,9 @@ namespace Projectiles.UI
 			}
 
 			_observedAgentRoot.SetActive(true);
+
+			// Trigger spawn-in countdown
+			StartSpawnCountdown();
 		}
 
 		private void OnHitPerformed(HitData hitData)
@@ -349,6 +361,84 @@ namespace Projectiles.UI
 			else
 			{
 				_aliveGroup.DOFade(0f, _aliveGroupFadeOut);
+			}
+		}
+
+		// SPAWN COUNTDOWN
+
+		private void EnsureSpawnCountdownUI()
+		{
+			if (_spawnCountdownText != null)
+				return;
+
+			var go = new GameObject("SpawnCountdown");
+			go.layer = gameObject.layer;
+			go.transform.SetParent(transform, false);
+
+			var rect = go.AddComponent<RectTransform>();
+			rect.anchorMin = new Vector2(0.5f, 0.5f);
+			rect.anchorMax = new Vector2(0.5f, 0.5f);
+			rect.pivot = new Vector2(0.5f, 0.5f);
+			rect.anchoredPosition = Vector2.zero;
+			rect.sizeDelta = new Vector2(400f, 200f);
+
+			_spawnCountdownText = go.AddComponent<TextMeshProUGUI>();
+			_spawnCountdownText.fontSize = 96f;
+			_spawnCountdownText.fontStyle = FontStyles.Bold;
+			_spawnCountdownText.alignment = TextAlignmentOptions.Center;
+			_spawnCountdownText.color = new Color(0.95f, 0.95f, 1f, 1f);
+			_spawnCountdownText.raycastTarget = false;
+			go.SetActive(false);
+		}
+
+		private void StartSpawnCountdown()
+		{
+			EnsureSpawnCountdownUI();
+			_spawnTime = Time.time;
+			_showingSpawnCountdown = true;
+			_lastCountdownValue = -1;
+			if (_spawnCountdownText != null)
+				_spawnCountdownText.gameObject.SetActive(true);
+		}
+
+		private void UpdateSpawnCountdown()
+		{
+			if (!_showingSpawnCountdown || _spawnCountdownText == null)
+				return;
+
+			float elapsed = Time.time - _spawnTime;
+			float remaining = SpawnCountdownDuration - elapsed;
+
+			if (remaining <= 0f)
+			{
+				// Show "GO!" briefly
+				if (_lastCountdownValue != 0)
+				{
+					_lastCountdownValue = 0;
+					_spawnCountdownText.text = "GO!";
+					_spawnCountdownText.color = new Color(0.2f, 1f, 0.3f, 1f);
+					_spawnCountdownText.transform.localScale = Vector3.one;
+					_spawnCountdownText.transform.DOKill();
+					_spawnCountdownText.transform.DOPunchScale(Vector3.one * 0.3f, 0.3f, 6, 0.5f);
+				}
+
+				if (elapsed > SpawnCountdownDuration + 0.8f)
+				{
+					_showingSpawnCountdown = false;
+					_spawnCountdownText.gameObject.SetActive(false);
+					_spawnCountdownText.color = new Color(0.95f, 0.95f, 1f, 1f);
+				}
+				return;
+			}
+
+			int displayValue = Mathf.CeilToInt(remaining);
+			if (displayValue != _lastCountdownValue)
+			{
+				_lastCountdownValue = displayValue;
+				_spawnCountdownText.text = displayValue.ToString();
+				_spawnCountdownText.transform.localScale = Vector3.one;
+				_spawnCountdownText.transform.DOKill();
+				_spawnCountdownText.transform.DOPunchScale(Vector3.one * 0.2f, 0.4f, 4, 0.5f);
 			}
 		}
 

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Fusion;
 using TMPro;
 using UnityEngine;
@@ -58,6 +59,9 @@ namespace Projectiles.UI
 			_lastTeam2 = -1;
 			_lastToWin = -1;
 			_lastGameOver = false;
+
+			UIUtility.AddBackgroundPanel(RectTransform, new Color(0.3f, 0.3f, 0.4f, 0.6f), 1f);
+			UIUtility.AddBackgroundPanel(RectTransform, new Color(0.08f, 0.08f, 0.12f, 0.7f));
 
 			EnsureUI();
 			if (_winPanel != null)
@@ -286,6 +290,33 @@ namespace Projectiles.UI
 			}
 		}
 
+		private void AddFinalScoreText(Gameplay gameplay)
+		{
+			// Avoid duplicates
+			var existing = _winPanel.transform.Find("FinalScore");
+			if (existing != null)
+				return;
+
+			var font = TMPro.TMP_Settings.defaultFontAsset;
+
+			var scoreGo = new GameObject("FinalScore");
+			scoreGo.transform.SetParent(_winPanel.transform, false);
+			var scoreRect = scoreGo.AddComponent<RectTransform>();
+			scoreRect.anchorMin = new Vector2(0.5f, 0.5f);
+			scoreRect.anchorMax = new Vector2(0.5f, 0.5f);
+			scoreRect.pivot = new Vector2(0.5f, 0.5f);
+			scoreRect.anchoredPosition = new Vector2(0f, -50f);
+			scoreRect.sizeDelta = new Vector2(400f, 40f);
+
+			var scoreText = scoreGo.AddComponent<TextMeshProUGUI>();
+			if (font != null) scoreText.font = font;
+			scoreText.text = $"{gameplay.Team1Score} - {gameplay.Team2Score}";
+			scoreText.fontSize = 32;
+			scoreText.alignment = TextAlignmentOptions.Center;
+			scoreText.color = new Color(0.8f, 0.8f, 0.9f, 0.9f);
+			scoreText.raycastTarget = false;
+		}
+
 		private void OnExitRoomClicked()
 		{
 			var runner = _context?.Runner ?? FindObjectOfType<NetworkRunner>();
@@ -363,10 +394,23 @@ namespace Projectiles.UI
 					ETeam localTeam = GetLocalPlayerTeam();
 					bool localPlayerWon = localTeam == gameplay.WinningTeam;
 
-					_winText.text = localPlayerWon ? "You Win!" : "You Lose!";
+					_winText.text = localPlayerWon ? "YOU WIN!" : "YOU LOSE";
 					_winText.color = localPlayerWon
 						? (gameplay.WinningTeam == ETeam.Team1 ? _team1Color : _team2Color)
 						: new Color(0.9f, 0.3f, 0.3f, 1f);
+
+					// Animate entrance
+					_winText.transform.localScale = Vector3.one * 0.5f;
+					_winText.transform.DOScale(Vector3.one, 0.4f).SetEase(Ease.OutBack);
+
+					var panelCg = _winPanel.GetComponent<CanvasGroup>();
+					if (panelCg == null)
+						panelCg = _winPanel.AddComponent<CanvasGroup>();
+					panelCg.alpha = 0f;
+					panelCg.DOFade(1f, 0.5f);
+
+					// Add final score text
+					AddFinalScoreText(gameplay);
 				}
 			}
 		}
