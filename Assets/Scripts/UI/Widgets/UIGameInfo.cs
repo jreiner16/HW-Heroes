@@ -1,6 +1,7 @@
 ﻿using Fusion;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Projectiles.UI
 {
@@ -26,16 +27,39 @@ namespace Projectiles.UI
 		private double _rtt;
 		private ConnectionType _connectionType;
 
+		private bool _visible;
+		private CanvasGroup _canvasGroup;
+
 		// MONOBEHAVIOUR
 
 		protected void OnEnable()
 		{
+			_canvasGroup = GetComponent<CanvasGroup>();
+			if (_canvasGroup == null)
+				_canvasGroup = gameObject.AddComponent<CanvasGroup>();
+
+			SetVisible(false);
 			UpdateInfo(GameUI.Runner, true);
 		}
 
 		protected void Update()
 		{
-			UpdateInfo(GameUI.Runner);
+			if (Keyboard.current != null && Keyboard.current.f3Key.wasPressedThisFrame)
+			{
+				SetVisible(!_visible);
+			}
+
+			if (_visible)
+			{
+				UpdateInfo(GameUI.Runner);
+			}
+		}
+
+		private void SetVisible(bool visible)
+		{
+			_visible = visible;
+			if (_canvasGroup != null)
+				_canvasGroup.alpha = visible ? 1f : 0f;
 		}
 
 		// PRIVATE MEMBERS

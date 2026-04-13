@@ -10,6 +10,12 @@ namespace Projectiles
 	[RequireComponent(typeof(Collider))]
 	public class TheissDamageDebuffField : ContextBehaviour
 	{
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		private static void ResetStatics()
+		{
+			_activeFields.Clear();
+		}
+
 		[SerializeField]
 		private float _lifetime = 8f;
 		[SerializeField, Range(0.1f, 1f)]

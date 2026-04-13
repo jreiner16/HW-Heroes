@@ -59,7 +59,18 @@ namespace Projectiles.UI
 		private PlayerAgent _observedAgent;
 		private NetworkBehaviourId _observedAgentId;
 
+		private IAbility _cachedMovement;
+		private IAbility _cachedRightClick;
+		private IAbility _cachedUltimate;
+
 		private bool _aliveGroupVisible;
+
+		// Spawn-in countdown
+		private TextMeshProUGUI _spawnCountdownText;
+		private float _spawnTime;
+		private bool _showingSpawnCountdown;
+		private int _lastCountdownValue;
+		private static readonly float SpawnCountdownDuration = 3f;
 
 		// MONOBEHAVIOUR
 
@@ -117,7 +128,8 @@ namespace Projectiles.UI
 
 			SetObservedAgent(_context.LocalAgent);
 
-			if (_observedAgent == null)
+			// Guard against accessing a despawned agent during character switch.
+			if (_observedAgent == null || _observedAgent.Object == null || _observedAgent.Object.IsValid == false)
 				return;
 
 		_health.UpdateHealth(_observedAgent.Health);
@@ -128,41 +140,14 @@ namespace Projectiles.UI
 
 			if (_movementAbility != null)
 			{
-				var goeddeMovement = _observedAgent.GetComponent<GoeddeMovementAbility>();
-				var cohenMovement = _observedAgent.GetComponent<CohenMovementAbility>();
-				var theissBuff = _observedAgent.GetComponent<TheissBuffAbility>();
-
-				if (goeddeMovement != null)
-				{
-					_movementAbility.UpdateAbility(goeddeMovement);
-				}
-				else if (cohenMovement != null)
-				{
-					_movementAbility.UpdateAbility(cohenMovement);
-				}
-				else
-				{
-					_movementAbility.UpdateAbility(theissBuff);
-				}
+				_movementAbility.UpdateAbility(_cachedMovement);
 			}
 
 			if (_rightClickAbility != null)
 			{
-				var goeddeFlamethrower = _observedAgent.GetComponent<GoeddeFlamethrowerAbility>();
-				var cohenRicochet      = _observedAgent.GetComponent<CohenRicochetAbility>();
-				var theissShield       = _observedAgent.GetComponent<TheissShieldAbility>();
-
-				if (goeddeFlamethrower != null)
+				if (_cachedRightClick != null)
 				{
-					_rightClickAbility.UpdateAbility(goeddeFlamethrower);
-				}
-				else if (cohenRicochet != null)
-				{
-					_rightClickAbility.UpdateAbility(cohenRicochet);
-				}
-				else if (theissShield != null)
-				{
-					_rightClickAbility.UpdateAbility(theissShield);
+					_rightClickAbility.UpdateAbility(_cachedRightClick);
 				}
 				else
 				{
@@ -172,25 +157,12 @@ namespace Projectiles.UI
 
 			if (_ultimateAbility != null)
 			{
-				var goeddeUltimate = _observedAgent.GetComponent<GoeddeUltimateAbility>();
-				var cohenUltimate = _observedAgent.GetComponent<CohenUltimateAbility>();
-				var theissUltimate = _observedAgent.GetComponent<TheissUltimateAbility>();
-
-				if (goeddeUltimate != null)
-				{
-					_ultimateAbility.UpdateAbility(goeddeUltimate);
-				}
-				else if (cohenUltimate != null)
-				{
-					_ultimateAbility.UpdateAbility(cohenUltimate);
-				}
-				else
-				{
-					_ultimateAbility.UpdateAbility(theissUltimate);
-				}
+				_ultimateAbility.UpdateAbility(_cachedUltimate);
 			}
 
 			ShowAliveGroup(_observedAgent.Health.IsAlive);
+
+			UpdateSpawnCountdown();
 		}
 
 		// PRIVATE METHODS
@@ -310,23 +282,56 @@ namespace Projectiles.UI
 
 		private void SetObservedAgent(PlayerAgent agent, bool force = false)
 		{
-			if (agent == _observedAgent && agent.Id == _observedAgentId && force == false)
-				return;
+			// Short-circuit if nothing changed.
+			if (agent == _observedAgent && force == false)
+			{
+				if (agent == null)
+					return;
+				if (agent.Id == _observedAgentId)
+					return;
+			}
 
 			ClearObservedAgent(false);
+
+			if (agent == null)
+			{
+				_observedAgentId = default;
+				_observedAgent = null;
+				_cachedMovement = null;
+				_cachedRightClick = null;
+				_cachedUltimate = null;
+				if (_observedAgentRoot != null) _observedAgentRoot.SetActive(false);
+				return;
+			}
 
 			// Same object can be reused from cache so storing NB Id is needed to detect
 			// that object was despawned and immediately spawned again
 			_observedAgentId = agent.Id;
 			_observedAgent = agent;
 
-			if (agent != null)
+			// Cache ability references by slot
+			_cachedMovement = null;
+			_cachedRightClick = null;
+			_cachedUltimate = null;
+
+			agent.Health.HitPerformed += OnHitPerformed;
+			agent.Health.HitTaken += OnHitTaken;
+
+			var abilities = agent.GetComponents<IAbility>();
+			foreach (var ability in abilities)
 			{
-				agent.Health.HitPerformed += OnHitPerformed;
-				agent.Health.HitTaken += OnHitTaken;
+				switch (ability.Slot)
+				{
+					case EAbilitySlot.Movement:  _cachedMovement = ability; break;
+					case EAbilitySlot.RightClick: _cachedRightClick = ability; break;
+					case EAbilitySlot.Ultimate:   _cachedUltimate = ability; break;
+				}
 			}
 
 			_observedAgentRoot.SetActive(true);
+
+			// Trigger spawn-in countdown
+			StartSpawnCountdown();
 		}
 
 		private void OnHitPerformed(HitData hitData)
@@ -356,6 +361,84 @@ namespace Projectiles.UI
 			else
 			{
 				_aliveGroup.DOFade(0f, _aliveGroupFadeOut);
+			}
+		}
+
+		// SPAWN COUNTDOWN
+
+		private void EnsureSpawnCountdownUI()
+		{
+			if (_spawnCountdownText != null)
+				return;
+
+			var go = new GameObject("SpawnCountdown");
+			go.layer = gameObject.layer;
+			go.transform.SetParent(transform, false);
+
+			var rect = go.AddComponent<RectTransform>();
+			rect.anchorMin = new Vector2(0.5f, 0.5f);
+			rect.anchorMax = new Vector2(0.5f, 0.5f);
+			rect.pivot = new Vector2(0.5f, 0.5f);
+			rect.anchoredPosition = Vector2.zero;
+			rect.sizeDelta = new Vector2(400f, 200f);
+
+			_spawnCountdownText = go.AddComponent<TextMeshProUGUI>();
+			_spawnCountdownText.fontSize = 96f;
+			_spawnCountdownText.fontStyle = FontStyles.Bold;
+			_spawnCountdownText.alignment = TextAlignmentOptions.Center;
+			_spawnCountdownText.color = new Color(0.95f, 0.95f, 1f, 1f);
+			_spawnCountdownText.raycastTarget = false;
+			go.SetActive(false);
+		}
+
+		private void StartSpawnCountdown()
+		{
+			EnsureSpawnCountdownUI();
+			_spawnTime = Time.time;
+			_showingSpawnCountdown = true;
+			_lastCountdownValue = -1;
+			if (_spawnCountdownText != null)
+				_spawnCountdownText.gameObject.SetActive(true);
+		}
+
+		private void UpdateSpawnCountdown()
+		{
+			if (!_showingSpawnCountdown || _spawnCountdownText == null)
+				return;
+
+			float elapsed = Time.time - _spawnTime;
+			float remaining = SpawnCountdownDuration - elapsed;
+
+			if (remaining <= 0f)
+			{
+				// Show "GO!" briefly
+				if (_lastCountdownValue != 0)
+				{
+					_lastCountdownValue = 0;
+					_spawnCountdownText.text = "GO!";
+					_spawnCountdownText.color = new Color(0.2f, 1f, 0.3f, 1f);
+					_spawnCountdownText.transform.localScale = Vector3.one;
+					_spawnCountdownText.transform.DOKill();
+					_spawnCountdownText.transform.DOPunchScale(Vector3.one * 0.3f, 0.3f, 6, 0.5f);
+				}
+
+				if (elapsed > SpawnCountdownDuration + 0.8f)
+				{
+					_showingSpawnCountdown = false;
+					_spawnCountdownText.gameObject.SetActive(false);
+					_spawnCountdownText.color = new Color(0.95f, 0.95f, 1f, 1f);
+				}
+				return;
+			}
+
+			int displayValue = Mathf.CeilToInt(remaining);
+			if (displayValue != _lastCountdownValue)
+			{
+				_lastCountdownValue = displayValue;
+				_spawnCountdownText.text = displayValue.ToString();
+				_spawnCountdownText.transform.localScale = Vector3.one;
+				_spawnCountdownText.transform.DOKill();
+				_spawnCountdownText.transform.DOPunchScale(Vector3.one * 0.2f, 0.4f, 4, 0.5f);
 			}
 		}
 

@@ -59,6 +59,9 @@ namespace Projectiles
 			var direction = nextPosition - previousPosition;
 			float distance = direction.magnitude;
 
+			if (distance <= 0f)
+				return;
+
 			// Normalize
 			direction /= distance;
 
@@ -115,6 +118,9 @@ namespace Projectiles
 					continue;
 
 				float distance = direction.magnitude;
+				if (distance <= 0f)
+					continue;
+
 				direction /= distance; // Normalize
 
 				float dot = Vector3.Dot(fireDirection, direction);
@@ -173,6 +179,9 @@ namespace Projectiles
 
 			var newDirection = (targetPosition - data.Position);
 			float distance = newDirection.magnitude;
+
+			if (distance <= 0f)
+				return;
 
 			newDirection /= distance; // Normalize
 

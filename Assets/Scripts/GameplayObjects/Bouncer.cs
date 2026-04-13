@@ -26,6 +26,11 @@ namespace Projectiles
 			TryBounce(collision.collider);
 		}
 
+		private void OnDisable()
+		{
+			_lastBounceFrameByAgent.Clear();
+		}
+
 		private void TryBounce(Collider other)
 		{
 			var agent = other.GetComponentInParent<PlayerAgent>();
@@ -37,6 +42,10 @@ namespace Projectiles
 					if (Time.frameCount - lastBounceFrame <= _duplicateBounceFrameWindow)
 						return;
 				}
+
+				// Cap dictionary size to prevent unbounded growth
+				if (_lastBounceFrameByAgent.Count > 32)
+					_lastBounceFrameByAgent.Clear();
 
 				_lastBounceFrameByAgent[agentId] = Time.frameCount;
 				agent.AddBounceImpulse(_bounceForce);

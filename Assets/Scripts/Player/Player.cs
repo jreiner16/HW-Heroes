@@ -29,6 +29,9 @@ namespace Projectiles
 		[SerializeField]
 		private PlayerAgent[] _agentPrefabs; // Array of character prefabs
 
+		[Networked]
+		private TickTimer _switchCooldown { get; set; }
+
 		private PlayerAgent _assignedAgent;
 		private int _lastWeaponSlot;
 
@@ -137,6 +140,18 @@ namespace Projectiles
 				return;
 			}
 
+			// Don't switch to same character
+			if (characterIndex == SelectedCharacterIndex)
+				return;
+
+			// Don't switch while dead
+			if (ActiveAgent != null && ActiveAgent.Health != null && ActiveAgent.Health.IsAlive == false)
+				return;
+
+			// Enforce cooldown between switches
+			if (_switchCooldown.ExpiredOrNotRunning(Runner) == false)
+				return;
+
 			if (_agentPrefabs[characterIndex] == null)
 			{
 				// Log all slot states to help diagnose which slots are missing
@@ -148,6 +163,7 @@ namespace Projectiles
 			}
 
 			SelectedCharacterIndex = characterIndex;
+			_switchCooldown = TickTimer.CreateFromSeconds(Runner, 0.3f);
 			Debug.Log($"[CharSwitch] Switching to index {characterIndex} ({_agentPrefabs[characterIndex].name}). ActiveAgent={ActiveAgent != null}");
 
 			// If agent is already spawned, request respawn with new character

@@ -253,7 +253,8 @@ namespace Projectiles
 				if (instigator == null)
 				{
 					var playerObject = Runner.GetPlayerObject(hitData.InstigatorRef);
-					var agent = playerObject != null ? playerObject.GetComponent<Player>().ActiveAgent : null;
+					var player = playerObject != null ? playerObject.GetComponent<Player>() : null;
+					var agent = player != null ? player.ActiveAgent : null;
 
 					instigator = agent != null ? agent.Health : null;
 				}

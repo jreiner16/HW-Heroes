@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using TMPro;
 using Fusion;
 using UnityEngine.EventSystems;
@@ -37,6 +38,7 @@ namespace Projectiles.UI
         private FusionBootstrap _bootstrap;
         private bool _isMultiplePeerMode;
         private string _clientCount = "1";
+        private Canvas _parentCanvas;
 
         void Awake()
         {
@@ -46,13 +48,13 @@ namespace Projectiles.UI
 
             _isMultiplePeerMode = NetworkProjectConfig.Global.PeerMode == NetworkProjectConfig.PeerModes.Multiple;
 
-            // Setup button listeners
-            if (_startSinglePlayerButton) _startSinglePlayerButton.onClick.AddListener(() => _bootstrap.StartSinglePlayer());
-            if (_startSharedClientButton) _startSharedClientButton.onClick.AddListener(OnStartSharedClient);
-            if (_startServerButton) _startServerButton.onClick.AddListener(OnStartServer);
-            if (_startHostButton) _startHostButton.onClick.AddListener(OnStartHost);
-            if (_startClientButton) _startClientButton.onClick.AddListener(OnStartClient);
-            if (_startAutoHostOrClientButton) _startAutoHostOrClientButton.onClick.AddListener(OnStartAutoHostOrClient);
+            // Setup button listeners. Show loading screen as soon as any start action is taken.
+            if (_startSinglePlayerButton) _startSinglePlayerButton.onClick.AddListener(() => { ShowLoadingScreen("Starting session..."); _bootstrap.StartSinglePlayer(); });
+            if (_startSharedClientButton) _startSharedClientButton.onClick.AddListener(() => { ShowLoadingScreen("Connecting..."); OnStartSharedClient(); });
+            if (_startServerButton) _startServerButton.onClick.AddListener(() => { ShowLoadingScreen("Starting server..."); OnStartServer(); });
+            if (_startHostButton) _startHostButton.onClick.AddListener(() => { ShowLoadingScreen("Starting host..."); OnStartHost(); });
+            if (_startClientButton) _startClientButton.onClick.AddListener(() => { ShowLoadingScreen("Connecting..."); OnStartClient(); });
+            if (_startAutoHostOrClientButton) _startAutoHostOrClientButton.onClick.AddListener(() => { ShowLoadingScreen("Connecting..."); OnStartAutoHostOrClient(); });
             if (_shutdownButton) _shutdownButton.onClick.AddListener(() => _bootstrap.ShutdownAll());
 
             // Setup inputs
@@ -69,7 +71,11 @@ namespace Projectiles.UI
             }
 
             if (_multiPeerPanel) _multiPeerPanel.SetActive(_isMultiplePeerMode);
+
+            _parentCanvas = GetComponentInParent<Canvas>();
         }
+
+
 
         void Update()
         {
@@ -96,12 +102,16 @@ namespace Projectiles.UI
             bool allowHotkeys = Application.isEditor || _enableHotkeysInBuild;
             if (_enableHotkeys && allowHotkeys && disconnected && IsTypingInInputField() == false)
             {
-                if (Input.GetKeyDown(KeyCode.I)) _bootstrap.StartSinglePlayer();
-                if (Input.GetKeyDown(KeyCode.H)) OnStartHost();
-                if (Input.GetKeyDown(KeyCode.S)) OnStartServer();
-                if (Input.GetKeyDown(KeyCode.C)) OnStartClient();
-                if (Input.GetKeyDown(KeyCode.A)) OnStartAutoHostOrClient();
-                if (Input.GetKeyDown(KeyCode.P)) OnStartSharedClient();
+                var kb = Keyboard.current;
+                if (kb != null)
+                {
+                    if (kb.iKey.wasPressedThisFrame) { ShowLoadingScreen("Starting session..."); _bootstrap.StartSinglePlayer(); }
+                    if (kb.hKey.wasPressedThisFrame) { ShowLoadingScreen("Starting host..."); OnStartHost(); }
+                    if (kb.sKey.wasPressedThisFrame) { ShowLoadingScreen("Starting server..."); OnStartServer(); }
+                    if (kb.cKey.wasPressedThisFrame) { ShowLoadingScreen("Connecting..."); OnStartClient(); }
+                    if (kb.aKey.wasPressedThisFrame) { ShowLoadingScreen("Connecting..."); OnStartAutoHostOrClient(); }
+                    if (kb.pKey.wasPressedThisFrame) { ShowLoadingScreen("Connecting..."); OnStartSharedClient(); }
+                }
             }
 
             // Auto-hide
@@ -110,6 +120,15 @@ namespace Projectiles.UI
         }
 
         void SetInteractable(Button btn, bool state) { if (btn) btn.interactable = state; }
+
+        void ShowLoadingScreen(string message)
+        {
+            // Don't disable _mainPanel or the LobbyUI GameObject — FusionBootstrap's StartHost/Client
+            // coroutines need this object active. Instead disable the parent Canvas's rendering.
+            LoadingScreen.GetOrCreate().Show(message);
+            if (_parentCanvas != null)
+                _parentCanvas.enabled = false;
+        }
 
         bool IsTypingInInputField()
         {

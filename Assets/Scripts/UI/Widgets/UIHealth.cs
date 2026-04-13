@@ -17,12 +17,16 @@ namespace Projectiles.UI
 		private int _lastMax = -1;
 		private float _lastFill = -1f;
 
+		private static readonly Color BackgroundColor = new Color(0.08f, 0.08f, 0.12f, 0.7f);
+
 		// MONOBEHAVIOUR
 
 		protected void Awake()
 		{
 			if (_fillImage == null)
 				_fillImage = GetComponentInChildren<Image>();
+
+			UIUtility.AddBackgroundPanel(RectTransform, BackgroundColor);
 		}
 
 		// PUBLIC METHODS

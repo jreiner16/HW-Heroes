@@ -14860,6 +14860,14 @@ MonoBehaviour:
   _team1Color: {r: 0.2, g: 0.5, b: 1, a: 1}
   _team2Color: {r: 1, g: 0.3, b: 0.2, a: 1}
   _neutralColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  _beamHeight: 20
+  _beamWidth: 0.4
+  _pulseSpeed: 2
+  _pulseMinAlpha: 0.3
+  _pulseMaxAlpha: 0.7
+  _lightIntensity: 3
+  _lightRange: 12
+  _lightHeight: 4
 --- !u!114 &390779143
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21275,6 +21283,7 @@ GameObject:
   - component: {fileID: 564169706}
   - component: {fileID: 564169712}
   - component: {fileID: 564169711}
+  - component: {fileID: 564169713}
   m_Layer: 5
   m_Name: LobbyUI
   m_TagString: Untagged
@@ -21418,6 +21427,27 @@ MonoBehaviour:
   _currentStage: 0
   AutoConnectVirtualInstances: 1
   VirtualInstanceConnectDelay: 1
+--- !u!114 &564169713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 564169704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455b40e108ecd44ad9548df22589b223, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _backgroundColor: {r: 0.04, g: 0.04, b: 0.07, a: 1}
+  _titleColor: {r: 0.95, g: 0.95, b: 1, a: 1}
+  _subtitleColor: {r: 0.6, g: 0.8, b: 1, a: 0.8}
+  _buttonNormalColor: {r: 0.12, g: 0.14, b: 0.22, a: 1}
+  _buttonHighlightColor: {r: 0.18, g: 0.22, b: 0.35, a: 1}
+  _buttonPressedColor: {r: 0.08, g: 0.1, b: 0.16, a: 1}
+  _buttonTextColor: {r: 0.85, g: 0.88, b: 0.95, a: 1}
+  _inputFieldColor: {r: 0.08, g: 0.08, b: 0.12, a: 0.9}
+  _panelColor: {r: 0.06, g: 0.06, b: 0.1, a: 0.85}
 --- !u!1 &564255798 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1229183045502283451, guid: 1393237e911244fad9e24b7696ce01c1, type: 3}

@@ -119,6 +119,10 @@ namespace Projectiles
 			if (_visual == null)
 				return;
 
+			// Prevent duplicate outline creation on repeated calls
+			if (_outlineRenderers.Count > 0)
+				return;
+
 			_outlineBlock ??= new MaterialPropertyBlock();
 
 			// Create (or reuse) a shared outline material.

@@ -233,7 +233,7 @@ namespace Projectiles
 				return;
 
 			_weaponContext.Buttons = input.Buttons;
-			_weaponContext.PressedButtons = input.Buttons.GetPressed(_agent.Input.PreviousButtons);
+			_weaponContext.PressedButtons = _agent.Input != null ? input.Buttons.GetPressed(_agent.Input.PreviousButtons) : default;
 			_weaponContext.MoveVelocity = _agent.KCC.RealVelocity;
 			_weaponContext.AimDirection = GetCameraAimDirection();
 

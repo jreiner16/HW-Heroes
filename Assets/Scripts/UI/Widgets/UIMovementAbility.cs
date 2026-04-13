@@ -17,6 +17,24 @@ namespace Projectiles.UI
 		private Vector2 _readyAnchoredPosition;
 		private bool _readyPositionCached;
 
+		private static readonly Color BackgroundColor = new Color(0.08f, 0.08f, 0.12f, 0.7f);
+		private static readonly Color ReadyColor = new Color(0.2f, 0.9f, 0.3f, 0.9f);
+		private static readonly Color ActiveColor = new Color(1f, 0.8f, 0.2f, 0.9f);
+		private static readonly Color CooldownColor = new Color(0.8f, 0.2f, 0.2f, 0.9f);
+
+		protected void Awake()
+		{
+			UIUtility.AddBackgroundPanel(RectTransform, BackgroundColor);
+
+			if (_cooldownFill != null)
+			{
+				_cooldownFill.type = Image.Type.Filled;
+				_cooldownFill.fillMethod = Image.FillMethod.Radial360;
+				_cooldownFill.fillOrigin = (int)Image.Origin360.Top;
+				_cooldownFill.fillClockwise = false;
+			}
+		}
+
 		private void CacheReadyText()
 		{
 			if (_readyTextCached || _statusText == null)
@@ -44,7 +62,7 @@ namespace Projectiles.UI
 			_statusText.rectTransform.anchoredPosition = _readyAnchoredPosition + offset;
 		}
 
-		public void UpdateAbility(GoeddeMovementAbility ability)
+		public void UpdateAbility(IAbility ability)
 		{
 			CacheReadyText();
 
@@ -56,167 +74,31 @@ namespace Projectiles.UI
 
 			gameObject.SetActive(true);
 
-			if (ability.IsPhased)
+			Color fillColor;
+
+			if (ability.IsActive && ability.HasDuration)
 			{
 				float ratio = ability.DurationTotal > 0 ? ability.DurationRemainingTime / ability.DurationTotal : 0f;
 				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
 				SetStatusText($"{ability.DurationRemainingTime:F1}s", true);
+				fillColor = ActiveColor;
 			}
 			else if (ability.IsOnCooldown)
 			{
 				float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
 				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
 				SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
+				fillColor = CooldownColor;
 			}
 			else
 			{
 				if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
 				SetStatusText(_readyText, false);
-			}
-		}
-
-		public void UpdateAbility(TheissBuffAbility ability)
-		{
-			CacheReadyText();
-
-			if (ability == null)
-			{
-				gameObject.SetActive(false);
-				return;
+				fillColor = ReadyColor;
 			}
 
-			gameObject.SetActive(true);
-
-			if (ability.IsActive)
-			{
-				float ratio = ability.DurationTotal > 0 ? ability.DurationRemainingTime / ability.DurationTotal : 0f;
-				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-				SetStatusText($"{ability.DurationRemainingTime:F1}s", true);
-			}
-			else if (ability.IsOnCooldown)
-			{
-				float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
-				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-				SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
-			}
-			else
-			{
-				if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
-				SetStatusText(_readyText, false);
-			}
+			if (_cooldownFill != null) _cooldownFill.color = fillColor;
 		}
-
-		public void UpdateAbility(TheissShieldAbility ability)
-		{
-			CacheReadyText();
-
-			if (ability == null)
-			{
-				gameObject.SetActive(false);
-				return;
-			}
-
-			gameObject.SetActive(true);
-
-			if (ability.IsOnCooldown)
-			{
-				float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
-				if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-				SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
-			}
-			else
-			{
-				if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
-				SetStatusText(_readyText, false);
-			}
-		}
-
-	public void UpdateAbility(CohenMovementAbility ability)
-	{
-		CacheReadyText();
-
-		if (ability == null)
-		{
-			gameObject.SetActive(false);
-			return;
-		}
-
-		gameObject.SetActive(true);
-
-		if (ability.IsShrunk)
-		{
-			float ratio = ability.DurationTotal > 0 ? ability.DurationRemainingTime / ability.DurationTotal : 0f;
-			if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-			SetStatusText($"{ability.DurationRemainingTime:F1}s", true);
-		}
-		else if (ability.IsOnCooldown)
-		{
-			float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
-			if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-			SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
-		}
-		else
-		{
-			if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
-			SetStatusText(_readyText, false);
-		}
-	}
-
-	public void UpdateAbility(GoeddeFlamethrowerAbility ability)
-	{
-		CacheReadyText();
-
-		if (ability == null)
-		{
-			gameObject.SetActive(false);
-			return;
-		}
-
-		gameObject.SetActive(true);
-
-		if (ability.IsActive)
-		{
-			float ratio = ability.DurationTotal > 0 ? ability.DurationRemainingTime / ability.DurationTotal : 0f;
-			if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-			SetStatusText($"{ability.DurationRemainingTime:F1}s", true);
-		}
-		else if (ability.IsOnCooldown)
-		{
-			float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
-			if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-			SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
-		}
-		else
-		{
-			if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
-			SetStatusText(_readyText, false);
-		}
-	}
-
-	public void UpdateAbility(CohenRicochetAbility ability)
-	{
-		CacheReadyText();
-
-		if (ability == null)
-		{
-			gameObject.SetActive(false);
-			return;
-		}
-
-		gameObject.SetActive(true);
-
-		if (ability.IsOnCooldown)
-		{
-			float ratio = ability.CooldownTotal > 0 ? ability.CooldownRemainingTime / ability.CooldownTotal : 0f;
-			if (_cooldownFill != null) _cooldownFill.fillAmount = ratio;
-			SetStatusText($"{ability.CooldownRemainingTime:F1}s", true);
-		}
-		else
-		{
-			if (_cooldownFill != null) _cooldownFill.fillAmount = 1f;
-			SetStatusText(_readyText, false);
-		}
-	}
 
 		/// <summary>
 		/// Fallback: show the right-click ability slot based on the current weapon's secondary action.

@@ -9,26 +9,17 @@ namespace Projectiles
 	[AddComponentMenu("Projectiles/Abilities/Theiss Buff Ability")]
 	[DisallowMultipleComponent]
 	[DefaultExecutionOrder(-10)]
-	public class TheissBuffAbility : ContextBehaviour
+	public class TheissBuffAbility : AbilityBase
 	{
-		// PUBLIC MEMBERS
+		public override EAbilitySlot Slot => EAbilitySlot.Movement;
+		public override bool IsActive => _isActive;
+		public override bool IsReady => base.IsReady && _isActive == false;
+		public override bool HasDuration => true;
+		public override float DurationRemainingTime => _durationTimer.RemainingTime(Runner).GetValueOrDefault();
+		public override float DurationTotal => _duration;
 
-		public bool  IsActive      => _isActive;
-		public bool  IsOnCooldown => _cooldownTimer.ExpiredOrNotRunning(Runner) == false;
-		public bool  IsReady      => _cooldownTimer.ExpiredOrNotRunning(Runner) && _isActive == false;
-
-		public float CooldownRemainingTime => _cooldownTimer.RemainingTime(Runner).GetValueOrDefault();
-		public float CooldownTotal         => _cooldown;
-		public float DurationRemainingTime => _durationTimer.RemainingTime(Runner).GetValueOrDefault();
-		public float DurationTotal         => _duration;
-
-		// PRIVATE MEMBERS
-
-		[Header("Ability Settings")]
-		[SerializeField]
-		private float _duration = 5f;
-		[SerializeField]
-		private float _cooldown = 15f;
+		[Header("Buff Settings")]
+		[SerializeField] private float _duration = 5f;
 		[SerializeField, Tooltip("Move speed multiplier while buff is active")]
 		private float _speedMultiplier = 1.5f;
 		[SerializeField, Tooltip("Jump height multiplier while buff is active")]
@@ -38,25 +29,9 @@ namespace Projectiles
 		[SerializeField, Tooltip("Immediate heal applied when buff activates")]
 		private float _activationHeal = 50f;
 
-		[Networked]
-		private NetworkBool _isActive { get; set; }
-		[Networked]
-		private TickTimer _durationTimer { get; set; }
-		[Networked]
-		private TickTimer _cooldownTimer { get; set; }
-		[Networked]
-		private NetworkBool _healthBuffApplied { get; set; }
-
-		private PlayerAgent _agent;
-
-		// MONOBEHAVIOUR
-
-		protected void Awake()
-		{
-			_agent = GetComponent<PlayerAgent>();
-		}
-
-		// NetworkBehaviour INTERFACE
+		[Networked] private NetworkBool _isActive { get; set; }
+		[Networked] private TickTimer _durationTimer { get; set; }
+		[Networked] private NetworkBool _healthBuffApplied { get; set; }
 
 		public override void FixedUpdateNetwork()
 		{
@@ -67,9 +42,9 @@ namespace Projectiles
 				_agent.JumpMultiplier = 1f;
 			}
 
-			if (_agent == null || _agent.Owner == null || _agent.Health.IsAlive == false)
+			if (!ValidateCanAct())
 			{
-				if (_isActive)
+				if (_isActive && HasStateAuthority)
 				{
 					ForceDeactivate();
 				}
@@ -97,8 +72,6 @@ namespace Projectiles
 			}
 		}
 
-		// PRIVATE METHODS
-
 		private void TryActivate()
 		{
 			if (_isActive || IsOnCooldown)
@@ -118,7 +91,7 @@ namespace Projectiles
 		{
 			RemoveHealthBuff();
 			_isActive = false;
-			_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
+			StartCooldown();
 		}
 
 		private void ForceDeactivate()
@@ -148,5 +121,4 @@ namespace Projectiles
 			_healthBuffApplied = false;
 		}
 	}
-
 }
