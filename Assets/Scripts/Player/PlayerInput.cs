@@ -38,7 +38,7 @@ namespace Projectiles
 		// PRIVATE MEMBERS
 
 		[SerializeField]
-		private float _lookSensitivity = 6;
+		private float _lookSensitivity = 30;
 
 		[Networked]
 		private NetworkButtons _previousButtons { get; set; }
@@ -102,7 +102,8 @@ namespace Projectiles
 				var mouseDelta = mouse.delta.ReadValue();
 
 				var lookRotationDelta = new Vector2(-mouseDelta.y, mouseDelta.x);
-				lookRotationDelta *= _lookSensitivity / 60f;
+				// Divisor was /60f; /10f gives ~6x more sensitivity regardless of prefab's serialized _lookSensitivity.
+				lookRotationDelta *= _lookSensitivity / 10f;
 				_lookRotationAccumulator.Accumulate(lookRotationDelta);
 
 				_accumulatedInput.Buttons.Set(EInputButton.Fire, mouse.leftButton.isPressed);

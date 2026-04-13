@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Projectiles
 {
@@ -35,7 +35,7 @@ namespace Projectiles
 
 		public override void Fire()
 		{
-			var projectileDirection = FireTransform.forward;
+			var projectileDirection = AimDirection;
 
 			if (_dispersion > 0f)
 			{

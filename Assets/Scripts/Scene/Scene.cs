@@ -34,7 +34,17 @@ namespace Projectiles
 			}
 
 			var localPlayer = Context.Runner.GetPlayerObject(runner.LocalPlayer);
-			Context.LocalAgent = localPlayer != null ? localPlayer.GetComponent<Player>().ActiveAgent : null;
+			var player = localPlayer != null ? localPlayer.GetComponent<Player>() : null;
+			var agent = player != null ? player.ActiveAgent : null;
+
+			// Only expose the agent if its NetworkObject is valid (spawned, not despawned).
+			// During character switches there can be a brief window where ActiveAgent still
+			// references the old despawned agent, which would crash downstream code that
+			// tries to read [Networked] properties.
+			if (agent != null && (agent.Object == null || agent.Object.IsValid == false))
+				agent = null;
+
+			Context.LocalAgent = agent;
 		}
 	}
 }

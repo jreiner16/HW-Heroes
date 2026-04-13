@@ -6,51 +6,26 @@ namespace Projectiles
 	/// <summary>
 	/// Cohen's right-click ability: fires a healing ricochet projectile in the current aim direction.
 	/// The projectile bounces off walls and heals allies on contact.
-	///
-	/// Setup in the inspector on Cohen_Agent:
-	///  1. Assign _projectilePrefab: a prefab using CohenRicochetProjectile (duplicate
-	///     Assets/Prefabs/Projectiles/RicochetProjectile.prefab and swap its script to
-	///     CohenRicochetProjectile to inherit its visual and physics settings).
-	///  2. Add that same prefab to KinematicProjectileBuffer._projectilePrefabs so the buffer
-	///     can track and render it.
 	/// </summary>
 	[DefaultExecutionOrder(5)]
-	public class CohenRicochetAbility : ContextBehaviour
+	public class CohenRicochetAbility : AbilityBase
 	{
-		// PUBLIC MEMBERS
-
-		public bool  IsOnCooldown          => _cooldownTimer.ExpiredOrNotRunning(Runner) == false;
-		public bool  IsReady               => _cooldownTimer.ExpiredOrNotRunning(Runner);
-
-		public float CooldownRemainingTime => _cooldownTimer.RemainingTime(Runner).GetValueOrDefault();
-		public float CooldownTotal         => _cooldown;
-
-		// PRIVATE MEMBERS
-
-		[Header("Ability Settings")]
-		[SerializeField] private float _cooldown = 8f;
+		public override EAbilitySlot Slot => EAbilitySlot.RightClick;
 
 		[Header("Projectile")]
 		[SerializeField] private KinematicProjectile _projectilePrefab;
 
-		[Networked] private TickTimer _cooldownTimer { get; set; }
-
-		private PlayerAgent               _agent;
 		private KinematicProjectileBuffer _projectileBuffer;
 
-		// MONOBEHAVIOUR
-
-		protected void Awake()
+		protected override void Awake()
 		{
-			_agent            = GetComponent<PlayerAgent>();
+			base.Awake();
 			_projectileBuffer = GetComponent<KinematicProjectileBuffer>();
 		}
 
-		// NetworkBehaviour INTERFACE
-
 		public override void FixedUpdateNetwork()
 		{
-			if (_agent == null || _agent.Owner == null || _agent.Health.IsAlive == false)
+			if (!ValidateCanAct())
 				return;
 
 			if (GetInput(out GameplayInput input) == false)
@@ -61,8 +36,6 @@ namespace Projectiles
 				TryFire();
 			}
 		}
-
-		// PRIVATE METHODS
 
 		private void TryFire()
 		{
@@ -75,10 +48,12 @@ namespace Projectiles
 			if (_projectilePrefab == null || _projectileBuffer == null)
 				return;
 
-			var fireTransform = _agent.Weapons.FireTransform;
-			_projectileBuffer.AddProjectile(_projectilePrefab, fireTransform.position, fireTransform.forward);
+			var weapons = _agent.Weapons;
+			if (weapons == null || weapons.FireTransform == null)
+				return;
 
-			_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
+			_projectileBuffer.AddProjectile(_projectilePrefab, weapons.FireTransform.position, weapons.AimDirection);
+			StartCooldown();
 		}
 	}
 }

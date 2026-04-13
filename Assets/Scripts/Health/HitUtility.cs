@@ -210,9 +210,11 @@ namespace Projectiles
 
 						if (instigatorAgent != null)
 						{
-							instigatorAgent.GetComponent<GoeddeUltimateAbility>()?.AccelerateCooldownFromDamage(hitData.Amount);
-							instigatorAgent.GetComponent<TheissUltimateAbility>()?.AccelerateCooldownFromDamage(hitData.Amount);
-							instigatorAgent.GetComponent<CohenUltimateAbility>()?.AccelerateCooldownFromDamage(hitData.Amount);
+							var ultimates = instigatorAgent.GetComponents<IUltimateAbility>();
+							for (int i = 0; i < ultimates.Length; i++)
+							{
+								ultimates[i].AccelerateCooldownFromDamage(hitData.Amount);
+							}
 						}
 					}
 				}

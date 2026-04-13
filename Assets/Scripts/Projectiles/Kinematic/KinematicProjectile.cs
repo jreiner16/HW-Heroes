@@ -122,5 +122,21 @@ namespace Projectiles
 		// PROTECTED METHODS
 
 		protected abstract Vector3 GetRenderPosition(ref KinematicData data, ref KinematicData fromData, float alpha);
+
+		/// <summary>
+		/// Extends the raycast backward by the projectile's visual length for better hit detection
+		/// on moving targets. Call after normalizing direction.
+		/// </summary>
+		protected void AdjustForProjectileLength(ref Vector3 previousPosition, ref float distance, Vector3 direction, Vector3 originPosition)
+		{
+			if (_length <= 0f)
+				return;
+
+			float elapsedDistanceSqr = (previousPosition - originPosition).sqrMagnitude;
+			float projectileLength = elapsedDistanceSqr > _length * _length ? _length : Mathf.Sqrt(elapsedDistanceSqr);
+
+			previousPosition -= direction * projectileLength;
+			distance += projectileLength;
+		}
 	}
 }

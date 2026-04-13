@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Projectiles
 {
@@ -10,6 +11,10 @@ namespace Projectiles
 	{
 		[SerializeField, Tooltip("Upward force applied to the player when they touch the bouncer")]
 		private float _bounceForce = 12f;
+		[SerializeField, Tooltip("Ignore duplicate bounce events for the same player within this many frames")]
+		private int _duplicateBounceFrameWindow = 1;
+
+		private readonly Dictionary<int, int> _lastBounceFrameByAgent = new Dictionary<int, int>();
 
 		private void OnTriggerEnter(Collider other)
 		{
@@ -21,11 +26,28 @@ namespace Projectiles
 			TryBounce(collision.collider);
 		}
 
+		private void OnDisable()
+		{
+			_lastBounceFrameByAgent.Clear();
+		}
+
 		private void TryBounce(Collider other)
 		{
 			var agent = other.GetComponentInParent<PlayerAgent>();
 			if (agent != null && agent.Health.IsAlive)
 			{
+				int agentId = agent.GetInstanceID();
+				if (_lastBounceFrameByAgent.TryGetValue(agentId, out int lastBounceFrame))
+				{
+					if (Time.frameCount - lastBounceFrame <= _duplicateBounceFrameWindow)
+						return;
+				}
+
+				// Cap dictionary size to prevent unbounded growth
+				if (_lastBounceFrameByAgent.Count > 32)
+					_lastBounceFrameByAgent.Clear();
+
+				_lastBounceFrameByAgent[agentId] = Time.frameCount;
 				agent.AddBounceImpulse(_bounceForce);
 			}
 		}
