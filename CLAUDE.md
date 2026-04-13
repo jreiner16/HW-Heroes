@@ -44,7 +44,7 @@ GameManager (INetworkRunnerCallbacks) → spawns Player on join
 Characters are swapped mid-game via `Player.RPC_SelectCharacter(index)` → `Gameplay.RequestCharacterSwitch()`. Each character is a separate `PlayerAgent` prefab with unique weapons and abilities:
 
 - **Cohen** (DPS): Shrink ability (55% size, 3s), ricochet projectile, explosive ultimate. Primary: kinematic explosion projectile.
-- **Goedde** (Mobility): Phase teleport (4m, invulnerable, 2s), flamethrower spray, hitscan rifle primary.
+- **Goedde** (Mobility): Phase-dash (4m, invulnerable, 2s) with wall-slide and ground snap, flamethrower spray, hitscan rifle primary.
 - **Theiss** (Tank): Shield wall, buff ability (1.5x speed, 1.4x jump, +50 HP for 5s), damage debuff field.
 
 Character switching is only allowed in spawn areas (gated by `DisappearWhenPlayerNotInArea.IsLocalPlayerInside`), triggered by Tab key. Switching has a 1-second cooldown and is blocked while dead.
@@ -59,6 +59,17 @@ All abilities extend `AbilityBase` (which extends `ContextBehaviour` and impleme
 - `EAbilitySlot` — `Movement`, `RightClick`, `Ultimate`. Each ability declares its slot.
 
 **Adding a new character:** Create 3 new ability classes extending `AbilityBase` (or `AbilityBase` + `IUltimateAbility` for the ultimate). Set the `Slot` property. No UI code changes needed — `UIGameplayView` discovers abilities via `GetComponents<IAbility>()` and buckets by slot.
+
+### Goedde Phase-Dash (GoeddeMovementAbility)
+
+Goedde's movement ability is a phase-dash that uses a two-phase collision sweep:
+
+1. **Back-stepped CapsuleCast**: The cast origin is offset *backward* by `capsuleRadius + 0.05f` to detect walls the player is pressed against. Unity's `CapsuleCast` ignores colliders the capsule starts inside, so this back-step prevents the wall-phasing exploit.
+2. **Wall slide**: When hitting a wall at an angle, remaining distance is projected onto the wall tangent plane with a second CapsuleCast, letting the player slide along surfaces.
+3. **Minimum travel gate**: If the resolved distance is below `_minTravelDistance` (0.3m), activation silently fails — no cooldown consumed, no phase triggered.
+4. **AnimationCurve slide**: Dash motion uses a serialized `AnimationCurve` for snappy acceleration/deceleration.
+5. **Ground snap**: A downward raycast each tick keeps the character on terrain during the dash.
+6. **VFX hooks**: Optional serialized `ParticleSystem` fields for entry burst, exit burst, and trail particles (in addition to the existing `_visual` and `_phaseEffect` toggles).
 
 ### Weapon System
 
@@ -91,6 +102,7 @@ Team-filtered `SpawnPoint` components. On death: 3-second delay → new agent sp
 | `Assets/Scripts/Health/Health.cs` | Health, damage, immortality, death |
 | `Assets/Scripts/Game/CapturePoint.cs` | Objective zone scoring |
 | `Assets/Scripts/Utility/SceneContext.cs` | Central scene data hub |
+| `Assets/Scripts/Player/GoeddeMovementAbility.cs` | Goedde's phase-dash with wall detection/sliding |
 
 ## Testing
 
