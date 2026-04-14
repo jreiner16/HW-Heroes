@@ -13,6 +13,7 @@ namespace Projectiles
 		Reload   = 3,
 		X        = 4,
 		E        = 5,
+		Q        = 6,
 	}
 
 	public struct GameplayInput : INetworkInput
@@ -125,6 +126,7 @@ namespace Projectiles
 				// Extra input buttons for weapon triggers / abilities.
 				_accumulatedInput.Buttons.Set(EInputButton.X, keyboard.xKey.isPressed);
 				_accumulatedInput.Buttons.Set(EInputButton.E, keyboard.eKey.isPressed);
+				_accumulatedInput.Buttons.Set(EInputButton.Q, keyboard.qKey.isPressed);
 
 				_accumulatedInput.Buttons.Set(EInputButton.Jump, keyboard.spaceKey.isPressed);
 				_accumulatedInput.Buttons.Set(EInputButton.Reload, keyboard.rKey.isPressed);

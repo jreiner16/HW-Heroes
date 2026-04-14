@@ -35,7 +35,16 @@ namespace Projectiles
 		/// Multipliers applied to movement (used by abilities). Default 1. Abilities with execution order before this should set these.
 		/// </summary>
 		public float MoveSpeedMultiplier { get; set; } = 1f;
-		public float JumpMultiplier { get; set; } = 1f;
+		public float JumpMultiplier      { get; set; } = 1f;
+
+		/// <summary>Extra upward impulse added this tick (cleared after use). Set by abilities to trigger a jump.</summary>
+		public float ExtraJumpImpulse { get; set; } = 0f;
+
+		/// <summary>When set, overrides the gravity applied this tick. Set by abilities for float/slam phases.</summary>
+		public float? GravityOverride { get; set; }
+
+		/// <summary>When true, horizontal move input is ignored this tick (e.g. during jump smash flight).</summary>
+		public bool LockMovement { get; set; }
 
 		// PRIVATE MEMBERS
 
@@ -72,6 +81,8 @@ namespace Projectiles
 		private Vector3 _moveVelocity { get; set; }
 		[Networked]
 		private float _pendingBounceImpulse { get; set; }
+		[Networked]
+		private Vector3 _pendingKnockback { get; set; }
 
 		private Vector2 _lastFUNLookRotation;
 
@@ -83,6 +94,16 @@ namespace Projectiles
 			if (HasStateAuthority == false)
 				return;
 			_pendingBounceImpulse += impulse;
+		}
+
+		/// <summary>
+		/// Applies a horizontal knockback impulse (e.g. from AoE smash). State authority only.
+		/// </summary>
+		public void AddKnockbackImpulse(Vector3 direction, float force)
+		{
+			if (HasStateAuthority == false)
+				return;
+			_pendingKnockback += direction * force;
 		}
 
 		// NetworkBehaviour INTERFACE
@@ -165,11 +186,16 @@ namespace Projectiles
 
 			KCC.AddLookRotation(input.LookRotationDelta, -_maxCameraAngle, _maxCameraAngle);
 
-			// It feels better when player falls quicker
-			KCC.SetGravity(KCC.RealVelocity.y >= 0f ? _upGravity : _downGravity);
+			// Gravity — abilities can override for float/slam phases
+			if (GravityOverride.HasValue)
+				KCC.SetGravity(GravityOverride.Value);
+			else
+				KCC.SetGravity(KCC.RealVelocity.y >= 0f ? _upGravity : _downGravity);
 
 			// Calculate input direction based on recently updated look rotation (the change propagates internally also to KCC.TransformRotation)
-			var inputDirection = KCC.TransformRotation * new Vector3(input.MoveDirection.x, 0f, input.MoveDirection.y);
+			var inputDirection = LockMovement
+				? Vector3.zero
+				: KCC.TransformRotation * new Vector3(input.MoveDirection.x, 0f, input.MoveDirection.y);
 
 			float moveSpeed = _moveSpeed * MoveSpeedMultiplier;
 			var desiredMoveVelocity = inputDirection * moveSpeed;
@@ -187,10 +213,23 @@ namespace Projectiles
 
 			_moveVelocity = Vector3.Lerp(_moveVelocity, desiredMoveVelocity, acceleration * Runner.DeltaTime);
 
+			// Apply pending horizontal knockback (from AoE abilities) directly into move velocity
+			if (_pendingKnockback.sqrMagnitude > 0.001f)
+			{
+				_moveVelocity += _pendingKnockback;
+				_pendingKnockback = Vector3.zero;
+			}
+
 			float jumpImpulse = input.Buttons.WasPressed(Input.PreviousButtons, EInputButton.Jump) && KCC.IsGrounded ? _jumpImpulse * JumpMultiplier : 0f;
-			jumpImpulse += _pendingBounceImpulse;
+			jumpImpulse += _pendingBounceImpulse + ExtraJumpImpulse;
 			_pendingBounceImpulse = 0f;
+			ExtraJumpImpulse      = 0f;
+
 			KCC.Move(_moveVelocity, jumpImpulse);
+
+			// Reset per-tick ability overrides after movement is processed
+			GravityOverride = null;
+			LockMovement    = false;
 		}
 	}
 }
