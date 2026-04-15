@@ -74,6 +74,24 @@ namespace Projectiles.UI
 		{
 			EnsureScoreElements();
 			EnsureGameOverPanel();
+
+			// Guarantee score texts render above bars regardless of sibling order or hierarchy.
+			EnsureScoreTextOnTop(_team1ScoreText);
+			EnsureScoreTextOnTop(_team2ScoreText);
+		}
+
+		private static void EnsureScoreTextOnTop(TextMeshProUGUI text)
+		{
+			if (text == null)
+				return;
+
+			text.transform.SetAsLastSibling();
+
+			var canvas = text.GetComponent<Canvas>();
+			if (canvas == null)
+				canvas = text.gameObject.AddComponent<Canvas>();
+			canvas.overrideSorting = true;
+			canvas.sortingOrder = 10;
 		}
 
 		private void EnsureScoreElements()
@@ -127,6 +145,9 @@ namespace Projectiles.UI
 				t1Rect.pivot = new Vector2(1f, 1f);
 				t1Rect.anchoredPosition = new Vector2(-gap * 2 - barW, rowY);
 				t1Rect.sizeDelta = new Vector2(scoreW, 28f);
+				var t1Canvas = t1Go.AddComponent<Canvas>();
+				t1Canvas.overrideSorting = true;
+				t1Canvas.sortingOrder = 10;
 				_team1ScoreText = t1Go.AddComponent<TextMeshProUGUI>();
 				if (defaultFont != null) _team1ScoreText.font = defaultFont;
 				_team1ScoreText.fontSize = 24;
@@ -176,6 +197,9 @@ namespace Projectiles.UI
 				t2Rect.pivot = new Vector2(0f, 1f);
 				t2Rect.anchoredPosition = new Vector2(gap * 2 + barW, rowY);
 				t2Rect.sizeDelta = new Vector2(scoreW, 28f);
+				var t2Canvas = t2Go.AddComponent<Canvas>();
+				t2Canvas.overrideSorting = true;
+				t2Canvas.sortingOrder = 10;
 				_team2ScoreText = t2Go.AddComponent<TextMeshProUGUI>();
 				if (defaultFont != null) _team2ScoreText.font = defaultFont;
 				_team2ScoreText.fontSize = 24;
@@ -214,9 +238,7 @@ namespace Projectiles.UI
 				_team2Fill.fillOrigin = (int)Image.OriginHorizontal.Right;
 			}
 
-			// Ensure score text renders above bars
-			if (_team1ScoreText != null) _team1ScoreText.transform.SetAsLastSibling();
-			if (_team2ScoreText != null) _team2ScoreText.transform.SetAsLastSibling();
+			// Score text ordering is handled by EnsureScoreTextOnTop in EnsureUI().
 		}
 
 		private static Sprite CreateWhiteSprite()
