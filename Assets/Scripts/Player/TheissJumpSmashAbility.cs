@@ -22,7 +22,7 @@ namespace Projectiles
 
 		[Header("Launch")]
 		[SerializeField, Tooltip("Upward impulse applied when the ability activates")]
-		private float _launchImpulse = 9f;
+		private float _launchImpulse = 11.25f;
 		[SerializeField, Tooltip("Vertical velocity threshold (m/s) below which we consider the player at the apex and begin Hang")]
 		private float _apexVelocityThreshold = 1.5f;
 		[SerializeField, Tooltip("Safety timeout (seconds) — forces Hang if apex is never detected")]
@@ -49,6 +49,10 @@ namespace Projectiles
 		private float _knockbackForce = 8f;
 		[SerializeField, Tooltip("Upward bounce impulse applied to hit targets")]
 		private float _verticalKnockback = 4f;
+		[SerializeField, Tooltip("Optional VFX prefab spawned at the smash landing point (local, visual only)")]
+		private GameObject _smashVFXPrefab;
+		[SerializeField, Tooltip("How long (seconds) the smash VFX object lives before being destroyed")]
+		private float _vfxLifetime = 3f;
 
 		[Networked] private SmashPhase  _phase               { get; set; }
 		[Networked] private TickTimer   _phaseTimer          { get; set; }
@@ -153,7 +157,10 @@ namespace Projectiles
 			if (justLanded || timedOut)
 			{
 				if (justLanded)
+				{
 					PerformSmash();
+					SpawnSmashVFX();
+				}
 
 				_phase = SmashPhase.Idle;
 				StartCooldown();
@@ -161,6 +168,15 @@ namespace Projectiles
 		}
 
 		// SMASH LOGIC --------------------------------------------------------
+
+		private void SpawnSmashVFX()
+		{
+			if (_smashVFXPrefab == null || HasInputAuthority == false)
+				return;
+
+			var vfx = Instantiate(_smashVFXPrefab, transform.position, Quaternion.identity);
+			Destroy(vfx, _vfxLifetime);
+		}
 
 		private void PerformSmash()
 		{

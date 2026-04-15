@@ -18,6 +18,7 @@ namespace Projectiles.Editor
         private const string PrefabPath      = "Assets/Prefabs/Players/Theiss/Theiss_Agent.prefab";
         private const string ShieldPath      = "Assets/Prefabs/Players/Theiss/TheissShield.prefab";
         private const string ShieldPrevPath  = "Assets/Prefabs/Players/Theiss/TheissShieldPreview.prefab";
+        private const string SmashVFXPath    = "Assets/Prefabs/Effects/NukeExplosionPurple.prefab";
 
         [MenuItem("Tools/Theiss/Setup Abilities on Prefab")]
         public static void SetupAbilities()
@@ -31,6 +32,7 @@ namespace Projectiles.Editor
 
             var shieldWallPrefab    = AssetDatabase.LoadAssetAtPath<TheissShieldWall>(ShieldPath);
             var shieldPreviewPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ShieldPrevPath);
+            var smashVFXPrefab      = AssetDatabase.LoadAssetAtPath<GameObject>(SmashVFXPath);
 
             using (var scope = new PrefabUtility.EditPrefabContentsScope(PrefabPath))
             {
@@ -75,7 +77,7 @@ namespace Projectiles.Editor
                 }
                 var soJump = new SerializedObject(jumpSmash);
                 soJump.FindProperty("_cooldown").floatValue         = 15f;
-                soJump.FindProperty("_launchImpulse").floatValue    = 9f;
+                soJump.FindProperty("_launchImpulse").floatValue    = 11.25f;
                 soJump.FindProperty("_hangGravity").floatValue      = 1.5f;
                 soJump.FindProperty("_hangDuration").floatValue     = 0.6f;
                 soJump.FindProperty("_descendGravity").floatValue   = 55f;
@@ -84,6 +86,11 @@ namespace Projectiles.Editor
                 soJump.FindProperty("_smashDamage").floatValue      = 80f;
                 soJump.FindProperty("_knockbackForce").floatValue   = 8f;
                 soJump.FindProperty("_verticalKnockback").floatValue = 4f;
+                soJump.FindProperty("_vfxLifetime").floatValue       = 3f;
+                if (smashVFXPrefab != null)
+                    soJump.FindProperty("_smashVFXPrefab").objectReferenceValue = smashVFXPrefab;
+                else
+                    Debug.LogWarning($"[TheissPrefabSetup] Could not find smash VFX prefab at: {SmashVFXPath}");
                 soJump.ApplyModifiedProperties();
 
                 // --- TheissSugarRushAbility (E key) ---
