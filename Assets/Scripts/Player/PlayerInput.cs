@@ -13,6 +13,7 @@ namespace Projectiles
 		Reload   = 3,
 		X        = 4,
 		E        = 5,
+		Shift    = 6,
 	}
 
 	public struct GameplayInput : INetworkInput
@@ -128,6 +129,7 @@ namespace Projectiles
 
 				_accumulatedInput.Buttons.Set(EInputButton.Jump, keyboard.spaceKey.isPressed);
 				_accumulatedInput.Buttons.Set(EInputButton.Reload, keyboard.rKey.isPressed);
+				_accumulatedInput.Buttons.Set(EInputButton.Shift, keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed);
 
 				_accumulatedInput.WeaponButton = 0;
 				for (int i = (int)Key.Digit1; i <= (int)Key.Digit9; i++)
