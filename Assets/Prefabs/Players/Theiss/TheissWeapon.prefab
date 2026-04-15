@@ -424,7 +424,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0578f350f734b73b0e080681c0e3cb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _projectilePrefab: {fileID: 8201653215476214794, guid: 95026cd3233f4bd48b1d3ad15e6d81b3, type: 3}
+  _projectilePrefab: {fileID: 3893831311589886993, guid: 7ab0c0bdbd0284353af3d78901f3e708, type: 3}
   _standaloneProjectilePrefab: {fileID: 0}
   _standaloneProjectileBuffer: {fileID: 0}
   _projectilesPerShot: 1
@@ -442,7 +442,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787c9237c47d4becb62d11e3708bc38b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _fireParticle: {fileID: 1067724143266150, guid: f484d2249b4e8094bbb56f283b8ce11c, type: 3}
+  _fireParticle: {fileID: 1067724143266150, guid: 08ac8b3df7fee4a369e4d0c5dc4e9a6b, type: 3}
   _fireParticleReturnTime: 1
   _fireAudioEffectsRoot: {fileID: 7922358712448589423}
   _fireSound:
