@@ -191,6 +191,9 @@ namespace Projectiles
 				var runner = targetHealth != null ? targetHealth.Runner : null;
 				float multiplier = TheissDamageDebuffField.GetOutgoingDamageMultiplier(runner, hitData.InstigatorRef);
 				hitData.Amount *= multiplier;
+
+				float enragedBoost = GoeddeUltimateAbility.GetEnragedDamageMultiplier(runner, hitData.InstigatorRef);
+				hitData.Amount *= enragedBoost;
 			}
 
 			hitData.Target.ProcessHit(ref hitData);

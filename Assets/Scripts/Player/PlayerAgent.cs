@@ -27,7 +27,8 @@ namespace Projectiles
 		public SimpleKCC   KCC           { get; private set; }
 		public PlayerInput Input         { get; private set; }
 
-		public bool        InputBlocked  => Health.IsAlive == false;
+		public bool        InputBlocked  => Health.IsAlive == false || IsStunned;
+		public bool        IsStunned     => _stunTimer.ExpiredOrNotRunning(Runner) == false;
 
 		public CharacterClass Class => _characterClass;
 
@@ -72,8 +73,23 @@ namespace Projectiles
 		private Vector3 _moveVelocity { get; set; }
 		[Networked]
 		private float _pendingBounceImpulse { get; set; }
+		[Networked]
+		private TickTimer _stunTimer { get; set; }
 
 		private Vector2 _lastFUNLookRotation;
+
+		/// <summary>
+		/// Server-authoritative stun: blocks movement and input for the given duration.
+		/// A shorter stun will not overwrite a longer one already in progress.
+		/// </summary>
+		public void ApplyStun(float duration)
+		{
+			if (HasStateAuthority == false || duration <= 0f)
+				return;
+			float remaining = _stunTimer.RemainingTime(Runner).GetValueOrDefault();
+			if (duration > remaining)
+				_stunTimer = TickTimer.CreateFromSeconds(Runner, duration);
+		}
 
 		/// <summary>
 		/// Applies an upward impulse to the player (e.g. from bouncers). Call from OnTriggerEnter/OnCollisionEnter.
@@ -153,6 +169,13 @@ namespace Projectiles
 
 		private void ProcessMovementInput()
 		{
+			if (IsStunned)
+			{
+				_moveVelocity = Vector3.zero;
+				KCC.Move(Vector3.zero, 0f);
+				return;
+			}
+
 			if (GetInput(out GameplayInput input) == false)
 			{
 				if (_pendingBounceImpulse > 0f)
