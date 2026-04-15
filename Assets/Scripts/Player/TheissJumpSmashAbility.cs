@@ -20,19 +20,21 @@ namespace Projectiles
 
 		[Header("Launch")]
 		[SerializeField, Tooltip("Upward impulse applied when the ability activates")]
-		private float _launchImpulse = 14f;
-		[SerializeField, Tooltip("Seconds to wait in Launch before transitioning to Hang")]
-		private float _launchDuration = 0.35f;
+		private float _launchImpulse = 9f;
+		[SerializeField, Tooltip("Vertical velocity threshold (m/s) below which we consider the player at the apex and begin Hang")]
+		private float _apexVelocityThreshold = 1.5f;
+		[SerializeField, Tooltip("Safety timeout (seconds) — forces Hang if apex is never detected")]
+		private float _maxLaunchDuration = 1.5f;
 
 		[Header("Hang (floaty)")]
-		[SerializeField, Tooltip("Gravity value during the floaty hang phase (very low)")]
-		private float _hangGravity = 1.5f;
+		[SerializeField, Tooltip("Gravity value during the floaty hang phase — low but not zero")]
+		private float _hangGravity = 4f;
 		[SerializeField, Tooltip("Duration of the floaty hang phase in seconds")]
-		private float _hangDuration = 0.65f;
+		private float _hangDuration = 0.6f;
 
 		[Header("Descend")]
 		[SerializeField, Tooltip("Gravity value during the fast descent phase")]
-		private float _descendGravity = 70f;
+		private float _descendGravity = 55f;
 		[SerializeField, Tooltip("Safety timeout for descent in case the player never lands")]
 		private float _maxDescendTime = 5f;
 
@@ -89,15 +91,20 @@ namespace Projectiles
 			// giving the local client responsive predicted movement.
 			_agent.ExtraJumpImpulse = _launchImpulse;
 			_phase      = SmashPhase.Launch;
-			_phaseTimer = TickTimer.CreateFromSeconds(Runner, _launchDuration);
+			_phaseTimer = TickTimer.CreateFromSeconds(Runner, _maxLaunchDuration);
 		}
 
 		private void HandleLaunch()
 		{
-			// Lock horizontal steering during the brief launch window
+			// Lock horizontal steering during ascent
 			_agent.LockMovement = true;
 
-			if (_phaseTimer.Expired(Runner))
+			// Transition to Hang once the player reaches the apex (upward velocity
+			// has dropped to near zero). Fall back to a timer so it never gets stuck.
+			bool atApex   = _agent.KCC.RealVelocity.y <= _apexVelocityThreshold;
+			bool timedOut = _phaseTimer.Expired(Runner);
+
+			if (atApex || timedOut)
 			{
 				_phase      = SmashPhase.Hang;
 				_phaseTimer = TickTimer.CreateFromSeconds(Runner, _hangDuration);
