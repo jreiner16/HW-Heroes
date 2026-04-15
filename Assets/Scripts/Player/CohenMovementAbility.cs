@@ -27,6 +27,7 @@ namespace Projectiles
 		[Header("References")]
 		[SerializeField] private Transform _burrowCameraAnchor;
 		[SerializeField] private GameObject _groundIndicator;
+		[SerializeField] private CohenLoSSphere _healingAuraPrefab;
 
 		[Networked] private NetworkBool _isBurrowed { get; set; }
 		[Networked] private TickTimer _durationTimer { get; set; }
@@ -61,6 +62,12 @@ namespace Projectiles
 			if (GetInput(out GameplayInput input) == false)
 				return;
 
+			if (_isBurrowed && input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.Shift))
+			{
+				Deactivate();
+				return;
+			}
+
 			if (input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.E))
 			{
 				TryActivate();
@@ -80,6 +87,7 @@ namespace Projectiles
 			if (HasInputAuthority)
 			{
 				_agent.CameraOverride = _isBurrowed ? _burrowCameraAnchor : null;
+				_agent.BlockPitchInput = _isBurrowed;
 			}
 		}
 
@@ -112,6 +120,15 @@ namespace Projectiles
 			if (_hitboxRoot != null)
 			{
 				_hitboxRoot.HitboxRootActive = true;
+			}
+
+			if (_healingAuraPrefab != null)
+			{
+				var aura = Runner.Spawn(_healingAuraPrefab, transform.position, Quaternion.identity, Object.InputAuthority);
+				if (aura != null)
+				{
+					aura.Initialize(_agent.Owner);
+				}
 			}
 		}
 

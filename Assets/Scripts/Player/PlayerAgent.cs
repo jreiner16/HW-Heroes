@@ -38,6 +38,12 @@ namespace Projectiles
 		public Transform CameraOverride { get; set; }
 
 		/// <summary>
+		/// When true, vertical mouse input is ignored and pitch is locked to 0.
+		/// Set by abilities (e.g. Cohen burrow) that need to prevent the camera looking up/down.
+		/// </summary>
+		public bool BlockPitchInput { get; set; }
+
+		/// <summary>
 		/// Multipliers applied to movement (used by abilities). Default 1. Abilities with execution order before this should set these.
 		/// </summary>
 		public float MoveSpeedMultiplier { get; set; } = 1f;
@@ -116,6 +122,12 @@ namespace Projectiles
 				ProcessMovementInput();
 			}
 
+			if (BlockPitchInput)
+			{
+				var look = KCC.GetLookRotation();
+				KCC.SetLookRotation(new Vector2(0f, look.y));
+			}
+
 			// Setting camera pivot rotation
 			var pitchRotation = KCC.GetLookRotation(true, false);
 			_cameraPivot.localRotation = Quaternion.Euler(pitchRotation);
@@ -138,7 +150,10 @@ namespace Projectiles
 			if (HasInputAuthority == true && Owner != null && Health.IsAlive == true)
 			{
 				// For responsive look experience we use last FUN look + accumulated look rotation delta
-				KCC.SetLookRotation(_lastFUNLookRotation + Input.AccumulatedLook, -_maxCameraAngle, _maxCameraAngle);
+				var lookToApply = _lastFUNLookRotation + Input.AccumulatedLook;
+				if (BlockPitchInput)
+					lookToApply.x = 0f;
+				KCC.SetLookRotation(lookToApply, -_maxCameraAngle, _maxCameraAngle);
 			}
 
 			// Update camera pitch
@@ -201,7 +216,7 @@ namespace Projectiles
 
 			_moveVelocity = Vector3.Lerp(_moveVelocity, desiredMoveVelocity, acceleration * Runner.DeltaTime);
 
-			float jumpImpulse = input.Buttons.WasPressed(Input.PreviousButtons, EInputButton.Jump) && KCC.IsGrounded ? _jumpImpulse * JumpMultiplier : 0f;
+			float jumpImpulse = input.Buttons.WasPressed(Input.PreviousButtons, EInputButton.Jump) && KCC.IsGrounded && !BlockPitchInput ? _jumpImpulse * JumpMultiplier : 0f;
 			jumpImpulse += _pendingBounceImpulse;
 			_pendingBounceImpulse = 0f;
 			KCC.Move(_moveVelocity, jumpImpulse);
