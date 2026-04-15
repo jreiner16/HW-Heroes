@@ -7,12 +7,13 @@ namespace Projectiles
 {
 	public enum EInputButton
 	{
-		Fire     = 0,
-		Ability  = 1,
-		Jump     = 2,
-		Reload   = 3,
-		X        = 4,
-		E        = 5,
+		Fire       = 0,
+		Ability    = 1,
+		Jump       = 2,
+		Reload     = 3,
+		X          = 4,
+		E          = 5,
+		EquipRifle = 6,
 	}
 
 	public struct GameplayInput : INetworkInput
@@ -128,6 +129,11 @@ namespace Projectiles
 
 				_accumulatedInput.Buttons.Set(EInputButton.Jump, keyboard.spaceKey.isPressed);
 				_accumulatedInput.Buttons.Set(EInputButton.Reload, keyboard.rKey.isPressed);
+
+				bool ctrlShiftG = (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed)
+				               && (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed)
+				               && keyboard.gKey.isPressed;
+				_accumulatedInput.Buttons.Set(EInputButton.EquipRifle, ctrlShiftG);
 
 				_accumulatedInput.WeaponButton = 0;
 				for (int i = (int)Key.Digit1; i <= (int)Key.Digit9; i++)

@@ -44,7 +44,7 @@ GameManager (INetworkRunnerCallbacks) → spawns Player on join
 Characters are swapped mid-game via `Player.RPC_SelectCharacter(index)` → `Gameplay.RequestCharacterSwitch()`. Each character is a separate `PlayerAgent` prefab with unique weapons and abilities:
 
 - **Cohen** (DPS): Shrink ability (55% size, 3s), ricochet projectile, explosive ultimate. Primary: kinematic explosion projectile.
-- **Goedde** (Mobility): Phase-dash (4m, invulnerable, 2s) with wall-slide and ground snap, flamethrower spray, hitscan rifle primary. Ultimate: enraged form with 3 book traps (damage + stun) and damage boost.
+- **Goedde** (Mobility): Phase-dash (4m, invulnerable, 2s) with wall-slide and ground snap, flamethrower spray, hitscan rifle primary. Ultimate: enraged form with 3 book traps (damage + stun) and damage boost. 
 - **Theiss** (Tank): Shield wall, buff ability (1.5x speed, 1.4x jump, +50 HP for 5s), damage debuff field.
 
 Character switching is only allowed in spawn areas (gated by `DisappearWhenPlayerNotInArea.IsLocalPlayerInside`), triggered by Tab key. Switching has a 1-second cooldown and is blocked while dead.
@@ -115,6 +115,7 @@ Team-filtered `SpawnPoint` components. On death: 3-second delay → new agent sp
 | `Assets/Scripts/Player/GoeddeMovementAbility.cs` | Goedde's phase-dash with wall detection/sliding |
 | `Assets/Scripts/Player/GoeddeUltimateAbility.cs` | Goedde's book-trap ultimate with enraged state + stun |
 | `Assets/Scripts/Health/HitUtility.cs` | Central hit pipeline, damage multipliers, ultimate charge |
+| `Assets/Scripts/Player/GoeddeRifleEquip.cs` | Ctrl+Shift+G runtime rifle equip for Goedde |
 
 ## Testing
 

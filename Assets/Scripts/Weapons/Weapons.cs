@@ -127,6 +127,28 @@ namespace Projectiles
 			return 0;
 		}
 
+		/// <summary>
+		/// Returns true if a weapon is already assigned to the given slot.
+		/// </summary>
+		public bool HasWeaponInSlot(int slot)
+		{
+			return slot >= 0 && slot < _weapons.Length && _weapons[slot] != null;
+		}
+
+		/// <summary>
+		/// Spawns a weapon from a prefab at runtime and equips it. State authority only.
+		/// If a weapon already occupies that slot it is replaced.
+		/// </summary>
+		public void SpawnAndEquipWeapon(Weapon weaponPrefab)
+		{
+			if (weaponPrefab == null || HasStateAuthority == false)
+				return;
+
+			var weapon = Runner.Spawn(weaponPrefab, inputAuthority: Object.InputAuthority);
+			AddWeapon(weapon);
+			SwitchWeapon(weapon.WeaponSlot, false);
+		}
+
 		public void GetAllWeapons(List<Weapon> weapons)
 		{
 			for (int i = 0; i < _weapons.Length; i++)
