@@ -186,9 +186,11 @@ namespace Projectiles
 
 			KCC.AddLookRotation(input.LookRotationDelta, -_maxCameraAngle, _maxCameraAngle);
 
-			// Gravity — abilities can override for float/slam phases
+			// Gravity — abilities can override for float/slam phases.
+			// GravityOverride uses an intuitive positive magnitude (higher = stronger downward pull),
+			// which is negated here to match the negative convention expected by SetGravity.
 			if (GravityOverride.HasValue)
-				KCC.SetGravity(GravityOverride.Value);
+				KCC.SetGravity(-Mathf.Abs(GravityOverride.Value));
 			else
 				KCC.SetGravity(KCC.RealVelocity.y >= 0f ? _upGravity : _downGravity);
 

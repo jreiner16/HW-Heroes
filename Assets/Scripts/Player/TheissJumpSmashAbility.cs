@@ -15,6 +15,8 @@ namespace Projectiles
 	{
 		public override EAbilitySlot Slot     => EAbilitySlot.RightClick;
 		public override bool         IsActive => _phase != SmashPhase.Idle;
+		// Jump Smash is only usable while Sugar Rush is active
+		public override bool         IsReady  => base.IsReady && _sugarRush != null && _sugarRush.IsActive;
 
 		private enum SmashPhase : byte { Idle, Launch, Hang, Descend }
 
@@ -52,6 +54,14 @@ namespace Projectiles
 		[Networked] private TickTimer   _phaseTimer          { get; set; }
 		[Networked] private NetworkBool _wasGroundedLastTick  { get; set; }
 
+		private TheissSugarRushAbility _sugarRush;
+
+		protected override void Awake()
+		{
+			base.Awake();
+			_sugarRush = GetComponent<TheissSugarRushAbility>();
+		}
+
 		// AbilityBase / NetworkBehaviour INTERFACE ---------------------------
 
 		public override void FixedUpdateNetwork()
@@ -78,10 +88,14 @@ namespace Projectiles
 
 		private void HandleIdle()
 		{
+			// Only usable while Sugar Rush is active — shield takes the slot otherwise
+			if (_sugarRush == null || _sugarRush.IsActive == false)
+				return;
+
 			if (GetInput(out GameplayInput input) == false)
 				return;
 
-			if (input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.Q) == false)
+			if (input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.Ability) == false)
 				return;
 
 			if (IsOnCooldown || _agent.KCC.IsGrounded == false)
