@@ -14,6 +14,7 @@ namespace Projectiles
 		X          = 4,
 		E          = 5,
 		EquipRifle = 6,
+		Shift      = 7,
 	}
 
 	public struct GameplayInput : INetworkInput
@@ -129,6 +130,7 @@ namespace Projectiles
 
 				_accumulatedInput.Buttons.Set(EInputButton.Jump, keyboard.spaceKey.isPressed);
 				_accumulatedInput.Buttons.Set(EInputButton.Reload, keyboard.rKey.isPressed);
+				_accumulatedInput.Buttons.Set(EInputButton.Shift, keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed);
 
 				bool ctrlShiftG = (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed)
 				               && (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed)
