@@ -55,7 +55,7 @@ namespace Projectiles
 		public AudioSetup  DefaultSetup        => _defaultSetup;
 		public AudioSetup  CurrentSetup        => _currentSetup;
 		public AudioSource AudioSource         => _audioSource;
-		public bool        IsPlaying           => _audioSource.isPlaying == true || _delayedPlayRoutine != null;
+		public bool        IsPlaying           => (_audioSource != null && _audioSource.isPlaying) || _delayedPlayRoutine != null;
 
 		public int         LastPlayedClipIndex { get; set; }
 

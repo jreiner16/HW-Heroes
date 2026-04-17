@@ -11,6 +11,7 @@ namespace Projectiles
 		public NetworkButtons            Buttons;
 		public NetworkButtons            PressedButtons;
 		public Vector3                   MoveVelocity;
+		public Vector3                   AimDirection;
 
 		public Transform                 FireTransform;
 		public HitscanProjectileBuffer   HitscanProjectiles;
@@ -31,6 +32,7 @@ namespace Projectiles
 		public Weapon       CurrentWeapon           => _weapons[CurrentWeaponSlot];
 		public Weapon       PendingWeapon           => _weapons[PendingWeaponSlot];
 		public Transform    FireTransform           => _fireTransform;
+		public Vector3      AimDirection            => _weaponContext.AimDirection.sqrMagnitude > 0.0001f ? _weaponContext.AimDirection : _fireTransform.forward;
 
 		[Networked, HideInInspector]
 		public int          CurrentWeaponSlot       { get; private set; }
@@ -209,6 +211,7 @@ namespace Projectiles
 			_weaponContext.KinematicProjectiles = GetComponent<KinematicProjectileBuffer>();
 			_weaponContext.HitscanProjectiles = GetComponent<HitscanProjectileBuffer>();
 			_weaponContext.FireTransform = _fireTransform;
+			_weaponContext.AimDirection = _fireTransform.forward;
 		}
 
 		// PRIVATE METHODS
@@ -230,13 +233,22 @@ namespace Projectiles
 				return;
 
 			_weaponContext.Buttons = input.Buttons;
-			_weaponContext.PressedButtons = input.Buttons.GetPressed(_agent.Input.PreviousButtons);
+			_weaponContext.PressedButtons = _agent.Input != null ? input.Buttons.GetPressed(_agent.Input.PreviousButtons) : default;
 			_weaponContext.MoveVelocity = _agent.KCC.RealVelocity;
+			_weaponContext.AimDirection = GetCameraAimDirection();
 
 			if (CurrentWeapon.ProcessFireInput() == true)
 			{
 				_agent.Health.StopImmortality();
 			}
+		}
+
+		private Vector3 GetCameraAimDirection()
+		{
+			// Use networked look state (yaw + pitch) instead of model/barrel orientation.
+			var pitchRotation = _agent.KCC.GetLookRotation(true, false);
+			var aimDirection = _agent.KCC.TransformRotation * Quaternion.Euler(pitchRotation.x, 0f, 0f) * Vector3.forward;
+			return aimDirection.normalized;
 		}
 
 		private void StartWeaponSwitch(int weaponSlot)

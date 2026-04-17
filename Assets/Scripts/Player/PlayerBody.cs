@@ -43,6 +43,19 @@ namespace Projectiles
 		private Material _outlineMaterial;
 		private MaterialPropertyBlock _outlineBlock;
 
+		// PUBLIC METHODS
+
+		/// <summary>
+		/// Toggles the visual root on/off. Renderer shadow/visibility settings applied in Spawned() persist through toggling.
+		/// </summary>
+		public void SetVisible(bool visible)
+		{
+			if (_visual != null)
+			{
+				_visual.SetActive(visible);
+			}
+		}
+
 		// ContextBehaviour INTERFACE
 
 		public override void Spawned()
@@ -117,6 +130,10 @@ namespace Projectiles
 		private void SetupTeamOutlineRenderers()
 		{
 			if (_visual == null)
+				return;
+
+			// Prevent duplicate outline creation on repeated calls
+			if (_outlineRenderers.Count > 0)
 				return;
 
 			_outlineBlock ??= new MaterialPropertyBlock();

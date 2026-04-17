@@ -18,6 +18,8 @@ namespace Projectiles
 		public bool    IsAlive       => CurrentHealth > 0f;
 		public bool    IsImmortal    => _immortalCooldown.ExpiredOrNotRunning(Runner) == false;
 		public float   MaxHealth     => _maxHealth + _maxHealthBonus;
+		public float   BaseMaxHealth => _maxHealth;
+		public float   MaxHealthBonus => _maxHealthBonus;
 
 		[Networked]
 		public float   CurrentHealth { get; private set; }
@@ -253,7 +255,8 @@ namespace Projectiles
 				if (instigator == null)
 				{
 					var playerObject = Runner.GetPlayerObject(hitData.InstigatorRef);
-					var agent = playerObject != null ? playerObject.GetComponent<Player>().ActiveAgent : null;
+					var player = playerObject != null ? playerObject.GetComponent<Player>() : null;
+					var agent = player != null ? player.ActiveAgent : null;
 
 					instigator = agent != null ? agent.Health : null;
 				}

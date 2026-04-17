@@ -71,14 +71,7 @@ namespace Projectiles
 			// Normalize
 			direction /= distance;
 
-			if (_length > 0f)
-			{
-				float elapsedDistanceSqr = (previousPosition - data.Position).sqrMagnitude;
-				float projectileLength = elapsedDistanceSqr > _length * _length ? _length : Mathf.Sqrt(elapsedDistanceSqr);
-
-				previousPosition -= direction * projectileLength;
-				distance += projectileLength;
-			}
+			AdjustForProjectileLength(ref previousPosition, ref distance, direction, data.Position);
 
 			// Ignore self hit but only at the start of projectile lifetime
 			// (bouncing projectiles can still hurt the owner)

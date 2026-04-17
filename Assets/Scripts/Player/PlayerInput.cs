@@ -13,6 +13,7 @@ namespace Projectiles
 		Reload   = 3,
 		X        = 4,
 		E        = 5,
+		Shift    = 6,
 	}
 
 	public struct GameplayInput : INetworkInput
@@ -38,7 +39,7 @@ namespace Projectiles
 		// PRIVATE MEMBERS
 
 		[SerializeField]
-		private float _lookSensitivity = 6;
+		private float _lookSensitivity = 30;
 
 		[Networked]
 		private NetworkButtons _previousButtons { get; set; }
@@ -102,7 +103,8 @@ namespace Projectiles
 				var mouseDelta = mouse.delta.ReadValue();
 
 				var lookRotationDelta = new Vector2(-mouseDelta.y, mouseDelta.x);
-				lookRotationDelta *= _lookSensitivity / 60f;
+				// Divisor was /60f; /10f gives ~6x more sensitivity regardless of prefab's serialized _lookSensitivity.
+				lookRotationDelta *= _lookSensitivity / 10f;
 				_lookRotationAccumulator.Accumulate(lookRotationDelta);
 
 				_accumulatedInput.Buttons.Set(EInputButton.Fire, mouse.leftButton.isPressed);
@@ -127,6 +129,7 @@ namespace Projectiles
 
 				_accumulatedInput.Buttons.Set(EInputButton.Jump, keyboard.spaceKey.isPressed);
 				_accumulatedInput.Buttons.Set(EInputButton.Reload, keyboard.rKey.isPressed);
+				_accumulatedInput.Buttons.Set(EInputButton.Shift, keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed);
 
 				_accumulatedInput.WeaponButton = 0;
 				for (int i = (int)Key.Digit1; i <= (int)Key.Digit9; i++)

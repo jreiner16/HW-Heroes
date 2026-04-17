@@ -30,6 +30,10 @@ namespace Projectiles.UI
 
 			_hitPerformedGroup.DOFade(1f, _hitGroupFadeInDuration).SetDelay(_hitGroupDelay);
 			_hitPerformedGroup.DOFade(0f, _hitGroupFadeOutDuration).SetDelay(_hitGroupDelay + _hitGroupFadeInDuration + 0.1f);
+
+			transform.DOKill();
+			transform.localScale = Vector3.one;
+			transform.DOPunchScale(Vector3.one * 0.15f, 0.2f, 8, 0.5f);
 		}
 
 		// PRIVATE MEMBERS

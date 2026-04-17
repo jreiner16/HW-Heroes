@@ -10,56 +10,28 @@ namespace Projectiles
 	[AddComponentMenu("Projectiles/Abilities/Theiss Shield Ability")]
 	[DisallowMultipleComponent]
 	[DefaultExecutionOrder(5)]
-	public class TheissShieldAbility : ContextBehaviour
+	public class TheissShieldAbility : AbilityBase
 	{
-		// PUBLIC MEMBERS
+		public override EAbilitySlot Slot => EAbilitySlot.RightClick;
 
-		public bool IsOnCooldown => _cooldownTimer.ExpiredOrNotRunning(Runner) == false;
-		public bool IsReady      => _cooldownTimer.ExpiredOrNotRunning(Runner);
-		public float CooldownRemainingTime => _cooldownTimer.RemainingTime(Runner).GetValueOrDefault();
-		public float CooldownTotal => _cooldown;
-
-		// PRIVATE MEMBERS
-
-		[Header("Ability Settings")]
-		[SerializeField]
-		private float _cooldown = 12f;
+		[Header("Shield Settings")]
 		[SerializeField]
 		private float _spawnDistance = 2.5f;
 		[SerializeField]
 		private float _spawnHeightOffset = 0f;
-		[SerializeField]
-		[Range(0f, 1f)]
+		[SerializeField, Range(0f, 1f)]
 		private float _previewAlpha = 0.35f;
 
 		[Header("References")]
 		[SerializeField]
 		private TheissShieldWall _shieldPrefab;
-		/// <summary>
-		/// Optional: assign a prefab to use as the placement preview. If left empty, the ability
-		/// will attempt to build a ghost from the shield prefab's renderers at runtime.
-		/// Recommended: duplicate the shield visual mesh prefab and assign a semi-transparent URP
-		/// material to it, then assign that prefab here.
-		/// </summary>
 		[SerializeField]
 		private GameObject _shieldPreviewPrefab;
 
 		[Networked]
-		private TickTimer _cooldownTimer { get; set; }
-		[Networked]
 		private NetworkId _activeShieldId { get; set; }
 
-		private PlayerAgent _agent;
-		private GameObject  _previewInstance;
-
-		// MONOBEHAVIOUR
-
-		protected void Awake()
-		{
-			_agent = GetComponent<PlayerAgent>();
-		}
-
-		// NetworkBehaviour INTERFACE
+		private GameObject _previewInstance;
 
 		public override void Spawned()
 		{
@@ -83,42 +55,39 @@ namespace Projectiles
 			}
 		}
 
-	public override void FixedUpdateNetwork()
-	{
-		if (_agent == null || _agent.Owner == null || _agent.Health.IsAlive == false)
-			return;
-
-		if (GetInput(out GameplayInput input) == false)
-			return;
-
-		bool abilityPressed = input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.Ability);
-		if (abilityPressed && HasStateAuthority)
+		public override void FixedUpdateNetwork()
 		{
-			DespawnActiveShieldIfAny();
-		}
+			if (!ValidateCanAct())
+				return;
 
-		// Cast shield when right-click is released (hold to aim, release to place).
-		bool abilityReleased = _agent.Input.PreviousButtons.IsSet(EInputButton.Ability)
-		                    && input.Buttons.IsSet(EInputButton.Ability) == false;
+			if (GetInput(out GameplayInput input) == false)
+				return;
 
-		if (abilityReleased)
-		{
-			TryCastShield();
+			bool abilityPressed = input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.Ability);
+			if (abilityPressed && HasStateAuthority)
+			{
+				var id = _activeShieldId;
+				DespawnActiveObjectIfAny(ref id);
+				_activeShieldId = id;
+			}
+
+			bool abilityReleased = _agent.Input.PreviousButtons.IsSet(EInputButton.Ability)
+			                    && input.Buttons.IsSet(EInputButton.Ability) == false;
+
+			if (abilityReleased)
+			{
+				TryCastShield();
+			}
 		}
-	}
 
 		public override void Render()
 		{
 			UpdatePreview();
 		}
 
-		// PRIVATE METHODS
-
 		private void UpdatePreview()
 		{
-			if (_previewInstance == null)
-				return;
-			if (HasInputAuthority == false)
+			if (_previewInstance == null || HasInputAuthority == false)
 				return;
 
 			var mouse = Mouse.current;
@@ -133,28 +102,12 @@ namespace Projectiles
 			if (isHolding == false)
 				return;
 
-			var fireTransform = _agent.Weapons?.FireTransform;
-			if (fireTransform == null)
-				return;
-
-			var forward = fireTransform.forward;
-			forward.y = 0f;
-			if (forward.sqrMagnitude < 0.0001f)
-			{
-				forward = transform.forward;
-				forward.y = 0f;
-			}
-			forward.Normalize();
-
+			var forward = GetHorizontalAimForward();
 			var previewPos = transform.position + forward * _spawnDistance + Vector3.up * _spawnHeightOffset;
 			var previewRot = Quaternion.LookRotation(forward, Vector3.up);
 			_previewInstance.transform.SetPositionAndRotation(previewPos, previewRot);
 		}
 
-		/// <summary>
-		/// Duplicates each material on every renderer in the preview object and forces
-		/// URP Lit-compatible transparency at the configured alpha level.
-		/// </summary>
 		private void ApplyPreviewMaterials(GameObject previewObj)
 		{
 			foreach (var rend in previewObj.GetComponentsInChildren<Renderer>(true))
@@ -170,14 +123,9 @@ namespace Projectiles
 			}
 		}
 
-		/// <summary>
-		/// Patches a URP Lit (or compatible) material to render as alpha-blended transparent.
-		/// </summary>
 		private static void SetMaterialTransparent(Material mat, float alpha)
 		{
-			// URP Lit surface type: 0 = Opaque, 1 = Transparent
 			mat.SetFloat("_Surface", 1f);
-			// Blend mode: 0 = Alpha
 			mat.SetFloat("_Blend", 0f);
 			mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
 			mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
@@ -192,27 +140,16 @@ namespace Projectiles
 
 		private void TryCastShield()
 		{
-			if (IsOnCooldown)
+			if (IsOnCooldown || HasStateAuthority == false)
 				return;
-			if (_shieldPrefab == null)
-				return;
-			if (_agent.Weapons == null || _agent.Weapons.FireTransform == null)
-				return;
-			if (HasStateAuthority == false)
+			if (_shieldPrefab == null || _agent.Weapons?.FireTransform == null)
 				return;
 
-			DespawnActiveShieldIfAny();
+			var id = _activeShieldId;
+			DespawnActiveObjectIfAny(ref id);
+			_activeShieldId = id;
 
-			var fireTransform = _agent.Weapons.FireTransform;
-			var forward = fireTransform.forward;
-			forward.y = 0f;
-			if (forward.sqrMagnitude < 0.0001f)
-			{
-				forward = transform.forward;
-				forward.y = 0f;
-			}
-			forward.Normalize();
-
+			var forward = GetHorizontalAimForward();
 			var spawnPosition = transform.position + forward * _spawnDistance + Vector3.up * _spawnHeightOffset;
 			var spawnRotation = Quaternion.LookRotation(forward, Vector3.up);
 
@@ -223,21 +160,7 @@ namespace Projectiles
 				_activeShieldId = shield.Object.Id;
 			}
 
-			_cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
-		}
-
-		private void DespawnActiveShieldIfAny()
-		{
-			if (_activeShieldId.IsValid == false)
-				return;
-
-			var existingObject = Runner.FindObject(_activeShieldId);
-			if (existingObject != null)
-			{
-				Runner.Despawn(existingObject);
-			}
-
-			_activeShieldId = default;
+			StartCooldown();
 		}
 	}
 }

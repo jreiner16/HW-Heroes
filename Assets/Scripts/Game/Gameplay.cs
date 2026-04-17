@@ -222,6 +222,12 @@ namespace Projectiles
 
 				// Spawn new agent at stored position
 				PlayerAgent agentPrefab = request.Player.AgentPrefab;
+				if (agentPrefab == null)
+				{
+					Debug.LogError($"No agent prefab for player {request.Player.Object.InputAuthority}");
+					continue;
+				}
+
 				PlayerAgent newAgent;
 
 				if (request.HasPosition)
@@ -232,6 +238,9 @@ namespace Projectiles
 				{
 					newAgent = SpawnAgent(request.Player.Object.InputAuthority, agentPrefab, request.Player.Team) as PlayerAgent;
 				}
+
+				if (newAgent == null)
+					continue;
 
 				request.Player.AssignAgent(newAgent);
 				newAgent.Health.FatalHitTaken += OnFatalHitTaken;
@@ -293,6 +302,16 @@ namespace Projectiles
 
 		if (player == null || player.Object == null)
 			return;
+
+		// Prevent queue overflow and duplicate requests
+		if (_characterSwitchRequests.Count >= 10)
+			return;
+
+		for (int i = 0; i < _characterSwitchRequests.Count; i++)
+		{
+			if (_characterSwitchRequests[i].Player == player)
+				return;
+		}
 
 		// Store current position and rotation if agent exists
 		Vector3 position = Vector3.zero;

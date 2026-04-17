@@ -17,4 +17,6 @@ https://docs.google.com/spreadsheets/d/1JAX8BJoPRpNAQsH4tiXJRVe0GxBT1-DG-yVf_mY8
 
  Design spec:
  https://www.figma.com/board/89CE58n7rvGjobqVV8o2S5/HW-Heroes?node-id=1-212
+
+Very basic character implementation tutorial: https://drive.google.com/file/d/1CE_AyMLigCBnkJ65bBsSOVyhrFXjHEUB/view?usp=sharing
  

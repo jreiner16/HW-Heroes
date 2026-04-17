@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Projectiles
 {
@@ -32,7 +32,7 @@ namespace Projectiles
 				Random.InitState(Runner.Tick * unchecked((int)Object.Id.Raw));
 			}
 
-			var fireRotation = FireTransform.rotation * Quaternion.Euler(-_additionalFirePitch, 0f, 0f);;
+			var fireRotation = Quaternion.LookRotation(AimDirection, Vector3.up) * Quaternion.Euler(-_additionalFirePitch, 0f, 0f);
 
 			for (int i = 0; i < _projectilesPerShot; i++)
 			{

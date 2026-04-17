@@ -1,4 +1,4 @@
-﻿using Fusion;
+using Fusion;
 using UnityEngine;
 
 namespace Projectiles
@@ -18,6 +18,7 @@ namespace Projectiles
 		public NetworkButtons     Buttons           => WeaponContext.Buttons;
 		public NetworkButtons     PressedButtons    => WeaponContext.PressedButtons;
 		public Transform          FireTransform     => WeaponContext.FireTransform;
+		public Vector3            AimDirection      => WeaponContext.AimDirection;
 
 		public virtual bool       IsBusy             => false;
 
