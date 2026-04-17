@@ -44,7 +44,7 @@ GameManager (INetworkRunnerCallbacks) → spawns Player on join
 Characters are swapped mid-game via `Player.RPC_SelectCharacter(index)` → `Gameplay.RequestCharacterSwitch()`. Each character is a separate `PlayerAgent` prefab with unique weapons and abilities:
 
 - **Cohen** (DPS): Shrink ability (55% size, 3s), ricochet projectile, explosive ultimate. Primary: kinematic explosion projectile.
-- **Goedde** (Mobility): Phase teleport (4m, invulnerable, 2s), flamethrower spray, hitscan rifle primary.
+- **Goedde** (Mobility): Phase-dash (4m, invulnerable, 2s) with wall-slide and ground snap, flamethrower spray, hitscan rifle primary. Ultimate: enraged form with 3 book traps (damage + stun) and damage boost. 
 - **Theiss** (Tank): Shield wall, buff ability (1.5x speed, 1.4x jump, +50 HP for 5s), damage debuff field.
 
 Character switching is only allowed in spawn areas (gated by `DisappearWhenPlayerNotInArea.IsLocalPlayerInside`), triggered by Tab key. Switching has a 1-second cooldown and is blocked while dead.
@@ -60,6 +60,27 @@ All abilities extend `AbilityBase` (which extends `ContextBehaviour` and impleme
 
 **Adding a new character:** Create 3 new ability classes extending `AbilityBase` (or `AbilityBase` + `IUltimateAbility` for the ultimate). Set the `Slot` property. No UI code changes needed — `UIGameplayView` discovers abilities via `GetComponents<IAbility>()` and buckets by slot.
 
+### Goedde Phase-Dash (GoeddeMovementAbility)
+
+Goedde's movement ability is a phase-dash that uses a two-phase collision sweep:
+
+1. **Back-stepped CapsuleCast**: The cast origin is offset *backward* by `capsuleRadius + 0.05f` to detect walls the player is pressed against. Unity's `CapsuleCast` ignores colliders the capsule starts inside, so this back-step prevents the wall-phasing exploit.
+2. **Wall slide**: When hitting a wall at an angle, remaining distance is projected onto the wall tangent plane with a second CapsuleCast, letting the player slide along surfaces.
+3. **Minimum travel gate**: If the resolved distance is below `_minTravelDistance` (0.3m), activation silently fails — no cooldown consumed, no phase triggered.
+4. **AnimationCurve slide**: Dash motion uses a serialized `AnimationCurve` for snappy acceleration/deceleration.
+5. **Ground snap**: A downward raycast each tick keeps the character on terrain during the dash.
+6. **VFX hooks**: Optional serialized `ParticleSystem` fields for entry burst, exit burst, and trail particles (in addition to the existing `_visual` and `_phaseEffect` toggles).
+
+### Goedde Book-Trap Ultimate (GoeddeUltimateAbility)
+
+Goedde's ultimate enters an enraged state and summons 3 book traps from the floor:
+
+1. **Enraged state**: Duration-based (8s). While active, all outgoing damage is multiplied (`_enragedDamageMultiplier`). Tracked via static `_enragedMultipliers` dictionary queried by `HitUtility.ProcessHit`.
+2. **Book traps**: 3 rectangular zones placed in a fan pattern (center, left, right at `_trapSpreadAngle`). After `_snapDelay` (0.8s), books "snap shut" dealing `_trapDamage` (80) and applying stun (`_stunDuration`, 2s) to all enemies inside via `Physics.OverlapBox`.
+3. **Stun system**: `PlayerAgent.ApplyStun(float)` sets a `[Networked] TickTimer`. While stunned, `InputBlocked` is true (client stops sending input) and `ProcessMovementInput` zeroes velocity (server enforcement).
+4. **Visuals**: Procedural cube GameObjects animate rising from the floor (SmoothStep ease), flash on snap. Character gets emissive glow via `MaterialPropertyBlock`. Optional `_enragedEffect` GameObject toggle (e.g. particle for glowing eyes).
+5. **No prefab required**: Book trap visuals are created client-side in `Render()`. All damage logic runs server-side in `FixedUpdateNetwork()`.
+
 ### Weapon System
 
 `Weapons` manages an array of `Weapon` slots per agent. Each `Weapon` contains `WeaponAction` children with composable `WeaponComponent` pieces (barrel, trigger, magazine, spray, beam, effects).
@@ -68,7 +89,7 @@ Projectile types: **Hitscan** (instant trace), **Kinematic** (physics-based with
 
 ### Damage & Health
 
-`HitData` struct carries damage info (action, amount, direction, instigator, target, type). `Health` component manages HP with networked state, immortality timer (3s on respawn), and max health bonuses from buffs. Friendly fire is disabled (`FRIENDLY_FIRE_ENABLED = false`).
+`HitData` struct carries damage info (action, amount, direction, instigator, target, type). `Health` component manages HP with networked state, immortality timer (3s on respawn), and max health bonuses from buffs. Friendly fire is disabled (`FRIENDLY_FIRE_ENABLED = false`). `HitUtility.ProcessHit` applies Theiss debuff and Goedde enraged multipliers before dealing damage. `PlayerAgent.ApplyStun()` provides a server-authoritative stun that blocks movement and input.
 
 ### Game Mode: Capture Point
 
@@ -91,6 +112,9 @@ Team-filtered `SpawnPoint` components. On death: 3-second delay → new agent sp
 | `Assets/Scripts/Health/Health.cs` | Health, damage, immortality, death |
 | `Assets/Scripts/Game/CapturePoint.cs` | Objective zone scoring |
 | `Assets/Scripts/Utility/SceneContext.cs` | Central scene data hub |
+| `Assets/Scripts/Player/GoeddeMovementAbility.cs` | Goedde's phase-dash with wall detection/sliding |
+| `Assets/Scripts/Player/GoeddeUltimateAbility.cs` | Goedde's book-trap ultimate with enraged state + stun |
+| `Assets/Scripts/Health/HitUtility.cs` | Central hit pipeline, damage multipliers, ultimate charge |
 
 ## Testing
 
