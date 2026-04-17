@@ -1,4 +1,4 @@
-using Fusion;
+	using Fusion;
 using UnityEngine;
 
 namespace Projectiles
@@ -7,11 +7,17 @@ namespace Projectiles
 	/// Cohen's primary projectile: travels in a straight line and stops on the first target
 	/// it hits. Spawns an impact object (CohenExplosion) at the hit point.
 	/// Does no direct damage — all damage and healing is handled by the explosion.
+	/// Uses a wide circle cast (multiple rays in a ring) to simulate a large hitbox,
+	/// matching the ink-blob design spec ("large hitbox").
 	/// </summary>
 	public class CohenPrimaryProjectile : KinematicProjectile
 	{
 		[SerializeField]
 		private LayerMask _hitMask;
+		[SerializeField, Tooltip("Radius of the circle cast — gives the projectile a large hitbox matching the ink blob visual.")]
+		private float _castRadius = 1.5f;
+		[SerializeField, Tooltip("Number of rays fired around the cast radius (1 center + N perimeter). More rays = more reliable hit detection.")]
+		private int _castRays = 7;
 
 		// KinematicProjectile INTERFACE
 
@@ -32,7 +38,7 @@ namespace Projectiles
 
 			AdjustForProjectileLength(ref previousPosition, ref distance, direction, data.Position);
 
-			if (ProjectileUtility.ProjectileCast(runner, Context.Owner, previousPosition, direction, distance, _hitMask, out LagCompensatedHit hit) == true)
+			if (ProjectileUtility.CircleCast(runner, Context.Owner, previousPosition, direction, distance, _castRadius, _castRays, _hitMask, out LagCompensatedHit hit) == true)
 			{
 				data.ImpactPosition = hit.Point;
 				data.ImpactNormal   = (hit.Normal - direction) * 0.5f;

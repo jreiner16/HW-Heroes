@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 123456789012345602}
   - component: {fileID: 123456789012345603}
-  - component: {fileID: 123456789012345604}
+  - component: {fileID: -4716367434328610509}
   - component: {fileID: 123456789012345605}
   - component: {fileID: 123456789012345606}
   - component: {fileID: 123456789012345607}
@@ -54,10 +54,10 @@ MonoBehaviour:
   Flags: 264449
   NestedObjects: []
   NetworkedBehaviours:
-  - {fileID: 123456789012345604}
+  - {fileID: -4716367434328610509}
   - {fileID: 123456789012345605}
   ForceRemoteRenderTimeframe: 0
---- !u!114 &123456789012345604
+--- !u!114 &-4716367434328610509
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -66,7 +66,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 123456789012345601}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d179f921055184b449320adacdcbdd28, type: 3}
+  m_Script: {fileID: 11500000, guid: e05f9b3c2a4d6e7f8c9a0b1c2d3e4f5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _targetMask:
@@ -75,15 +75,13 @@ MonoBehaviour:
   _blockingMask:
     serializedVersion: 2
     m_Bits: 1
-  _hitType: 2
   _explosionCheckOffset: {x: 0, y: 0.5, z: 0}
-  _innerRadius: 1
-  _outerRadius: 2.5
-  _innerDamage: 50
-  _outerDamage: 5
-  _canDamageOwner: 1
+  _damageRadius: 5
+  _damage: 60
+  _healRadius: 5
+  _heal: 75
   _despawnDelay: 3
-  _effectRoot: {fileID: 0}
+  _effectRoot: {fileID: 118940869069631434}
 --- !u!114 &123456789012345605
 MonoBehaviour:
   m_ObjectHideFlags: 0
