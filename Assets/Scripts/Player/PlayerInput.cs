@@ -138,6 +138,12 @@ namespace Projectiles
 
 				_accumulatedInput.Buttons.Set(EInputButton.Jump, keyboard.spaceKey.isPressed);
 				_accumulatedInput.Buttons.Set(EInputButton.Reload, keyboard.rKey.isPressed);
+				_accumulatedInput.Buttons.Set(EInputButton.Shift, keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed);
+
+				bool ctrlShiftG = (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed)
+				               && (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed)
+				               && keyboard.gKey.isPressed;
+				_accumulatedInput.Buttons.Set(EInputButton.EquipRifle, ctrlShiftG);
 
 				_accumulatedInput.WeaponButton = 0;
 				for (int i = (int)Key.Digit1; i <= (int)Key.Digit9; i++)

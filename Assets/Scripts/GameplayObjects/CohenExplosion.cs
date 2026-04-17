@@ -6,8 +6,8 @@ namespace Projectiles
 {
 	/// <summary>
 	/// Cohen primary-shot explosion: spawned at the projectile's first impact point.
-	/// - Enemies within radius take damage (60 max at center, steep falloff to edges).
-	/// - Allies within radius are healed  (75 max at center, gentler falloff to edges).
+	/// - Enemies within radius take flat damage (no falloff).
+	/// - Allies within radius receive flat healing (no falloff).
 	///
 	/// Set _impactObjectPrefab on CohenPrimaryProjectile to this prefab's NetworkObject.
 	/// Input authority on this spawned object identifies the shooting player.
@@ -25,24 +25,16 @@ namespace Projectiles
 		private Vector3 _explosionCheckOffset = new(0f, 0.5f, 0f);
 
 		[Header("Damage (Enemies)")]
-		[SerializeField, Tooltip("Radius of full damage (no falloff inside this)")]
-		private float _innerDamageRadius = 1f;
-		[SerializeField, Tooltip("Outer edge of the damage sphere (no damage beyond this)")]
-		private float _outerDamageRadius = 5f;
+		[SerializeField, Tooltip("Flat damage dealt to all enemies within radius — no falloff")]
+		private float _damageRadius = 5f;
 		[SerializeField]
-		private float _centerDamage = 60f;
-		[SerializeField]
-		private float _outerDamage = 0f;
+		private float _damage = 60f;
 
 		[Header("Healing (Allies)")]
-		[SerializeField, Tooltip("Radius of full healing (no falloff inside this)")]
-		private float _innerHealRadius = 2.5f;
-		[SerializeField, Tooltip("Outer edge of the heal sphere (no healing beyond this)")]
-		private float _outerHealRadius = 5f;
+		[SerializeField, Tooltip("Flat healing applied to all allies within radius — no falloff")]
+		private float _healRadius = 5f;
 		[SerializeField]
-		private float _centerHeal = 75f;
-		[SerializeField, Tooltip("Heal amount at the very edge of the heal radius (less falloff than damage)")]
-		private float _outerHeal = 40f;
+		private float _heal = 75f;
 
 		[Header("Misc")]
 		[SerializeField]
@@ -85,7 +77,7 @@ namespace Projectiles
 			var instigatorPlayer       = instigatorPlayerObject != null ? instigatorPlayerObject.GetComponent<Player>() : null;
 			var instigatorTeam         = instigatorPlayer != null ? instigatorPlayer.Team : ETeam.None;
 
-			float maxRadius = Mathf.Max(_outerDamageRadius, _outerHealRadius);
+			float maxRadius = Mathf.Max(_damageRadius, _healRadius);
 			var   position  = transform.position + _explosionCheckOffset;
 
 			var hits     = ListPool.Get<LagCompensatedHit>(16);
@@ -139,20 +131,13 @@ namespace Projectiles
 
 				if (isAlly == true)
 				{
-					if (distance > _outerHealRadius)
+					if (distance > _healRadius)
 						continue;
-
-					float heal = _centerHeal;
-
-					if (_innerHealRadius < _outerHealRadius && _centerHeal != _outerHeal && distance > _innerHealRadius)
-					{
-						heal = MathUtility.Map(_innerHealRadius, _outerHealRadius, _centerHeal, _outerHeal, distance);
-					}
 
 					HitData healData = new HitData
 					{
 						Action        = EHitAction.Heal,
-						Amount        = heal,
+						Amount        = _heal,
 						Position      = hit.Point,
 						Normal        = hit.Normal,
 						Direction     = direction,
@@ -165,17 +150,10 @@ namespace Projectiles
 				}
 				else
 				{
-					if (distance > _outerDamageRadius)
+					if (distance > _damageRadius)
 						continue;
 
-					float damage = _centerDamage;
-
-					if (_innerDamageRadius < _outerDamageRadius && _centerDamage != _outerDamage && distance > _innerDamageRadius)
-					{
-						damage = MathUtility.Map(_innerDamageRadius, _outerDamageRadius, _centerDamage, _outerDamage, distance);
-					}
-
-					HitUtility.ProcessHit(Object.InputAuthority, direction, hit, damage, EHitType.Explosion);
+					HitUtility.ProcessHit(Object.InputAuthority, direction, hit, _damage, EHitType.Explosion);
 				}
 			}
 
@@ -191,7 +169,7 @@ namespace Projectiles
 			if (_effectRoot != null)
 			{
 				_effectRoot.SetActive(true);
-				_effectRoot.localScale = Vector3.one * Mathf.Max(_outerDamageRadius, _outerHealRadius) * 2f;
+				_effectRoot.localScale = Vector3.one * Mathf.Max(_damageRadius, _healRadius) * 2f;
 			}
 		}
 	}

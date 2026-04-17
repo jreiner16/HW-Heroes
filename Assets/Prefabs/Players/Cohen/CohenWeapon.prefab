@@ -80,7 +80,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d2e87423e6d46c79c124cb1e1c2e609, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cadence: 120
+  _cadence: 80
   _fireButton: 0
   _fireOnKeyDownOnly: 0
 --- !u!114 &5619079538414019358
@@ -99,7 +99,7 @@ MonoBehaviour:
   _standaloneProjectilePrefab: {fileID: 0}
   _standaloneProjectileBuffer: {fileID: 0}
   _projectilesPerShot: 1
-  _dispersion: 0.5
+  _dispersion: 0
   _additionalFirePitch: 0
 --- !u!114 &4598274169144945357
 MonoBehaviour:
