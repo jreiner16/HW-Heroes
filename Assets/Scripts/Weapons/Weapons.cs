@@ -39,6 +39,15 @@ namespace Projectiles
 		[Networked,HideInInspector]
 		public int          PendingWeaponSlot       { get; private set; }
 
+		/// <summary>
+		/// When true, digit-key weapon switching (via <see cref="GameplayInput.WeaponSlot"/>)
+		/// is ignored in <see cref="ProcessInput"/>. External systems (e.g. Goedde's
+		/// rifle cheat) can lock the current weapon so only they can switch it.
+		/// State-authority writable; replicated to all.
+		/// </summary>
+		[Networked, HideInInspector]
+		public NetworkBool  LockInputSwitching      { get; set; }
+
 		public int          Version                 => _version;
 
 		// PRIVATE MEMBERS
@@ -146,7 +155,24 @@ namespace Projectiles
 
 			var weapon = Runner.Spawn(weaponPrefab, inputAuthority: Object.InputAuthority);
 			AddWeapon(weapon);
-			SwitchWeapon(weapon.WeaponSlot, false);
+			// Immediate swap — callers use this for runtime/cheat equips where
+			// the normal switch animation delay is undesirable.
+			SwitchWeapon(weapon.WeaponSlot, true);
+		}
+
+		/// <summary>
+		/// Removes and despawns the weapon in the given slot (state authority only).
+		/// Complement to <see cref="SpawnAndEquipWeapon"/> for runtime-managed weapons.
+		/// </summary>
+		public void RemoveAndDespawnWeapon(int slot)
+		{
+			if (HasStateAuthority == false)
+				return;
+
+			if (slot < 0 || slot >= _weapons.Length)
+				return;
+
+			RemoveWeapon(slot, true);
 		}
 
 		public void GetAllWeapons(List<Weapon> weapons)
@@ -249,7 +275,12 @@ namespace Projectiles
 			if (GetInput(out GameplayInput input) == false)
 				return;
 
-			SwitchWeapon(input.WeaponSlot, false);
+			// Digit-key weapon switching is suppressed while a runtime system
+			// (e.g. Goedde's Ctrl+Shift+G rifle toggle) owns the current weapon.
+			if (LockInputSwitching == false)
+			{
+				SwitchWeapon(input.WeaponSlot, false);
+			}
 
 			if (IsSwitchingWeapon == true)
 				return;
