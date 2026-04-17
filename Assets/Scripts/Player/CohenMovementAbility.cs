@@ -4,7 +4,8 @@ using UnityEngine;
 namespace Projectiles
 {
 	/// <summary>
-	/// Cohen's movement ability: shrink for a short duration.
+	/// Cohen's movement ability: burrow underground for a short duration.
+	/// While burrowed, Cohen is invulnerable and his hitbox is disabled.
 	/// Triggered by the E key.
 	/// </summary>
 	[AddComponentMenu("Projectiles/Abilities/Cohen Movement Ability")]
@@ -13,49 +14,46 @@ namespace Projectiles
 	public class CohenMovementAbility : AbilityBase
 	{
 		public override EAbilitySlot Slot => EAbilitySlot.Movement;
-		public bool IsShrunk => _isShrunk;
-		public override bool IsActive => _isShrunk;
-		public override bool IsReady => base.IsReady && _isShrunk == false;
+		public bool IsBurrowed => _isBurrowed;
+		public override bool IsActive => _isBurrowed;
+		public override bool IsReady => base.IsReady && _isBurrowed == false;
 		public override bool HasDuration => true;
 		public override float DurationRemainingTime => _durationTimer.RemainingTime(Runner).GetValueOrDefault();
 		public override float DurationTotal => _duration;
 
-		[Header("Shrink Settings")]
+		[Header("Burrow Settings")]
 		[SerializeField] private float _duration = 3.0f;
-		[SerializeField, Range(0.2f, 1f)] private float _shrinkScale = 0.55f;
 
 		[Header("References")]
-		[SerializeField] private Transform _visualRoot;
+		[SerializeField] private Transform _burrowCameraAnchor;
+		[SerializeField] private GameObject _groundIndicator;
+		[SerializeField] private CohenLoSSphere _healingAuraPrefab;
 
-		[Networked] private NetworkBool _isShrunk { get; set; }
+		[Networked] private NetworkBool _isBurrowed { get; set; }
 		[Networked] private TickTimer _durationTimer { get; set; }
 
-		private Vector3 _visualOriginalScale = Vector3.one;
-		private bool _visualOriginalScaleCached;
+		private HitboxRoot _hitboxRoot;
+		private PlayerBody _playerBody;
 
 		protected override void Awake()
 		{
 			base.Awake();
-
-			if (_visualRoot != null)
-			{
-				_visualOriginalScale = _visualRoot.localScale;
-				_visualOriginalScaleCached = true;
-			}
+			_hitboxRoot = GetComponent<HitboxRoot>();
+			_playerBody = GetComponent<PlayerBody>();
 		}
 
 		public override void FixedUpdateNetwork()
 		{
 			if (!ValidateCanAct())
 			{
-				if (_isShrunk && HasStateAuthority)
+				if (_isBurrowed && HasStateAuthority)
 				{
 					ForceDeactivate();
 				}
 				return;
 			}
 
-			if (_isShrunk && _durationTimer.Expired(Runner))
+			if (_isBurrowed && _durationTimer.Expired(Runner))
 			{
 				Deactivate();
 				return;
@@ -63,6 +61,12 @@ namespace Projectiles
 
 			if (GetInput(out GameplayInput input) == false)
 				return;
+
+			if (_isBurrowed && input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.Shift))
+			{
+				Deactivate();
+				return;
+			}
 
 			if (input.Buttons.WasPressed(_agent.Input.PreviousButtons, EInputButton.E))
 			{
@@ -72,25 +76,35 @@ namespace Projectiles
 
 		public override void Render()
 		{
-			if (_visualRoot == null)
-				return;
+			_playerBody?.SetVisible(!_isBurrowed);
 
-			if (_visualOriginalScaleCached == false)
+			if (_groundIndicator != null)
 			{
-				_visualOriginalScale = _visualRoot.localScale;
-				_visualOriginalScaleCached = true;
+				_groundIndicator.SetActive(_isBurrowed);
 			}
 
-			_visualRoot.localScale = _isShrunk ? _visualOriginalScale * _shrinkScale : _visualOriginalScale;
+			// Camera override is local-player only; set every render frame so it stays in sync with networked state.
+			if (HasInputAuthority)
+			{
+				_agent.CameraOverride = _isBurrowed ? _burrowCameraAnchor : null;
+				_agent.BlockPitchInput = _isBurrowed;
+			}
 		}
 
 		private void TryActivate()
 		{
-			if (_isShrunk || IsOnCooldown || HasStateAuthority == false)
+			if (_isBurrowed || IsOnCooldown || HasStateAuthority == false)
 				return;
 
-			_isShrunk = true;
+			_isBurrowed = true;
 			_durationTimer = TickTimer.CreateFromSeconds(Runner, _duration);
+
+			_agent.Health.SetImmortality(_duration + 0.5f);
+
+			if (_hitboxRoot != null)
+			{
+				_hitboxRoot.HitboxRootActive = false;
+			}
 		}
 
 		private void Deactivate()
@@ -98,15 +112,36 @@ namespace Projectiles
 			if (HasStateAuthority == false)
 				return;
 
-			_isShrunk = false;
+			_isBurrowed = false;
 			StartCooldown();
+
+			_agent.Health.StopImmortality();
+
+			if (_hitboxRoot != null)
+			{
+				_hitboxRoot.HitboxRootActive = true;
+			}
+
+			if (_healingAuraPrefab != null)
+			{
+				var aura = Runner.Spawn(_healingAuraPrefab, transform.position, Quaternion.identity, Object.InputAuthority);
+				if (aura != null)
+				{
+					aura.Initialize(_agent.Owner);
+				}
+			}
 		}
 
 		private void ForceDeactivate()
 		{
-			_isShrunk = false;
+			_isBurrowed = false;
 			_durationTimer = default;
 			_cooldownTimer = default;
+
+			if (_hitboxRoot != null)
+			{
+				_hitboxRoot.HitboxRootActive = true;
+			}
 		}
 	}
 }

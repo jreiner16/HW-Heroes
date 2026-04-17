@@ -27,9 +27,22 @@ namespace Projectiles
 		public SimpleKCC   KCC           { get; private set; }
 		public PlayerInput Input         { get; private set; }
 
-		public bool        InputBlocked  => Health.IsAlive == false;
+		public bool        InputBlocked  => Health.IsAlive == false || IsStunned;
+		public bool        IsStunned     => _stunTimer.ExpiredOrNotRunning(Runner) == false;
 
 		public CharacterClass Class => _characterClass;
+
+		/// <summary>
+		/// When set, overrides the first-person camera position/rotation each LateUpdate.
+		/// Set by abilities (e.g. Cohen burrow) that need a custom camera angle.
+		/// </summary>
+		public Transform CameraOverride { get; set; }
+
+		/// <summary>
+		/// When true, vertical mouse input is ignored and pitch is locked to 0.
+		/// Set by abilities (e.g. Cohen burrow) that need to prevent the camera looking up/down.
+		/// </summary>
+		public bool BlockPitchInput { get; set; }
 
 		/// <summary>
 		/// Multipliers applied to movement (used by abilities). Default 1. Abilities with execution order before this should set these.
@@ -72,8 +85,23 @@ namespace Projectiles
 		private Vector3 _moveVelocity { get; set; }
 		[Networked]
 		private float _pendingBounceImpulse { get; set; }
+		[Networked]
+		private TickTimer _stunTimer { get; set; }
 
 		private Vector2 _lastFUNLookRotation;
+
+		/// <summary>
+		/// Server-authoritative stun: blocks movement and input for the given duration.
+		/// A shorter stun will not overwrite a longer one already in progress.
+		/// </summary>
+		public void ApplyStun(float duration)
+		{
+			if (HasStateAuthority == false || duration <= 0f)
+				return;
+			float remaining = _stunTimer.RemainingTime(Runner).GetValueOrDefault();
+			if (duration > remaining)
+				_stunTimer = TickTimer.CreateFromSeconds(Runner, duration);
+		}
 
 		/// <summary>
 		/// Applies an upward impulse to the player (e.g. from bouncers). Call from OnTriggerEnter/OnCollisionEnter.
@@ -110,6 +138,12 @@ namespace Projectiles
 				ProcessMovementInput();
 			}
 
+			if (BlockPitchInput)
+			{
+				var look = KCC.GetLookRotation();
+				KCC.SetLookRotation(new Vector2(0f, look.y));
+			}
+
 			// Setting camera pivot rotation
 			var pitchRotation = KCC.GetLookRotation(true, false);
 			_cameraPivot.localRotation = Quaternion.Euler(pitchRotation);
@@ -132,7 +166,10 @@ namespace Projectiles
 			if (HasInputAuthority == true && Owner != null && Health.IsAlive == true)
 			{
 				// For responsive look experience we use last FUN look + accumulated look rotation delta
-				KCC.SetLookRotation(_lastFUNLookRotation + Input.AccumulatedLook, -_maxCameraAngle, _maxCameraAngle);
+				var lookToApply = _lastFUNLookRotation + Input.AccumulatedLook;
+				if (BlockPitchInput)
+					lookToApply.x = 0f;
+				KCC.SetLookRotation(lookToApply, -_maxCameraAngle, _maxCameraAngle);
 			}
 
 			// Update camera pitch
@@ -144,8 +181,16 @@ namespace Projectiles
 			if (HasInputAuthority == true && Owner != null && Health.IsAlive == true && Context?.Camera != null)
 			{
 				var cameraTransform = Context.Camera.transform;
-				cameraTransform.position = _cameraHandle.position;
-				cameraTransform.rotation = KCC.TransformRotation * Quaternion.Euler(pitchRotation.x, 0f, 0f);
+				if (CameraOverride != null)
+				{
+					cameraTransform.position = CameraOverride.position;
+					cameraTransform.rotation = CameraOverride.rotation;
+				}
+				else
+				{
+					cameraTransform.position = _cameraHandle.position;
+					cameraTransform.rotation = KCC.TransformRotation * Quaternion.Euler(pitchRotation.x, 0f, 0f);
+				}
 			}
 	}
 
@@ -153,6 +198,13 @@ namespace Projectiles
 
 		private void ProcessMovementInput()
 		{
+			if (IsStunned)
+			{
+				_moveVelocity = Vector3.zero;
+				KCC.Move(Vector3.zero, 0f);
+				return;
+			}
+
 			if (GetInput(out GameplayInput input) == false)
 			{
 				if (_pendingBounceImpulse > 0f)
@@ -187,7 +239,7 @@ namespace Projectiles
 
 			_moveVelocity = Vector3.Lerp(_moveVelocity, desiredMoveVelocity, acceleration * Runner.DeltaTime);
 
-			float jumpImpulse = input.Buttons.WasPressed(Input.PreviousButtons, EInputButton.Jump) && KCC.IsGrounded ? _jumpImpulse * JumpMultiplier : 0f;
+			float jumpImpulse = input.Buttons.WasPressed(Input.PreviousButtons, EInputButton.Jump) && KCC.IsGrounded && !BlockPitchInput ? _jumpImpulse * JumpMultiplier : 0f;
 			jumpImpulse += _pendingBounceImpulse;
 			_pendingBounceImpulse = 0f;
 			KCC.Move(_moveVelocity, jumpImpulse);
