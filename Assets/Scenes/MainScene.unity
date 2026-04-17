@@ -98106,9 +98106,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 510503319}
     m_Modifications:
-    - target: {fileID: 272146751082120306, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
-      propertyPath: m_text
+    - target: {fileID: 4473209148066689393, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
+      propertyPath: m_Sprite
       value: 
+      objectReference: {fileID: 21300000, guid: 9486aae38c80340239ad18daa7a46e4e, type: 3}
+    - target: {fileID: 4473209148066689393, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
+      propertyPath: m_Color.a
+      value: 0.83137256
+      objectReference: {fileID: 0}
+    - target: {fileID: 4473209148066689393, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4473209148066689393, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4473209148066689393, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
+      propertyPath: m_Color.r
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6099326697267772690, guid: 893c1383e4f98d6449e3fe14c468f0c2, type: 3}
       propertyPath: _characterBlurbOffset.y
