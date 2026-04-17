@@ -115,7 +115,6 @@ Team-filtered `SpawnPoint` components. On death: 3-second delay → new agent sp
 | `Assets/Scripts/Player/GoeddeMovementAbility.cs` | Goedde's phase-dash with wall detection/sliding |
 | `Assets/Scripts/Player/GoeddeUltimateAbility.cs` | Goedde's book-trap ultimate with enraged state + stun |
 | `Assets/Scripts/Health/HitUtility.cs` | Central hit pipeline, damage multipliers, ultimate charge |
-| `Assets/Scripts/Player/GoeddeRifleEquip.cs` | Ctrl+Shift+G runtime rifle equip for Goedde |
 
 ## Testing
 
