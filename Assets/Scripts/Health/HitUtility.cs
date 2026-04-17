@@ -194,6 +194,10 @@ namespace Projectiles
 				float multiplier = TheissDamageDebuffField.GetOutgoingDamageMultiplier(runner, hitData.InstigatorRef);
 				hitData.Amount *= multiplier;
 
+				// Outgoing damage boost (Goedde enraged ultimate increases damage dealt)
+				float enragedBoost = GoeddeUltimateAbility.GetEnragedDamageMultiplier(runner, hitData.InstigatorRef);
+				hitData.Amount *= enragedBoost;
+
 				// Incoming damage reduction (Sugar Rush reduces damage taken by Theiss)
 				var targetRef = targetHealth != null ? targetHealth.Object.InputAuthority : default;
 				float incomingMultiplier = TheissSugarRushAbility.GetIncomingDamageMultiplier(runner, targetRef);

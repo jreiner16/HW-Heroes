@@ -28,6 +28,7 @@ namespace Projectiles
 		public PlayerInput Input         { get; private set; }
 
 		public bool        InputBlocked  => Health.IsAlive == false;
+		public bool        IsStunned     => _stunTimer.ExpiredOrNotRunning(Runner) == false;
 
 		public CharacterClass Class => _characterClass;
 
@@ -45,6 +46,9 @@ namespace Projectiles
 
 		/// <summary>When true, horizontal move input is ignored this tick (e.g. during jump smash flight).</summary>
 		public bool LockMovement { get; set; }
+
+		/// <summary>When true, camera pitch input and jumping are suppressed this tick.</summary>
+		public bool BlockPitchInput { get; set; }
 
 		// PRIVATE MEMBERS
 
@@ -82,9 +86,24 @@ namespace Projectiles
 		[Networked]
 		private float _pendingBounceImpulse { get; set; }
 		[Networked]
+		private TickTimer _stunTimer { get; set; }
+		[Networked]
 		private Vector3 _pendingKnockback { get; set; }
 
 		private Vector2 _lastFUNLookRotation;
+
+		/// <summary>
+		/// Server-authoritative stun: blocks movement and input for the given duration.
+		/// A shorter stun will not overwrite a longer one already in progress.
+		/// </summary>
+		public void ApplyStun(float duration)
+		{
+			if (HasStateAuthority == false || duration <= 0f)
+				return;
+			float remaining = _stunTimer.RemainingTime(Runner).GetValueOrDefault();
+			if (duration > remaining)
+				_stunTimer = TickTimer.CreateFromSeconds(Runner, duration);
+		}
 
 		/// <summary>
 		/// Applies an upward impulse to the player (e.g. from bouncers). Call from OnTriggerEnter/OnCollisionEnter.
@@ -222,7 +241,7 @@ namespace Projectiles
 				_pendingKnockback = Vector3.zero;
 			}
 
-			float jumpImpulse = input.Buttons.WasPressed(Input.PreviousButtons, EInputButton.Jump) && KCC.IsGrounded ? _jumpImpulse * JumpMultiplier : 0f;
+			float jumpImpulse = input.Buttons.WasPressed(Input.PreviousButtons, EInputButton.Jump) && KCC.IsGrounded && !BlockPitchInput ? _jumpImpulse * JumpMultiplier : 0f;
 			jumpImpulse += _pendingBounceImpulse + ExtraJumpImpulse;
 			_pendingBounceImpulse = 0f;
 			ExtraJumpImpulse      = 0f;
