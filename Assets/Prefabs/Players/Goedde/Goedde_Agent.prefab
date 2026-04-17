@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 1128444158403002832}
   - component: {fileID: 1128444158403002833}
   - component: {fileID: 3733613388712259037}
+  - component: {fileID: 7472000000000000001}
   m_Layer: 0
   m_Name: Goedde_Agent
   m_TagString: Untagged
@@ -74,6 +75,7 @@ MonoBehaviour:
   - {fileID: 1128444158403002831}
   - {fileID: 1128444158403002832}
   - {fileID: 1128444158403002833}
+  - {fileID: 7472000000000000001}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &2000174215685155523
 MonoBehaviour:
@@ -88,6 +90,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _Owner: {fileID: 0}
+  _characterClass: 0
   _cameraPivot: {fileID: 5401675310905547977}
   _cameraHandle: {fileID: 2117859135794692440}
   _moveSpeed: 6
@@ -308,10 +311,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 454a9c29e96e6456aad02a05c077204c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _duration: 2.5
   _cooldown: 10
+  _duration: 2.5
+  _teleportDistance: 4
+  _slideDuration: 0.35
+  _minTravelDistance: 0.3
+  _slideCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _capsuleRadius: 0.35
+  _capsuleHeight: 1.8
+  _wallLayers:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  _wallSkinWidth: 0.05
+  _wallSlideRetention: 0.7
+  _groundSnapDistance: 0.5
   _visual: {fileID: 2526105640932925329}
   _phaseEffect: {fileID: 5762880852013441109, guid: 808cc5444dae25b4f8a8fa0d9230409e, type: 3}
+  _entryBurstVFX: {fileID: 0}
+  _exitBurstVFX: {fileID: 0}
+  _phaseTrailVFX: {fileID: 0}
 --- !u!114 &1128444158403002833
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -326,8 +367,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cooldown: 15
   _cooldownSecondsPerDamage: 0.05
-  _kinematicProjectilePrefab: {fileID: 6760726039705429157, guid: da076ccc65bd7491d8b9629b993b2f6e, type: 3}
-  _standaloneProjectilePrefab: {fileID: 0}
+  _enragedDuration: 8
+  _enragedDamageMultiplier: 1.4
+  _trapDistance: 5
+  _trapSpreadAngle: 35
+  _snapDelay: 0.8
+  _trapDamage: 80
+  _stunDuration: 2
+  _trapHalfExtents: {x: 1, y: 1.5, z: 0.75}
+  _targetMask:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  _bookColor: {r: 0.35, g: 0.12, b: 0.08, a: 1}
+  _bookSnapColor: {r: 1, g: 0.85, b: 0.3, a: 1}
+  _bookVisualSize: {x: 2, y: 3, z: 0.2}
+  _enragedEffect: {fileID: 0}
+  _enragedEmissiveColor: {r: 0.8, g: 0.2, b: 0, a: 1}
+  _enragedEmissiveIntensity: 2
 --- !u!114 &3733613388712259037
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -341,6 +397,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _blurb: Dr. Goedde is a history teacher with a no-nonsense policy towards cheating.
+--- !u!114 &7472000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 260199661339379077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472de738714a83541bf33682c6805be5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _riflePrefab: {fileID: 2436901878621067112, guid: c89643832265e2d4a9b82ccd69f408c2, type: 3}
 --- !u!1 &504059032653147225
 GameObject:
   m_ObjectHideFlags: 0

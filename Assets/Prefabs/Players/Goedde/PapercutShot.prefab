@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4224916988346163789}
   - component: {fileID: 6760726039705429157}
+  - component: {fileID: 6789012345678901234}
   m_Layer: 0
   m_Name: PapercutShot
   m_TagString: Untagged
@@ -48,7 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _impactEffectPrefab: {fileID: 0}
   _impactEffectReturnTime: 2
-  _impactObjectPrefab: {fileID: 2971405447164247505, guid: fb1f6c926579ce449add3f69e9c33d7a, type: 3}
+  _impactObjectPrefab: {fileID: 3456789012345678901, guid: a9f3e1d5c7b2840f6e9d3c8b4a7f2e1d, type: 3}
   _startSpeed: 25
   _length: 1
   _maxDistance: 200
@@ -344,3 +345,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4091361758652186, guid: cbd35caa90b8a7d4fb146235656410a6, type: 3}
   m_PrefabInstance: {fileID: 1191453746386539980}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6789012345678901234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 400400945302543096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3a71c2e8b4d56091a2b3c4d5e6f7a8b, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  _bookColor: {r: 0.3, g: 0.1, b: 0.06, a: 1}
+  _tumbleSpeed: 540
