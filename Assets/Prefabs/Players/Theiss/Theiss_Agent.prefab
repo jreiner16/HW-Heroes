@@ -344,7 +344,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cooldown: 15
-  _launchImpulse: 9
+  _launchImpulse: 11.25
   _apexVelocityThreshold: 1.5
   _maxLaunchDuration: 1.5
   _hangGravity: 1.5
@@ -355,6 +355,8 @@ MonoBehaviour:
   _smashDamage: 80
   _knockbackForce: 8
   _verticalKnockback: 4
+  _smashVFXPrefab: {fileID: 0}
+  _vfxLifetime: 3
 --- !u!114 &4233622930867498419
 MonoBehaviour:
   m_ObjectHideFlags: 0
