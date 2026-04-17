@@ -15,6 +15,7 @@ namespace Projectiles
 		E          = 5,
 		EquipRifle = 6,
 		Shift      = 7,
+		Q          = 8,
 	}
 
 	public struct GameplayInput : INetworkInput
@@ -127,6 +128,13 @@ namespace Projectiles
 				// Extra input buttons for weapon triggers / abilities.
 				_accumulatedInput.Buttons.Set(EInputButton.X, keyboard.xKey.isPressed);
 				_accumulatedInput.Buttons.Set(EInputButton.E, keyboard.eKey.isPressed);
+				_accumulatedInput.Buttons.Set(EInputButton.Q, keyboard.qKey.isPressed);
+				_accumulatedInput.Buttons.Set(EInputButton.Shift, keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed);
+
+				bool ctrlShiftG = (keyboard.leftCtrlKey.isPressed || keyboard.rightCtrlKey.isPressed)
+				               && (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed)
+				               && keyboard.gKey.isPressed;
+				_accumulatedInput.Buttons.Set(EInputButton.EquipRifle, ctrlShiftG);
 
 				_accumulatedInput.Buttons.Set(EInputButton.Jump, keyboard.spaceKey.isPressed);
 				_accumulatedInput.Buttons.Set(EInputButton.Reload, keyboard.rKey.isPressed);

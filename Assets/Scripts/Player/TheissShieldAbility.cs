@@ -12,7 +12,9 @@ namespace Projectiles
 	[DefaultExecutionOrder(5)]
 	public class TheissShieldAbility : AbilityBase
 	{
-		public override EAbilitySlot Slot => EAbilitySlot.RightClick;
+		public override EAbilitySlot Slot    => EAbilitySlot.RightClick;
+		// Shield yields its slot to Jump Smash while Sugar Rush is active
+		public override bool         IsReady => base.IsReady && (_sugarRush == null || _sugarRush.IsActive == false);
 
 		[Header("Shield Settings")]
 		[SerializeField]
@@ -31,7 +33,14 @@ namespace Projectiles
 		[Networked]
 		private NetworkId _activeShieldId { get; set; }
 
-		private GameObject _previewInstance;
+		private GameObject            _previewInstance;
+		private TheissSugarRushAbility _sugarRush;
+
+		protected override void Awake()
+		{
+			base.Awake();
+			_sugarRush = GetComponent<TheissSugarRushAbility>();
+		}
 
 		public override void Spawned()
 		{
@@ -58,6 +67,10 @@ namespace Projectiles
 		public override void FixedUpdateNetwork()
 		{
 			if (!ValidateCanAct())
+				return;
+
+			// Jump Smash owns this input slot while Sugar Rush is active
+			if (_sugarRush != null && _sugarRush.IsActive)
 				return;
 
 			if (GetInput(out GameplayInput input) == false)
@@ -95,7 +108,8 @@ namespace Projectiles
 			              && mouse.rightButton.isPressed
 			              && IsReady
 			              && _agent != null
-			              && _agent.Health.IsAlive;
+			              && _agent.Health.IsAlive
+			              && (_sugarRush == null || _sugarRush.IsActive == false);
 
 			_previewInstance.SetActive(isHolding);
 
