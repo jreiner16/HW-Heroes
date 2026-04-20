@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.coplay.dev)",
+      "WebFetch(domain:github.com)"
+    ]
+  }
+}
